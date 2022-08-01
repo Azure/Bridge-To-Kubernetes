@@ -1,0 +1,7 @@
+[
+    {
+        "name": "Bridge to Kubernetes",
+        "type": "bridge-to-kubernetes.configuration",
+        "request": "launch"
+    }
+]

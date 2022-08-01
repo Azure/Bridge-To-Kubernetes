@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: REPLACE
+  labels:
+    app: REPLACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: REPLACE
+  template:
+    metadata:
+      labels:
+        app: REPLACE
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80

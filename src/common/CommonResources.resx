@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ClientRequestIdErrorMessageFormat" xml:space="preserve">
+    <value>Please include the following Client Request ID when contacting support: {0}</value>
+    <comment>{0} - unique ID like "4EA748AC-26A8-417C-A08F-D243EB2E3A59"</comment>
+  </data>
+  <data name="ElevationRequest_EditHostsFile" xml:space="preserve">
+    <value>Update your machine's hosts file to match your Kubernetes cluster environment</value>
+  </data>
+  <data name="ElevationRequest_FreePortRequestFormat" xml:space="preserve">
+    <value>Stop {0} to free port {1}</value>
+    <comment>{0} - The service or process name; {1} - the port number</comment>
+  </data>
+  <data name="Error_OopsMessage" xml:space="preserve">
+    <value>Oops... An unexpected error has occurred.</value>
+  </data>
+  <data name="Error_Unexpected" xml:space="preserve">
+    <value>An unexpected error occurred: '{0}'</value>
+    <comment>{0} - The error message</comment>
+  </data>
+  <data name="Error_SeeLogFile" xml:space="preserve">
+    <value>For diagnostic information, see logs at '{0}'.</value>
+    <comment>{0} - file path like "C:\logs\file.log"</comment>
+  </data>
+  <data name="Error_BridgeReport" xml:space="preserve">
+    <value>To see our active issues or file a bug report, please visit {0}.</value>
+    <comment>{0} - aka.ms link</comment>
+  </data>
+  <data name="DefaultingToContainerSpecEnvironmentVariables" xml:space="preserve">
+    <value>Defaulting to reading environment variables from the container manifest...</value>
+  </data>
+  <data name="FailedToDetermineClusterDetailsFromKubeConfig" xml:space="preserve">
+    <value>Failed to determine the cluster details from the kubeconfig file '{0}'.</value>
+    <comment>{0} - kubeconfig path</comment>
+  </data>
+  <data name="FailedToLoadKubeConfigFormat" xml:space="preserve">
+    <value>Failed to load current kubeconfig. This could be due to a typo in your kubeconfig or to an unsupported configuration. For more information, please see {0}.</value>
+    <comment>{0} - aka.ms link</comment>
+  </data>
+  <data name="FailedToLoadKubeConfigContext" xml:space="preserve">
+    <value>Failed to load current context from kubeconfig. Please confirm that your kubeconfig is valid.</value>
+  </data>
+  <data name="IncludeRBACInformationFormat" xml:space="preserve">
+    <value>Encountered permissions error. To see which permissions you need to run {0}, visit {1}. Error: {2}</value>
+    <comment>{0} - product name; {1} - aka.ms link; {2} - the error</comment>
+  </data>
+  <data name="KubeConfigMergeFailedFormat" xml:space="preserve">
+    <value>An error occurred merging kubeconfig files. Please run 'KUBECONFIG={0}:{1} kubectl config view --flatten' to manually merge the config files and try again.</value>
+    <comment>{0} - kubeconfig path; {1} - default config path</comment>
+  </data>
+  <data name="KubeConfigSetContextFailedFormat" xml:space="preserve">
+    <value>An error occurred setting the kubeconfig context. Please run 'kubectl config set - context {0} --namespace={1}' to set the context and try again.</value>
+    <comment>{0} - cluster; {1} - namespace</comment>
+  </data>
+  <data name="KubectlNotSupportedMessage" xml:space="preserve">
+    <value>The current platform is not supported for kubectl.</value>
+  </data>
+  <data name="RequestIdErrorMessageFormat" xml:space="preserve">
+    <value>Please include the following Request ID when contacting support: {0}</value>
+    <comment>{0} - unique ID like "4EA748AC-26A8-417C-A08F-D243EB2E3A59"</comment>
+  </data>
+  <data name="RestoreResourceRestoredWithImageFormat" xml:space="preserve">
+    <value>Restore: {0} '{1}' restored to original state with image '{2}'.</value>
+    <comment>{0} - resource type; {1} - deployment; {2} - image</comment>
+  </data>
+  <data name="RestoreResourceRestoredFormat" xml:space="preserve">
+    <value>Restore: {0} '{1}' restored to original state.</value>
+    <comment>{0} - resource type; {1} - resource name;</comment>
+  </data>
+  <data name="RestoreFailedToDeletePodFormat" xml:space="preserve">
+    <value>Restore: Failed to delete pod '{0}/{1}'.</value>
+    <comment>{0} - namespace name; {1} - pod name</comment>
+  </data>
+  <data name="RestoreFailedToRestoreResourceFormat" xml:space="preserve">
+    <value>Restore: Failed to restore {0} '{1}' to original state.</value>
+    <comment>{0} - resource type; {1} - resource name;</comment>
+  </data>
+  <data name="RestoreFailedToRestoreResourceWithImageFormat" xml:space="preserve">
+    <value>Restore: Failed to restore {0} '{1}' to original state with image '{2}'.</value>
+    <comment>{0} - resource type; {1} - resource name; {2} - image</comment>
+  </data>
+  <data name="RestorePodDeletedFormat" xml:space="preserve">
+    <value>Restore: Pod '{0}' deleted.</value>
+    <comment>{0} - pod name</comment>
+  </data>
+  <data name="RestorePodRestoredFormat" xml:space="preserve">
+    <value>Restore: Pod '{0}' restored to original state.</value>
+    <comment>{0} - pod name</comment>
+  </data>
+  <data name="RestorePodRestoredWithImageFormat" xml:space="preserve">
+    <value>Restore: Pod '{0}' restored to original state with image '{1}'.</value>
+    <comment>{0} - pod name; {1} - image</comment>
+  </data>
+  <data name="RestorePodRestoreFailedWithImageFormat" xml:space="preserve">
+    <value>Restore: Failed to restore pod '{0}' to original state with image '{1}'.</value>
+    <comment>{0} - pod name; {1} - image</comment>
+  </data>
+  <data name="NoKubernetesClusterFound" xml:space="preserve">
+    <value>No Kubernetes cluster found. Please check your kubeconfig.</value>
+  </data>
+  <data name="InvalidRoutingValueWithSpaceFormat" xml:space="preserve">
+    <value>Invalid value provided for isolateAs header: '{0}'. The value cannot contain spaces.</value>
+    <comment>{0} - routing header value</comment>
+  </data>
+  <data name="InvalidRoutingValueWithUpperCaseFormat" xml:space="preserve">
+    <value>Invalid value provided for isolateAs header: '{0}'. The value cannot contain upper case characters.</value>
+    <comment>{0} - routing header value</comment>
+  </data>
+  <data name="InvalidRoutingValue" xml:space="preserve">
+    <value>Invalid value provided for isolateAs header: '{0}'. The value may only contain alphanumeric characters.</value>
+    <comment>{0} - routing header value</comment>
+  </data>
+  <data name="FailedToGetTheContainerEnvironmentMinimalImageFormat" xml:space="preserve">
+    <value>Unable to resolve environment variables from container '{0}'. If you are using a minimal base image, please switch to a base image that includes the env utility. If the code you are debugging does not rely on environment variables from the container, you can ignore this error.</value>
+    <comment>{0} - the container name</comment>
+  </data>
+  <data name="FailedToGetTheContainerEnvironmentFormat" xml:space="preserve">
+    <value>Failed to get the environment for container '{0}'. Error: '{1}'</value>
+    <comment>{0} - the container name; {1} - the error message</comment>
+  </data>
+  <data name="CorrelationIdErrorMessageFormat" xml:space="preserve">
+    <value>Please include the following Correlation ID when contacting support: '{0}'. </value>
+    <comment>{0} - unique Correlation ID</comment>
+  </data>
+</root>

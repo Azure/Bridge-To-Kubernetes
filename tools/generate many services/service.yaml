@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: REPLACE
+spec:
+  selector:
+    app: REPLACE
+  ports:
+  - port: 80
+    targetPort: 80

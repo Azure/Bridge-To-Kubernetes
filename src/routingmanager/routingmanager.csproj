@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TieredCompilation>true</TieredCompilation>
+    <AssemblyName>Microsoft.BridgeToKubernetes.RoutingManager</AssemblyName>
+    <RootNamespace>Microsoft.BridgeToKubernetes.RoutingManager</RootNamespace>
+    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>portable</DebugType>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <AssemblyOriginatorKeyFile>..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    <AssemblyVersion>1.0</AssemblyVersion>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.4" />
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\AssemblyVersion.proj" />
+</Project>

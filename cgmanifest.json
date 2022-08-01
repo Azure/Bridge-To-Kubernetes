@@ -1,0 +1,14 @@
+{
+  "Registrations": [
+    {
+      "Component": {
+        "Type": "git",
+        "git": {
+          "repositoryUrl": "https://github.com/kubernetes/kubernetes",
+          "commitHash": "f6278300bebbb750328ac16ee6dd3aa7d3549568"
+        }
+      }
+    }
+  ],
+  "Version": 1
+}

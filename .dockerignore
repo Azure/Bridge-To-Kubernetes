@@ -1,0 +1,14 @@
+**/bin/*
+**/obj/*
+**/.vs/
+**/.git/
+src/packages/
+pkg/
+src/**/vendor/
+src/portal/
+src/envoy/
+telemetry/
+**/Dockerfile
+**/Dockerfile.*
+**/node_modules/
+malibu/wwwroot/dist/

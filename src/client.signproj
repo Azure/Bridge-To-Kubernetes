@@ -1,0 +1,68 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(BUILD_ARTIFACTSTAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.Signing.*\build\MicroBuild.Plugins.Signing.props" />
+
+  <PropertyGroup>
+    <SearchDir>**\bin\$(Configuration)\*\*\publish\**</SearchDir>
+    <OutDir>$(MSBuildThisFileDirectory)</OutDir>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)</IntermediateOutputPath>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <!-- Mindaro executables (no StrongName signing) -->
+    <FilesToSign
+      Include="
+        $(SearchDir)\dsc.exe;
+        $(SearchDir)\EndpointManager.exe">
+      <Authenticode>Microsoft400</Authenticode>
+    </FilesToSign>
+
+    <!-- Mindaro assemblies -->
+    <FilesToSign
+      Include="
+        $(SearchDir)\dsc.dll;
+        $(SearchDir)\dsc.resources.dll;
+        $(SearchDir)\EndpointManager.dll;
+        $(SearchDir)\EndpointManager.resources.dll;
+        $(SearchDir)\Microsoft.BridgeToKubernetes.Library.dll;
+        $(SearchDir)\Microsoft.BridgeToKubernetes.Library.resources.dll;
+        $(SearchDir)\Microsoft.BridgeToKubernetes.Common.dll;
+        $(SearchDir)\Microsoft.BridgeToKubernetes.Common.resources.dll;
+        $(SearchDir)\Microsoft.BridgeToKubernetes.Common.Json.dll">
+      <Authenticode>Microsoft400</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
+
+    <!-- Sign third-party dependencies with 3PartySHA2 cert -->
+    <FilesToSign 
+      Include="
+        $(SearchDir)\Autofac.dll;
+        $(SearchDir)\Autofac.Extensions.DependencyInjection.dll;
+        $(SearchDir)\AutoMapper.dll;
+        $(SearchDir)\BouncyCastle.Crypto.dll;
+        $(SearchDir)\Fractions.dll;
+        $(SearchDir)\IdentityModel.dll;
+        $(SearchDir)\IdentityModel.OidcClient.dll;
+        $(SearchDir)\KubernetesClient.dll;
+        $(SearchDir)\KubernetesClient.basic.dll;
+        $(SearchDir)\KubernetesClient.models.dll;
+        $(SearchDir)\kubectl.exe;
+        $(SearchDir)\MessagePack.dll;
+        $(SearchDir)\Minimatch.dll;
+        $(SearchDir)\Newtonsoft.Json.dll;
+        $(SearchDir)\Newtonsoft.Json.Bson.dll;
+        $(SearchDir)\prometheus.netcore.dll;
+        $(SearchDir)\prometheus.netstandard.dll;
+        $(SearchDir)\system.io.abstractions.dll;
+        $(SearchDir)\YamlDotNet.dll">
+      <Authenticode>3PartySHA2</Authenticode>
+    </FilesToSign>
+  </ItemGroup>
+
+  <Target Name="OutputFilesToSign" BeforeTargets="SignFiles">
+    <Message Importance="high" Text="FilesToSign = @(FilesToSign)"/>
+  </Target>
+
+  <Import Project="$(BUILD_ARTIFACTSTAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.Signing.*\build\MicroBuild.Plugins.Signing.targets" />
+</Project>

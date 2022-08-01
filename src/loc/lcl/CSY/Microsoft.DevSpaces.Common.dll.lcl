@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LCX SchemaVersion="6.0" Name="C:\A\_work\1\s\src\common\bin\Release\netstandard2.1\Microsoft.DevSpaces.Common.dll" PsrId="211" FileType="1" SrcCul="en-US" TgtCul="cs-CZ" xmlns="http://schemas.microsoft.com/locstudio/2006/6/lcx">
+  <OwnedComments>
+    <Cmt Name="Dev" />
+    <Cmt Name="LcxAdmin" />
+    <Cmt Name="RCCX" />
+  </OwnedComments>
+  <Settings Name="@vsLocTools@\default.lss" Type="Lss" />
+  <Item ItemId=";Managed Resources" ItemType="0" PsrId="211" Leaf="true">
+    <Disp Icon="Expand" Expand="true" Disp="true" LocTbl="false" />
+  </Item>
+  <Item ItemId=";Microsoft.DevSpaces.Common.CommonResources.resources" ItemType="0" PsrId="211" Leaf="false">
+    <Disp Icon="Expand" Expand="true" Disp="true" LocTbl="false" Path=" \ ;Managed Resources \ 0 \ 0" />
+    <Item ItemId=";Strings" ItemType="0" PsrId="211" Leaf="false">
+      <Disp Icon="Str" Disp="true" LocTbl="false" />
+      <Item ItemId=";ClientRequestIdErrorMessageFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Please include the following Client Request ID when contacting support: {0}]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Až se budete obracet na podporu, zahrňte prosím následující ID požadavku klienta: {0}]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";Error_OopsMessage" ItemType="0" PsrId="211" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Oops... An unexpected error has occurred.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Ale ne... Došlo k neočekávané chybě.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";Error_SeeLogFile" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[For diagnostic information, see logs at '{0}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Diagnostické informace najdete v protokolech na cestě {0}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";FailedToDetermineClusterDetailsFromKubeConfig" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Failed to determine the cluster details from the kubeconfig file '{0}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Ze souboru kubeconfig {0} se nepovedlo určit podrobnosti o clusteru.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";FailedToLoadKubeConfig" ItemType="0" PsrId="211" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Failed to load current kubeconfig. Please confirm that your kubeconfig is valid.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Nepovedlo se načíst aktuální kubeconfig. Potvrďte prosím, že váš soubor kubeconfig je platný.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";FailedToLoadKubeConfigContext" ItemType="0" PsrId="211" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Failed to load current context from kubeconfig. Please confirm that your kubeconfig is valid.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Nepovedlo se načíst aktuální kontext ze souboru kubeconfig. Potvrďte prosím, že váš soubor kubeconfig je platný.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";FailedToLoadKubeConfigFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Failed to load kubeconfig at '{0}': {1}]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Nepovedlo se načíst kubeconfig v {0}: {1}]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";InvalidRoutingValueWithSpaceFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Invalid routing value: '{0}'. Routing value cannot contain spaces.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Neplatná hodnota směrování: {0}. Tato hodnota nesmí obsahovat mezery.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";InvalidRoutingValueWithUpperCaseFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Invalid routing value: '{0}'. Routing value cannot contain upper case characters.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Neplatná hodnota směrování: {0}. Tato hodnota nesmí obsahovat velká písmena.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";KubeConfigMergeFailedFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[An error occurred merging kubeconfig files. Please run 'KUBECONFIG={0}:{1} kubectl config view --flatten' to manually merge the config files and try again.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Při slučování souborů kubeconfig došlo k chybě. Spusťte prosím příkaz KUBECONFIG={0}:{1} kubectl config view --flatten, aby se konfigurační soubory sloučily ručně, a pak to zkuste znovu.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";KubeConfigSetContextFailedFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[An error occurred setting the kubeconfig context. Please run 'kubectl config set - context {0} --namespace={1}' to set the context and try again.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Při nastavování kontextu kubeconfig došlo k chybě. Spusťte prosím příkaz kubectl config set - context {0} --namespace={1}, aby se kontext nastavil, a zkuste to znovu.]]></Val>
+          </Tgt>
+          <Prev Cat="Text">
+            <Val><![CDATA[An error occurred setting the kubeconfig context. Please run 'kubectl config set - context {0} --namespace={0}' to set the context and try again.]]></Val>
+          </Prev>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";KubectlNotSupportedMessage" ItemType="0" PsrId="211" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[The current platform is not supported for kubectl.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Aktuální platforma se pro kubectl nepodporuje.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";NoKubernetesClusterFound" ItemType="0" PsrId="211" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[No Kubernetes cluster found. Please check your kubeconfig.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Nenašel se žádný cluster Kubernetes. Zkontrolujte prosím svůj soubor kubeconfig.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RequestIdErrorMessageFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Please include the following Request ID when contacting support: {0}]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Až se budete obracet na podporu, zahrňte prosím následující ID požadavku: {0}]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestoreDeploymentRestoredFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Deployment '{0}' restored to original state.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Nasazení {0} se obnovilo do původního stavu.]]></Val>
+          </Tgt>
+          <Prev Cat="Text">
+            <Val><![CDATA[Restore: Deployment '{0}' restored to original state with image '{1}'.]]></Val>
+          </Prev>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestoreDeploymentRestoredWithImageFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Deployment '{0}' restored to original state with image '{1}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Nasazení {0} se obnovilo do původního stavu s imagí {1}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestoreFailedToDeletePodFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Failed to delete pod '{0}/{1}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Nepovedlo se odstranit pod {0}/{1}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestoreFailedToRestoreDeploymentFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Failed to restore deployment '{0}' to original state with image '{1}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Nepovedlo se obnovit nasazení {0} do původního stavu s imagí {1}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestorePodDeletedFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Pod '{0}' deleted.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Pod {0} se odstranil.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestorePodRestoreFailedFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Failed to restore pod '{0}' to original state with image '{1}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Nepovedlo se obnovit pod {0} do původního stavu s imagí {1}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+      <Item ItemId=";RestorePodRestoredFormat" ItemType="0" PsrId="211" InstFlg="true" Leaf="true">
+        <Str Cat="Text">
+          <Val><![CDATA[Restore: Pod '{0}' restored to original state with image '{1}'.]]></Val>
+          <Tgt Cat="Text" Stat="Loc" Orig="New">
+            <Val><![CDATA[Obnovení: Pod {0} se obnovil do původního stavu s imagí {1}.]]></Val>
+          </Tgt>
+        </Str>
+        <Disp Icon="Str" />
+      </Item>
+    </Item>
+  </Item>
+  <Item ItemId=";Version" ItemType="0" PsrId="211" Leaf="false">
+    <Disp Icon="Ver" Disp="true" LocTbl="false" Path=" \ ;Version \ 8 \ 0" />
+    <Item ItemId=";FileDescription" ItemType="0" PsrId="211" Leaf="true">
+      <Str Cat="Text">
+        <Val><![CDATA[Microsoft.DevSpaces.Common]]></Val>
+        <Tgt Cat="Text" Stat="Loc" Orig="New">
+          <Val><![CDATA[Microsoft.DevSpaces.Common]]></Val>
+        </Tgt>
+      </Str>
+      <Disp Icon="Str" />
+    </Item>
+    <Item ItemId=";InternalName" ItemType="0" PsrId="211" Leaf="true">
+      <Str Cat="Text" DevLk="true" UsrLk="true">
+        <Val><![CDATA[Microsoft.DevSpaces.Common.dll]]></Val>
+      </Str>
+      <Disp Icon="Str" />
+    </Item>
+    <Item ItemId=";LegalCopyright" ItemType="0" PsrId="211" Leaf="true">
+      <Str Cat="Text">
+        <Val><![CDATA[© Microsoft Corporation. All rights reserved.]]></Val>
+        <Tgt Cat="Text" Stat="Loc" Orig="New">
+          <Val><![CDATA[© Microsoft Corporation. Všechna práva vyhrazena.]]></Val>
+        </Tgt>
+      </Str>
+      <Disp Icon="Str" />
+    </Item>
+    <Item ItemId=";OriginalFilename" ItemType="0" PsrId="211" Leaf="true">
+      <Str Cat="Text" DevLk="true" UsrLk="true">
+        <Val><![CDATA[Microsoft.DevSpaces.Common.dll]]></Val>
+      </Str>
+      <Disp Icon="Str" />
+    </Item>
+  </Item>
+  <Item ItemId=";Version" ItemType="8" PsrId="211" Leaf="true">
+    <Disp Icon="Expand" Expand="true" Disp="true" LocTbl="false" />
+  </Item>
+</LCX>

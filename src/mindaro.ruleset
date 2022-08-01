@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="New Rule Set" Description=" " ToolsVersion="15.0">
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA1801" Action="Error" /><!--Review unused parameters-->
+    <Rule Id="CA1804" Action="Error" /><!--Remove unused locals-->
+    <Rule Id="CA1811" Action="Error" /><!--Avoid uncalled private code-->
+    <Rule Id="CA1812" Action="Error" /><!--Avoid uninstantiated internal classes-->
+    <Rule Id="CA1823" Action="Error" /><!--Avoid unused private fields-->
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeQuality.Analyzers" RuleNamespace="Microsoft.CodeQuality.Analyzers">
+    <Rule Id="CA1801" Action="Error" />
+    <Rule Id="CA1804" Action="Error" />
+    <Rule Id="CA1811" Action="Error" />
+    <Rule Id="CA1812" Action="Error" />
+    <Rule Id="CA1823" Action="Error" />
+  </Rules>
+</RuleSet>

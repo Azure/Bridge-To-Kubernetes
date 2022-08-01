@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Microsoft.BridgeToKubernetes.TestHelpers</AssemblyName>
+    <RootNamespace>Microsoft.BridgeToKubernetes.TestHelpers</RootNamespace>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extras.FakeItEasy" Version="5.0.1" />
+    <PackageReference Include="FakeItEasy" Version="5.1.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>restorationjob</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <TieredCompilation>true</TieredCompilation>
+    <RuntimeIdentifiers>linux-x64;linux-musl-x64;win-x64</RuntimeIdentifiers>
+    <AssemblyVersion>1.0</AssemblyVersion>
+    <RootNamespace>Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob</RootNamespace>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\AssemblyVersion.proj" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

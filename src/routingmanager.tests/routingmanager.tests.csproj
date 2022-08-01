@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFramework>netcoreapp3.1</TargetFramework>
+      <AssemblyName>Microsoft.BridgeToKubernetes.RoutingManager.Tests</AssemblyName>
+      <RootNamespace>Microsoft.BridgeToKubernetes.RoutingManager.Tests</RootNamespace>
+      <IsPackable>false</IsPackable>
+      <SignAssembly>true</SignAssembly>
+      <DelaySign>true</DelaySign>
+      <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+      <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_LoadBalancerTriggerA_PodTriggerA.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerA.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerB_HelloUniverse.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerB_HelloWorld.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerB_HelloUniverse.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_LoadBalancerTriggerA_PodTriggerA.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_LoadBalancerTriggerA_PodTriggerB_HelloUniverse.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_PodTrigger.txt" />
+    <None Remove="EnvoyConfigs\GetEnvoyConfig_PodTriggerB_HelloWorld.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_LoadBalancerTriggerA_PodTriggerA.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerA.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerB_HelloUniverse.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA_PodTriggerB_HelloWorld.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerB_HelloUniverse.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_PodTriggerB_HelloWorld.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_LoadBalancerTriggerA_PodTriggerA.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_LoadBalancerTriggerA_PodTriggerB_HelloUniverse.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EnvoyConfigs\GetEnvoyConfig_PodTrigger.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>..\mindaro.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup-->
+
+  <ItemGroup>
+      <PackageReference Include="Autofac.Extras.FakeItEasy" Version="5.0.1" />
+      <PackageReference Include="FakeItEasy" Version="5.1.0" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="xunit" Version="2.4.1" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\common\common.csproj" />
+    <ProjectReference Include="..\routingmanager\routingmanager.csproj" />
+  </ItemGroup>
+    
+</Project>
