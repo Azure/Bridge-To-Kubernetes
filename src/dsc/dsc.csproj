@@ -1,0 +1,146 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TieredCompilation>true</TieredCompilation>
+    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <DebugType>portable</DebugType>
+    <AssemblyName>dsc</AssemblyName>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    <RootNamespace>Microsoft.BridgeToKubernetes.Exe</RootNamespace>
+    <AssemblyVersion>1.0</AssemblyVersion>
+    <HighEntropyVA>True</HighEntropyVA>
+    <ConsumeEndpointManager Condition=" '$(ConsumeEndpointManager)' == '' ">true</ConsumeEndpointManager>
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+    <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>..\mindaro.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup-->
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\library\library.csproj" />
+    <ProjectReference Include="..\common.json\common.json.csproj" />
+    <ProjectReference Include="..\common\common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1" />
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <EndpointManagerRuntimeIdentifier>$(RuntimeIdentifier)</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsWindows)'=='true'">win-x64</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsOSX)'=='true'">osx-x64</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsLinux)'=='true'">linux-x64</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerFileName>EndpointManager</EndpointManagerFileName>
+    <EndpointManagerFileName Condition="'$(EndpointManagerRuntimeIdentifier)'=='win-x64'">EndpointManager.exe</EndpointManagerFileName>
+    <EndpointManagerSubDirName>EndpointManager</EndpointManagerSubDirName>
+    <EndpointManagerProjectDirectory>$(MSBuildThisFileDirectory)..\endpointmanager</EndpointManagerProjectDirectory>
+    <EndpointManagerPublishDirectory>$(EndpointManagerProjectDirectory)\bin\$(Configuration)\netcoreapp3.1\$(EndpointManagerRuntimeIdentifier)\publish</EndpointManagerPublishDirectory>
+    <EndpointManagerSourcePath>$(EndpointManagerPublishDirectory)\$(EndpointManagerFileName)</EndpointManagerSourcePath>
+  </PropertyGroup>
+
+  <!-- During build, only publish EndpointManager.csproj if EndpointManager.exe doesn't already exist (because publishing is slow) -->
+  <Target Name="PublishEndpointManagerOnBuild" BeforeTargets="BeforeBuild" Condition="'$(ConsumeEndpointManager)'=='true'">
+    <CallTarget Targets="PublishEndpointManager" Condition="!Exists('$(EndpointManagerSourcePath)')" />
+    <ItemGroup>
+      <EndpointManagerFiles Include="$(EndpointManagerPublishDirectory)\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(EndpointManagerFiles)" DestinationFolder="$(OutDir)\$(EndpointManagerSubDirName)\%(RecursiveDir)" />
+  </Target>
+
+  <!-- During publish, always publish EndpointManager.csproj to ensure we get a fresh copy of EndpointManager.exe -->
+  <Target Name="PublishEndpointManagerOnPublish" BeforeTargets="Publish" Condition="'$(ConsumeEndpointManager)'=='true'">
+    <CallTarget Targets="PublishEndpointManager" Condition="'$(PublishedEndpointManager)'!='true'" />
+    <ItemGroup>
+      <EndpointManagerFiles Include="$(EndpointManagerPublishDirectory)\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(EndpointManagerFiles)" DestinationFolder="$(PublishDir)\$(EndpointManagerSubDirName)\%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="PublishKubectl" BeforeTargets="Publish" >
+    <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'osx-x64' '$(Configuration)' 'osx'}&quot;" Condition="'$(IsOSX)'=='true' And '$(Configuration)'=='Debug'" />
+    <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'linux-x64' '$(Configuration)' 'linux'}&quot;" Condition="'$(IsLinux)'=='true' And '$(Configuration)'=='Debug'" />
+    <Exec Command="powershell.exe -Command &quot;&amp; {./downloadkubectl.ps1 'win-x64' $(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'"/>
+  </Target>
+
+  <!-- During an explicit clean, delete EndpointManager.exe to force it to re-publish on the next build -->
+  <Target Name="CleanEndpointManagerOnClean" AfterTargets="Clean">
+    <ItemGroup>
+      <EndpointManagerFiles Include="$(EndpointManagerPublishDirectory)\**\*" />
+    </ItemGroup>
+    <Delete Files="@(EndpointManagerFiles)" Condition="Exists('$(EndpointManagerSourcePath)')" />
+  </Target>
+
+  <Target Name="PublishEndpointManager">
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\common.json\common.json.csproj" Targets="Restore" Properties="RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier)" />
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\common.json\common.json.csproj" Targets="Build" Properties="Configuration=$(Configuration);RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier)" />
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\common\common.csproj" Targets="Restore" Properties="RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier)" />
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\common\common.csproj" Targets="Build" Properties="Configuration=$(Configuration);RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier)" />
+    <MSBuild Projects="$(EndpointManagerProjectDirectory)\endpointmanager.csproj" Targets="Restore" Properties="RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier)" />
+    <MSBuild Projects="$(EndpointManagerProjectDirectory)\endpointmanager.csproj" Targets="Publish" Properties="Configuration=$(Configuration);RuntimeIdentifier=$(EndpointManagerRuntimeIdentifier);PublishProfile=$(EndpointManagerProjectDirectory)\Properties\PublishProfiles\FolderProfile.pubxml;PublishDir=$(EndpointManagerPublishDirectory)" />
+    <PropertyGroup>
+      <PublishedEndpointManager>true</PublishedEndpointManager>
+    </PropertyGroup>
+  </Target>
+
+  <ItemGroup>
+    <None
+      Include="
+        $(MSBuildThisFileDirectory)..\vscode\ThirdPartyNotices\ThirdPartyNotices.txt;
+        $(MSBuildThisFileDirectory)..\resources\license.rtf">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="dsc.nuspec">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>$(NuspecProperties);version=$(Version)</NuspecProperties>
+    </PropertyGroup>
+    <Message Importance="high" Text="NuspecProperties: $(NuspecProperties)" />
+  </Target>
+
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\ClientAssemblyVersion.proj" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\AssemblyVersion.proj" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\..\build\localization.targets" />
+</Project>

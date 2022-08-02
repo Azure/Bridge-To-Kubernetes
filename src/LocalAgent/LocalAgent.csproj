@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TieredCompilation>true</TieredCompilation>
+    <AssemblyName>Microsoft.BridgeToKubernetes.LocalAgent</AssemblyName>
+    <RootNamespace>Microsoft.BridgeToKubernetes.LocalAgent</RootNamespace>
+    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>portable</DebugType>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Company>Microsoft</Company>
+    <Product />
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    <AssemblyOriginatorKeyFile>..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
+    <HighEntropyVA>True</HighEntropyVA>
+    <UserSecretsId>fd98643e-8a5f-4e08-a030-9bc36f0ddfc3</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.1" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\common.json\common.json.csproj" />
+    <ProjectReference Include="..\common\common.csproj" />
+    <ProjectReference Include="..\library\library.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+<!-- 
+Configures the assembly version based on the build number. This is specific for projects that are part of our client.
+The assembly version changes based on the build ID, so we can recover from its number the exact build that produced it.
+-->
+<Project>
+    <PropertyGroup>
+        <MajorVersion>1</MajorVersion>
+        <MinorVersion>0</MinorVersion>
+        <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">$(MajorVersion).$(MinorVersion)</VersionPrefix>
+        <BuildId Condition=" '$(BUILD_BUILDID)' != '' ">$([System.Int32]::Parse($(BUILD_BUILDID)))</BuildId>
+        <BuildNumber Condition=" '$(BuildId)' != '' ">$([MSBuild]::Divide($(BuildId), 1000))</BuildNumber>
+        <AssemblyVersion Condition=" '$(BuildNumber)' != '' ">$(VersionPrefix).$(BuildNumber)</AssemblyVersion>
+        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">$(VersionPrefix)</AssemblyVersion>
+    </PropertyGroup>
+</Project>

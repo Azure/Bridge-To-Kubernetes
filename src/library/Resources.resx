@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CannotDetermineActiveConnectionsFormat" xml:space="preserve">
+    <value>Cannot determine active connections using 'netstat {0}' command. Exit code {1}: {2}</value>
+    <comment>{0} - netstat arguments; {1} - exit code; {2} - error details</comment>
+  </data>
+  <data name="CannotObtainLocalIPsFormat" xml:space="preserve">
+    <value>Cannot obtain enough local IPs. Please kill '{0}' and try again.</value>
+    <comment>{0} - process name</comment>
+  </data>
+  <data name="CommandFailedFormat" xml:space="preserve">
+    <value>Running {0} {1} failed with exit code {2}: {3}</value>
+    <comment>{0} - command; {1} - arguments; {2} - exit code; {3} - error details</comment>
+  </data>
+  <data name="ContainerPortAvailableFormat" xml:space="preserve">
+    <value>Container port {0} is available at localhost:{1}.</value>
+    <comment>{0} - container port; {1} - local port</comment>
+  </data>
+  <data name="ContainerSpecCommandNotEmptyFormat" xml:space="preserve">
+    <value>ContainerSpec.Command is not empty: '{0}'. Overriding entrypoints is currently not supported.</value>
+    <comment>{0} - entryPoint value</comment>
+  </data>
+  <data name="ContainerStatusUnavailableMessage" xml:space="preserve">
+    <value>Container status is not available.</value>
+  </data>
+  <data name="CopyContainerFailedFormat" xml:space="preserve">
+    <value>Copying '{0}' from container '{1}' to '{2}' failed with exit code {3}.</value>
+    <comment>{0} - container path; {1} - container pod name; {2} - local path; {3} - exit code</comment>
+  </data>
+  <data name="ResourcePatchedForAgentFormat" xml:space="preserve">
+    <value>{0} '{1}/{2}' patched to run agent.</value>
+    <comment>{0} - resource type, {1} - namespace name; {2} - resource name</comment>
+  </data>
+  <data name="DownloadCompletedMessage" xml:space="preserve">
+    <value>Download completed.</value>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>Download failed with error: {0}</value>
+    <comment>{0} - error message</comment>
+  </data>
+  <data name="DownloadingFromFormat" xml:space="preserve">
+    <value>Downloading from '{0}' ...</value>
+    <comment>{0} - path</comment>
+  </data>
+  <data name="DownloadingVolumeFormat" xml:space="preserve">
+    <value>Downloading volume '{0}' from '{1}' ...</value>
+    <comment>{0} - volume mount; {1} - container path</comment>
+  </data>
+  <data name="FailedToDeletePodFormat" xml:space="preserve">
+    <value>Failed to delete pod '{0}'.</value>
+    <comment>{0} - pod name</comment>
+  </data>
+  <data name="FailedToDeployPodMessage" xml:space="preserve">
+    <value>Failed to deploy a pod into the cluster.</value>
+  </data>
+  <data name="FailedToDeployRemoteRestoreJobFormat" xml:space="preserve">
+    <value>Failed to deploy remote restore job for pod deployment '{0}/{1}' with error: {2}</value>
+    <comment>{0} - namespace name; {1} - deployment name; {2} - error details</comment>
+  </data>
+  <data name="FailedToDetermineCurrentUser" xml:space="preserve">
+    <value>Failed to determine the current user. Please try again.</value>
+  </data>
+  <data name="FailedToFindContainerFormat" xml:space="preserve">
+    <value>Failed to find container '{0}'.</value>
+    <comment>{0} - container name</comment>
+  </data>
+  <data name="FailedToFindContainerInPodFormat" xml:space="preserve">
+    <value>Failed to find container '{0}' in pod '{1}'.</value>
+    <comment>{0} - container name; {1} - pod name</comment>
+  </data>
+  <data name="FailedToFindDeploymentFormat" xml:space="preserve">
+    <value>Failed to find deployment '{0}' in namespace '{1}'.</value>
+    <comment>{0} - deployment name; {1} - namespace name</comment>
+  </data>
+  <data name="FailedToFindPodFormat" xml:space="preserve">
+    <value>Failed to find pod '{0}' hosting container '{1}'.</value>
+    <comment>{0} - pod name; {1} - container name</comment>
+  </data>
+  <data name="FailedToFindPodInNamespaceFormat" xml:space="preserve">
+    <value>Failed to find '{0}' in namespace '{1}'.</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="FailedToFindPodsInDeploymentFormat" xml:space="preserve">
+    <value>Failed to find pods in deployment '{0}' in namespace '{1}'.</value>
+    <comment>{0} - deployment name; {1} - namespace name</comment>
+  </data>
+  <data name="FailedToFindContainerInDeploymentFormat" xml:space="preserve">
+    <value>Failed to find containers in deployment '{0}' in namespace '{1}'.</value>
+    <comment>{0} - deployment name; {1} - namespace name</comment>
+  </data>
+  <data name="FailedToGetRoutingManagerDeploymentStatusFormat" xml:space="preserve">
+    <value>Failed to get routing manager deployment status: '{0}'</value>
+    <comment>{0} - error string</comment>
+  </data>
+  <data name="FailedToGetRunningPodInDeploymentFormat" xml:space="preserve">
+    <value>Failed to get running pod in the deployment '{0}' in namespace '{1}'.</value>
+    <comment>{0} - deployment name; {1} - namespace name</comment>
+  </data>
+  <data name="FailedToListPodsFormat" xml:space="preserve">
+    <value>Failed to list pods in namespace '{0}'...</value>
+    <comment>{0} - namespace name</comment>
+  </data>
+  <data name="FailedToIDContainerFormat" xml:space="preserve">
+    <value>Failed to identify the container to use in pod '{0}' from the container port information in the pod spec.</value>
+    <comment>{0} - pod name</comment>
+  </data>
+  <data name="FailedToIDContainerForPod" xml:space="preserve">
+    <value>Failed to identify the container to use in pod '{0}'.</value>
+    <comment>{0} - pod name</comment>
+  </data>
+  <data name="FailedToLaunchEndpointManagerFormat" xml:space="preserve">
+    <value>Failed to launch {0}.</value>
+    <comment>{0} - component name. When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="FailedToLoadBridgeToKubernetesEnvFileFormat" xml:space="preserve">
+    <value>Failed to load {0} environment file '{1}': {2}</value>
+    <comment>{0} - product name; {1} - path to env file; {1} - list of issues</comment>
+  </data>
+  <data name="FailedToResolveResourceBackingServiceFormat" xml:space="preserve">
+    <value>Failed to resolve the {0} backing the service '{1}'.</value>
+    <comment>{0} - resource type; {1} - service name</comment>
+  </data>
+  <data name="FailedToRestoreServiceFormat" xml:space="preserve">
+    <value>Failed to restore service at '{0}/{1}/{2}'.</value>
+    <comment>{0} - namespace name; {1} - pod name; {2} - container name</comment>
+  </data>
+  <data name="FailedToRunProcess" xml:space="preserve">
+    <value>Failed to run {0} with error: {1}</value>
+    <comment>{0} - process name; {1} - error details</comment>
+  </data>
+  <data name="RemoteAgentDeployedInPod" xml:space="preserve">
+    <value>Remote agent deployed in container '{0}' in pod '{1}'.</value>
+    <comment>{0} - container name; {1} - pod name</comment>
+  </data>
+  <data name="HostsFileUpdatedMessage" xml:space="preserve">
+    <value>Hosts file updated.</value>
+  </data>
+  <data name="ImageNotRunningAfterPatchFormat" xml:space="preserve">
+    <value>Container '{0}/{1}/{2}' is not running image '{3}' after patching.</value>
+    <comment>{0} - namespace name; {1} - pod name; {2} - container name; {3} - image</comment>
+  </data>
+  <data name="ImagePullPolicyCannotBeNeverMessage" xml:space="preserve">
+    <value>ImagePullPolicy cannot be 'Never'.  Please change it to a different value.</value>
+  </data>
+  <data name="InvalidServiceEntryFormat" xml:space="preserve">
+    <value>Unexpected service entry '{0}' found in {1}. A service entry must be 'service-name' or 'service-name.namespace-name'.</value>
+    <comment>{0} - the service entry; {1} - the config file</comment>
+  </data>
+  <data name="InvalidExternalEndpointEntryFormat" xml:space="preserve">
+    <value>Unexpected external endpoint entry '{0}' found in {1}. An external endpoint must be specified like 'DNS-name:port'.</value>
+    <comment>{0} - the dependency entry; {1} - the config file</comment>
+  </data>
+  <data name="InvalidPortEntryFormat" xml:space="preserve">
+    <value>Unexpected port number entry '{0}' found in {1}. Port number must be an integer between 1 and 65535. Use comma ',' to separate multiple port numbers.</value>
+    <comment>{0} - the port entry; {1} - the config file</comment>
+  </data>
+  <data name="IsolationNotSupportedWithIstio" xml:space="preserve">
+    <value>Using isolation with Istio is not currently supported due to conflicts between Istio routing and Bridge isolation. We recommend using Bridge without isolation, deploying a copy of the application in a separate namespace.</value>
+  </data>
+  <data name="LaunchProcessCancelled" xml:space="preserve">
+    <value>The {0} launch process was cancelled.</value>
+    <comment>{0} - component name. When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="LoadedBridgeToKubernetesEnvFileFormat" xml:space="preserve">
+    <value>Loaded {0} environment file '{1}'.</value>
+    <comment>{0} - product name; {1} - path to Bridge to Kubernetes env file</comment>
+  </data>
+  <data name="BridgeToKubernetesIsAKSOnlyFormat" xml:space="preserve">
+    <value>{0} can only be used on an {1}.</value>
+    <comment>{0} - Product name; {1} - AKS Cluster</comment>
+  </data>
+  <data name="MovingContentsFromContainerToLocalPathFormat" xml:space="preserve">
+    <value>Moving contents from {0} to {1}.</value>
+    <comment>{0} - target path; {1} - local path</comment>
+  </data>
+  <data name="NetStatCommandFailedFormat" xml:space="preserve">
+    <value>Running {0} {1} failed with exit code {2} and error: {3}</value>
+    <comment>{0} - netstat command; {1} - netstat args; {2} - exit code; {3} - output</comment>
+  </data>
+  <data name="PatchResourceFailedFormat" xml:space="preserve">
+    <value>Patch {0} '{1}/{2}' failed. Patch is {3}: {4}</value>
+    <comment>{0} - resource type; {1} - namespace name; {2} - deployment name; {3} - patch; {4} - error details</comment>
+  </data>
+  <data name="PatchingFailedFormat" xml:space="preserve">
+    <value>Patch '{0}/{1}/{2}' to use '{3}' failed: with error: {4}</value>
+    <comment>{0} - namespace name; {1} - pod name; {2} - container name; {3} - image; {4} - error message</comment>
+  </data>
+  <data name="PodAlreadyUsingAgentImageFormat" xml:space="preserve">
+    <value>'{0}/{1}/{2}' is already using '{3'}.</value>
+    <comment>{0} - namespace name; {1} - pod name; {2} - container name; {3} - image</comment>
+  </data>
+  <data name="PodCreatedFormat" xml:space="preserve">
+    <value>Pod '{0}/{1}' created.</value>
+    <comment>{0} - namespace name; {1} - pod name</comment>
+  </data>
+  <data name="PodCreatedInNamespaceFormat" xml:space="preserve">
+    <value>Pod '{0}' created in namespace '{1}'.</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="PodPatchedToAgentImageFormat" xml:space="preserve">
+    <value>'{0}/{1}/{2}' patched to use '{3}'.</value>
+    <comment>{0} - namespace name; {1} - pod name; {2} - container name; {3} - image</comment>
+  </data>
+  <data name="Port80WindowsServicesMessage" xml:space="preserve">
+    <value>If you are using Windows please disable the BranchCache service to free port 80. Services such as IISAdmin, HTTP or World Wide Web Publishing Service could also use port 80. Please stop them.</value>
+    <comment>When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="PortInUseFormat" xml:space="preserve">
+    <value>Port {0} is already in use on your machine. Please free this port and try again. {1}</value>
+    <comment>{0} - port number; {1} - more details. When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="PortRequiredFormat" xml:space="preserve">
+    <value>Port number must be specified for resource {0}.</value>
+    <comment>{0} - DNS name</comment>
+  </data>
+  <data name="PortsInUseMessage" xml:space="preserve">
+    <value>Use 'netstat -ano' command to find which program is using this port.</value>
+  </data>
+  <data name="PreparingToRunBridgeToKubernetesFormat" xml:space="preserve">
+    <value>Preparing to run {0} configured as pod {1}/{2} ...</value>
+    <comment>{0} - product name; {1} - namespace name; {2} - pod name</comment>
+  </data>
+  <data name="ProcessBindsOnPortFormat" xml:space="preserve">
+    <value>Process '{0}' binds to port '{1}' on all addresses. This will prevent '{2}' from forwarding network traffic on this port. Please stop this process or service and try again.</value>
+    <comment>{0} - process name; {1} - port; {2} - product name. When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="ResourceNotSupportedFormat" xml:space="preserve">
+    <value>{0} currently only supports debugging services backed by Deployments and StatefulSets.</value>
+    <comment>{0} - product name</comment>
+  </data>
+  <data name="RestoringResourcePatchMessage" xml:space="preserve">
+    <value>Restoring {0} patch ...</value>
+    <comment>{0} - resource type</comment>
+  </data>
+  <data name="RestoringPodDeploymentMessage" xml:space="preserve">
+    <value>Restoring pod deployment ...</value>
+  </data>
+  <data name="RetryingMessage" xml:space="preserve">
+    <value>Retrying ...</value>
+  </data>
+  <data name="RoutingSuccessfullyEnabledFormat" xml:space="preserve">
+    <value>Routing successfully enabled for service through pod '{0}' in namespace '{1}'.</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="RunningTarCommandFailed" xml:space="preserve">
+    <value>Running {0} {tarArguments} failed with exit code {exitCode}: {output}</value>
+    <comment>{0} - tar command; {1} - tar arguments; {2} - exit code; {3) - output</comment>
+  </data>
+  <data name="ServiceAvailableOnPortFormat" xml:space="preserve">
+    <value>Service '{0}' is available on {1}:{2}.</value>
+    <comment>{0} - service name; {1} - ip address; {2} - local port</comment>
+  </data>
+  <data name="ServiceNameNotDefinedForRoutingFormat" xml:space="preserve">
+    <value>Service name not defined to support routing for '{0}' in namespace '{1}'.</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="SpecifiedContainerNotFoundFormat" xml:space="preserve">
+    <value>The specified container '{0}' was not found in pod '{1}'.</value>
+    <comment>{0} - container name; {1} - pod name</comment>
+  </data>
+  <data name="SpecifiedServiceBackedByManyPodsInDifferentResourcesFormat" xml:space="preserve">
+    <value>The specified service '{0}' is backed by {1} pods owned by different {2}. Unable to scale down to a single Pod.</value>
+    <comment>{0} - service name; {1} - number of pods; {2} - resource type plural</comment>
+  </data>
+  <data name="SpecifiedServiceCouldNotBeFoundFormat" xml:space="preserve">
+    <value>The specified service '{0}' could not be found in namespace '{1}'.</value>
+    <comment>{0} - service name; {1} - namespace name</comment>
+  </data>
+  <data name="SpecifiedServiceNotBackedByRunningPodFormat" xml:space="preserve">
+    <value>The specified service '{0}' is not backed by a running pod. To check the status of your pods, you can run '{1}'.</value>
+    <comment>{0} - service name, {1} - kubectl command</comment>
+  </data>
+  <data name="SystemProcessBindsOnPortFormat" xml:space="preserve">
+    <value>Process '{0}' binds to port '{1}' on all addresses. This will prevent '{2}' from forwarding network traffic on this port. Please stop this process or service and try again.</value>
+    <comment>{0} - process name; {1} - port; {2} - product name. When updating this string, make similar change in /src/vscode/Constants.ts file if required.</comment>
+  </data>
+  <data name="TimedOutWaitingForPodFormat" xml:space="preserve">
+    <value>Timed out waiting for pod '{0}' in namespace '{1}' to reach running state.</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="WaitingForPodFormat" xml:space="preserve">
+    <value>Waiting for '{0}' in namespace '{1}' to reach running state...</value>
+    <comment>{0} - pod name; {1} - namespace name</comment>
+  </data>
+  <data name="UnixDomainSocketsNotSupported" xml:space="preserve">
+    <value>Unable to create a Unix Domain Socket. If you are running {0} on a version of Windows older than Windows 10 Version 1803 (10.0.17134), please consider upgrading your system.</value>
+    <comment>{0} - product name</comment>
+  </data>
+  <data name="VolumeMountCannotBeFoundFormat" xml:space="preserve">
+    <value>Volume mount '{0}' referenced in {1} config file '{2}' does not exist in the remote container.</value>
+    <comment>{0} - volume mount; {1} - product name; {2} - config file</comment>
+  </data>
+  <data name="WaitingForEndpointManagerFormat" xml:space="preserve">
+    <value>Waiting for {0} to come up ...</value>
+    <comment>{0} - endpoint manager</comment>
+  </data>
+  <data name="WindowsContainersNotSupportedFormat" xml:space="preserve">
+    <value>The target workload is running on a Windows node. This OS is currently not supported by {0}.</value>
+    <comment>{0} - product name</comment>
+  </data>
+  <data name="UnableToResolvePortFromContainer" xml:space="preserve">
+    <value>Unable to resolve port {0} from container '{1}' spec.</value>
+    <comment>{0} - port number; {1} container name</comment>
+  </data>
+  <data name="SpecifiedServiceBackedByMultipleRemoteAgents" xml:space="preserve">
+    <value>The specified service '{0}' is backed by {1} Remote Agent pod(s). Please try again later once the service is restored.</value>
+    <comment>{0} - service name; {1} - pods count</comment>
+  </data>
+  <data name="CannotObtainFreeLocalPorts" xml:space="preserve">
+    <value>Cannot find free local ports to map remote service ports. Retry later.</value>
+    <comment>Error message when free ports are not available on local machine</comment>
+  </data>
+  <data name="FailedToConfigureLocalHost" xml:space="preserve">
+    <value>Failed to configure local host.</value>
+  </data>
+  <data name="FailedToGetElevationRequests" xml:space="preserve">
+    <value>Failed to get elevation requests.</value>
+  </data>
+  <data name="FailedToGetWorkloadInfo" xml:space="preserve">
+    <value>Failed to get workload info.</value>
+  </data>
+  <data name="FailedToRestoreOriginalContainer" xml:space="preserve">
+    <value>Failed to restore original remote container.</value>
+  </data>
+  <data name="FailedToStartRemoteAgent" xml:space="preserve">
+    <value>Failed to start remote agent.</value>
+  </data>
+  <data name="FailedToStopLocalConnection" xml:space="preserve">
+    <value>Failed to stop local connection.</value>
+  </data>
+  <data name="FailedToWaitForRemoteAgent" xml:space="preserve">
+    <value>Failed to wait for remote agent to restart.</value>
+  </data>
+  <data name="FailedToConnectToRemoteAgent" xml:space="preserve">
+    <value>Failed to connect to the remote agent.</value>
+  </data>
+  <data name="FailedToStartLocalAgent" xml:space="preserve">
+    <value>Failed to start local agent.</value>
+  </data>
+  <data name="FailedToStopLocalAgent" xml:space="preserve">
+    <value>Failed to stop local agent.</value>
+  </data>
+  <data name="FailedToMapRemoteServices" xml:space="preserve">
+    <value>Failed to map remote services to local ports and IPs</value>
+  </data>
+</root>

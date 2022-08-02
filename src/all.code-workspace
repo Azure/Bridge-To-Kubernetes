@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "common"
+		},
+		{
+			"path": "common.json"
+		},
+		{
+			"path": "library"
+		},
+		{
+			"path": "devhostagent"
+		},
+		{
+			"path": "devhostagent.restorationjob"
+		},
+		{
+			"path": "endpointmanager"
+		},
+		{
+			"path": "routingmanager"
+		},
+		{
+			"path": "bridge"
+		}
+	],
+	"settings": {}
+}

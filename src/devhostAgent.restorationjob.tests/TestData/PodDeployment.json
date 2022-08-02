@@ -1,0 +1,38 @@
+﻿{
+  "pod": {
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "bikesharingweb-79794dd757-dznkh",
+      "namespace": "dev",
+      "labels": {
+        "app": "bikesharingweb",
+        "draft": "draft-app",
+        "pod-template-hash": "79794dd757",
+        "release": "bikesharingapp"
+      }
+    },
+    "spec": {
+      "containers": [
+        {
+          "name": "bikesharingweb",
+          "image": "azdspublic/bikesharing-bikesharingweb:build.20200619.1",
+          "ports": [
+            {
+              "name": "http",
+              "containerPort": 80,
+              "protocol": "TCP"
+            }
+          ],
+          "env": [
+            {
+              "name": "API_NAME",
+              "value": "gateway"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "type": "PodDeployment"
+}

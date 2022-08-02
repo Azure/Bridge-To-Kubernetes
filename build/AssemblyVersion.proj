@@ -1,0 +1,14 @@
+<!-- 
+Configures the version based on the build number. Assumes $AssemblyVersion has already been declared, as
+depends on each project.
+-->
+<Project>
+    <PropertyGroup Condition=" '$(Version)' == '' ">
+        <BUILD_BUILDNUMBER Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$(MINDARO_BUILD_NUMBER)</BUILD_BUILDNUMBER>
+        <BUILD_BUILDNUMBER Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$([System.DateTime]::Now.ToString(`yyyyMMdd`))</BUILD_BUILDNUMBER>
+        <VersionSuffix Condition=" '$(VersionSuffix)' == '' and '$(Configuration)' == 'Debug' and '$(USERNAME)' != '' and '$(DisableUsernameInAssemblyVersion)' == '' ">$(BUILD_BUILDNUMBER)-$(USERNAME)</VersionSuffix>
+        <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$(BUILD_BUILDNUMBER)</VersionSuffix>
+        <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">$(AssemblyVersion)</VersionPrefix>
+        <Version>$(VersionPrefix).$(VersionSuffix)</Version>
+    </PropertyGroup>
+</Project>

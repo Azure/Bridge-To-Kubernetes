@@ -1,0 +1,260 @@
+﻿{
+  "StaticResources": {
+    "Listeners": [
+      {
+        "Name": "listener_80_80",
+        "Address": {
+          "SocketAddress": {
+            "Address": "0.0.0.0",
+            "PortValue": 80
+          }
+        },
+        "ListenerFilters": [
+          {
+            "Name": "envoy.filters.listener.http_inspector",
+            "TypedConfig": null
+          }
+        ],
+        "FilterChains": [
+          {
+            "FilterChainMatch": {
+              "ApplicationProtocols": [
+                "http/1.0",
+                "http/1.1",
+                "h2c"
+              ],
+              "TransportProtocol": null
+            },
+            "Filters": [
+              {
+                "Name": "envoy.http_connection_manager",
+                "TypedConfig": {
+                  "Type": "type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager",
+                  "CodecType": "auto",
+                  "StatPrefix": "listener_80_80",
+                  "RouteConfig": {
+                    "Name": "listener_80_80_route",
+                    "VirtualHosts": [
+                      {
+                        "Name": "listener_80_80_route_ingress_withDomain_user1.hellouniverse.com",
+                        "Domains": [
+                          "user1.hellouniverse.com"
+                        ],
+                        "Routes": [
+                          {
+                            "Match": {
+                              "Headers": null,
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_debug_withHeader_kubernetes-route-as_user1_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": [
+                              {
+                                "Header": {
+                                  "Key": "kubernetes-route-as",
+                                  "Value": "user1"
+                                },
+                                "Append": false
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Name": "listener_80_80_route_ingress_withDomain_user2.hellouniverse.com",
+                        "Domains": [
+                          "user2.hellouniverse.com"
+                        ],
+                        "Routes": [
+                          {
+                            "Match": {
+                              "Headers": null,
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_original_clone_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": [
+                              {
+                                "Header": {
+                                  "Key": "kubernetes-route-as",
+                                  "Value": "user2"
+                                },
+                                "Append": false
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Name": "listener_80_80_route_ingress_withDomain_user1.hellouniverseagain.com",
+                        "Domains": [
+                          "user1.hellouniverseagain.com"
+                        ],
+                        "Routes": [
+                          {
+                            "Match": {
+                              "Headers": null,
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_debug_withHeader_kubernetes-route-as_user1_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": [
+                              {
+                                "Header": {
+                                  "Key": "kubernetes-route-as",
+                                  "Value": "user1"
+                                },
+                                "Append": false
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Name": "listener_80_80_route_ingress_withDomain_user2.hellouniverseagain.com",
+                        "Domains": [
+                          "user2.hellouniverseagain.com"
+                        ],
+                        "Routes": [
+                          {
+                            "Match": {
+                              "Headers": null,
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_original_clone_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": [
+                              {
+                                "Header": {
+                                  "Key": "kubernetes-route-as",
+                                  "Value": "user2"
+                                },
+                                "Append": false
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Name": "listener_80_80_route_default",
+                        "Domains": [
+                          "*"
+                        ],
+                        "Routes": [
+                          {
+                            "Match": {
+                              "Headers": [
+                                {
+                                  "Name": "kubernetes-route-as",
+                                  "Value": "user1"
+                                }
+                              ],
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_debug_withHeader_kubernetes-route-as_user1_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": null
+                          },
+                          {
+                            "Match": {
+                              "Headers": null,
+                              "Prefix": "/"
+                            },
+                            "Route": {
+                              "Cluster": "service_original_clone_80_80",
+                              "Timeout": "0s",
+                              "IdleTimeout": "0s"
+                            },
+                            "RequestHeadersToAdd": null
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "HttpFilters": [
+                    {
+                      "Name": "envoy.filters.http.router"
+                    }
+                  ]
+                },
+                "Config": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Clusters": [
+      {
+        "Name": "service_original_clone_80_80",
+        "ConnectTimeout": "1.00s",
+        "Type": "strict_dns",
+        "LoadAssignment": {
+          "ClusterName": "service_original_clone_80_80",
+          "Endpoints": [
+            {
+              "LbEndpoints": [
+                {
+                  "Endpoint": {
+                    "Address": {
+                      "SocketAddress": {
+                        "Address": "hellouniverse-service-cloned-routing-svc.default",
+                        "PortValue": 80
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Http2ProtocolOptions": null,
+        "Http1ProtocolOptions": null
+      },
+      {
+        "Name": "service_debug_withHeader_kubernetes-route-as_user1_80_80",
+        "ConnectTimeout": "1.00s",
+        "Type": "static",
+        "LoadAssignment": {
+          "ClusterName": "service_debug_withHeader_kubernetes-route-as_user1_80_80",
+          "Endpoints": [
+            {
+              "LbEndpoints": [
+                {
+                  "Endpoint": {
+                    "Address": {
+                      "SocketAddress": {
+                        "Address": "1.2.3.4",
+                        "PortValue": 80
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "Http2ProtocolOptions": null,
+        "Http1ProtocolOptions": null
+      }
+    ]
+  },
+  "Admin": {
+    "AccessLogPath": "/tmp/admin_access.log"
+  }
+}

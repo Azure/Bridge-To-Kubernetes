@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- Disable localization unless it has been explicitly enabled with Localize=true -->
+    <GenerateLCE Condition="'$(Localize)' != 'true'">false</GenerateLCE>
+    <LocalizationEnabled Condition="'$(Localize)' != 'true'">false</LocalizationEnabled>
+    <CopySatelliteDllsToStandardNETPaths>true</CopySatelliteDllsToStandardNETPaths>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FilesToLocalize Include="$(OutDir)$(TargetFileName)">
+      <TranslationFile>$(MSBuildThisFileDirectory)..\src\loc\lcl\{Lang}\$(TargetFileName).lcl</TranslationFile>
+    </FilesToLocalize>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Include="bin/$(Configuration)/$(TargetFramework)/*/$(AssemblyName).resources.dll"
+      Link="%(RecursiveDir)%(FileName)%(Extension)">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

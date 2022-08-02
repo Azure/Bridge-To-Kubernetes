@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="2.5">
+    <id>Microsoft.BridgeToKubernetes.CLI</id>
+    <version>$version$</version>
+    <title>Microsoft.BridgeToKubernetes.CLI</title>
+    <description>Microsoft.BridgeToKubernetes.CLI</description>
+    <authors>Microsoft</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+  </metadata>
+  <files>
+    <file src="**/*" exclude="**/*.nuspec;**/*.pdb;**/*.xml" target="runtimes/win-x64/native" />
+  </files>
+</package>

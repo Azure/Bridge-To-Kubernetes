@@ -1,0 +1,10 @@
+version: 0.1
+env:
+  - name: STORAGE_ACCOUNT_NAME
+    value: "mitestsa"
+  - name: STORAGE_CONTAINER_NAME
+    value: "mitestsa-container"
+  - name: MI_CLIENT_ID
+    value: "bb502719-354c-4ca3-8991-0bff00ffc7a5"
+enableFeatures:
+  - ManagedIdentity

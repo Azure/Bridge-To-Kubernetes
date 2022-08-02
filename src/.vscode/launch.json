@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+            "name": "bridge",
+            "type": "coreclr",
+            "request": "launch",
+            //"preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
+            // If you have changed target frameworks, make sure to update the program path.
+            // Replace osx-x64 with win-x64 if you are running in windows
+            "program": "${workspaceFolder}/dsc/bin/Debug/netcoreapp3.1/osx-x64/dsc.dll",
+            "args": ["connect", "--service", "stats-api", "--local-port", "3001", "--use-kubernetes-service-environment-variables", "--namespace", "todo-app", "--routing", "elvilla-8474"], //,
+            //"args": ["prep-connect", "--service", "stats-api"],// "--local-port", "3001", "--use-kubernetes-service-environment-variables"],
+            "env": {
+                "BRIDGE_ENVIRONMENT":"dev",
+                "BRIDGE_BINARYUTILITYVERSION":"v1"
+            },
+            "cwd": "${workspaceFolder}/dsc",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

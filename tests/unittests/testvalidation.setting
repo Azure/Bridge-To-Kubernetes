@@ -1,0 +1,13 @@
+src/execsvc/*,src/execsvc.tests/*,Missing execsvc test. Please add the test case before completing the PR.
+src/cli/*,src/cli.tests/*,Missing cli tests. Please add the test case before completing the PR.
+src/build/*,src/build.tests/*,Missing build tests. Please add the test case before completing the PR.
+src/client/*,src/client.tests/*,Missing client tests. Please add the test case before completing the PR.
+src/common.json/*,src/common.json.tests/*,Missing common.json tests. Please add the test case before completing the PR.
+src/common.rp/*,src/common.rp.tests/*,Missing common.rp tests. Please add the test case before completing the PR.
+src/common.svc/*,src/common.svc.tests/*,Missing common.svc tests. Please add the test case before completing the PR.
+src/common/*,src/common.tests/*,Missing common tests. Please add the test case before completing the PR.
+src/configuratorsvc/*,src/configuratorsvc.tests/*,Missing configuratorsvc tests. Please add the test case before completing the PR.
+src/configurejob/*,src/configurejob.tests/*,Missing configurejob tests. Please add the test case before completing the PR.
+src/devhostAgent/*,src/devhostAgent.tests/*,Missing devhostAgent tests. Please add the test case before completing the PR.
+src/execsvc/*,src/execsvc.tests/*,Missing execsvc tests. Please add the test case before completing the PR.
+src/rp/*,src/rp.tests/*,Missing rp tests. Please add the test case before completing the PR.
