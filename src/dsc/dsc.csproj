@@ -95,7 +95,7 @@
   <Target Name="PublishKubectl" BeforeTargets="Publish" >
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'osx-x64' '$(Configuration)' 'osx'}&quot;" Condition="'$(IsOSX)'=='true' And '$(Configuration)'=='Debug'" />
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'linux-x64' '$(Configuration)' 'linux'}&quot;" Condition="'$(IsLinux)'=='true' And '$(Configuration)'=='Debug'" />
-    <Exec Command="powershell.exe -Command &quot;&amp; {./downloadkubectl.ps1 'win-x64' $(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'"/>
+    <Exec Command="powershell.exe -Command &quot;&amp; {.\downloadkubectl.ps1 'win-x64' '$(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'"/>
   </Target>
 
   <!-- During an explicit clean, delete EndpointManager.exe to force it to re-publish on the next build -->
