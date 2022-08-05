@@ -1,0 +1,8 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+# Parent .gitignore excludes 'debug' directories, but this one is legit
+!src/debug
