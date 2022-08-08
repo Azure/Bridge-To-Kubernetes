@@ -35,6 +35,6 @@ jobs:
       with:
         type: 'zip'
         filename: 'lpk-win.zip'
-        directory:   ${GITHUB_WORKSPACE}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
+        directory:   ${{ env.GITHUB_WORKSPACE }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
 
