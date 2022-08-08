@@ -17,8 +17,10 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: Build
       run: dotnet build --no-restore
     - name: Test
