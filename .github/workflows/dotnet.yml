@@ -37,4 +37,9 @@ jobs:
         filename: 'lpk-win.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "lpk-win.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
 
