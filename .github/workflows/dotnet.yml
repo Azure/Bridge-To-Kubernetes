@@ -24,8 +24,18 @@ jobs:
     - name: Test
       run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
     - name: dotnet Publish for Windows
+      id: dotnet_publish_windows
       run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
     - name: dotnet Publish for Linux
       run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
     - name: dotnet Publish for Mac OS
       run: dotnet publish src/dsc/dsc.csproj -c Release -r osx-x64 --no-restore --self-contained true --verbosity normal
+    - name: Create .Zip files (Windows)
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-win.zip'
+        path:   ${GITHUB_WORKSPACE}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
+        directory:  ${GITHUB_WORKSPACE}/zip/win
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+
