@@ -21,10 +21,8 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
-    - name: Build
-      run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
     - name: dotnet Publish for Windows
       run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
     - name: dotnet Publish for Linux
