@@ -41,5 +41,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "lpk-win.zip"
+        tag: v0.1
         token: ${{ secrets.GITHUB_TOKEN }}
 
