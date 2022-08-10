@@ -33,6 +33,7 @@ jobs:
       with:
         inlineScript: |
           Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude '**/*.pdb   
+        azPSVersion: '3.1.0'
     - name: dotnet Publish for Linux
       run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
     - name: dotnet Publish for Mac OS
