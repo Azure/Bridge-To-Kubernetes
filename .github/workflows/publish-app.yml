@@ -58,6 +58,18 @@ jobs:
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for Linux
       run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
+    - name: Create .Zip files (Windows)
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-linux.zip'
+        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Upload Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: lpk-linux-artifact
+        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
   macOS-binaries:
     runs-on: windows-latest
     steps:
@@ -72,3 +84,15 @@ jobs:
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for Mac OS
       run: dotnet publish src/dsc/dsc.csproj -c Release -r osx-x64 --no-restore --self-contained true --verbosity normal
+    - name: Create .Zip files (Windows)
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-osx.zip'
+        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Upload Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: lpk-osx-artifact
+        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-osx.zip
