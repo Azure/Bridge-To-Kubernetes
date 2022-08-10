@@ -17,6 +17,12 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x86
+    - name: Build app for release
+      run: msbuild src/client.signproj /t:SignFiles /p:SignType=real /p:configuration=Release
     - name: Setup NuGet.exe for use with actions
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
