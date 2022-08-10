@@ -58,7 +58,7 @@ jobs:
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for Linux
       run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
-    - name: Create .Zip files (Windows)
+    - name: Create .Zip files (Linux)
       uses: TheDoctor0/zip-release@0.6.2
       with:
         type: 'zip'
@@ -84,7 +84,7 @@ jobs:
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for Mac OS
       run: dotnet publish src/dsc/dsc.csproj -c Release -r osx-x64 --no-restore --self-contained true --verbosity normal
-    - name: Create .Zip files (Windows)
+    - name: Create .Zip files (OSX)
       uses: TheDoctor0/zip-release@0.6.2
       with:
         type: 'zip'
