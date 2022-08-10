@@ -56,7 +56,7 @@ jobs:
       run: |
         dotnet build src/dsc/dsc.csproj /p:UseSharedCompilation=false
         dotnet build src/dsc.tests/dsc.tests.csproj /p:UseSharedCompilation=false
-        dotnet build src/LocalAgent/Localagent.csproj /p:UseSharedCompilation=false
+        dotnet build src/LocalAgent/LocalAgent.csproj /p:UseSharedCompilation=false
         dotnet build src/endpointmanagerlauncher/endpointmanagerlauncher.csproj /p:UseSharedCompilation=false
         dotnet build src/devhostAgent.restorationjob.tests/devhostAgent.restorationjob.tests.csproj /p:UseSharedCompilation=false
         dotnet build src/routingmanager/routingmanager.csproj /p:UseSharedCompilation=false
