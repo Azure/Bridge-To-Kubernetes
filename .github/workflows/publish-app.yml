@@ -7,10 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  windows-binaries:
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -32,12 +30,8 @@ jobs:
       uses: Azure/powershell@v1
       with:
         inlineScript: |
-          Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude '**/*.pdb   
+          Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
         azPSVersion: '3.1.0'
-    - name: dotnet Publish for Linux
-      run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
-    - name: dotnet Publish for Mac OS
-      run: dotnet publish src/dsc/dsc.csproj -c Release -r osx-x64 --no-restore --self-contained true --verbosity normal
     - name: Create .Zip files (Windows)
       uses: TheDoctor0/zip-release@0.6.2
       with:
@@ -50,3 +44,31 @@ jobs:
       with:
         name: lpk-win-artifact
         path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
+  linux-binaries:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for Linux
+      run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
+  macOS-binaries:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for Mac OS
+      run: dotnet publish src/dsc/dsc.csproj -c Release -r osx-x64 --no-restore --self-contained true --verbosity normal
