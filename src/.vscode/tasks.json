@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/dsc.csproj",
+                "${workspaceFolder}/dsc/dsc.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/dsc.csproj",
+                "${workspaceFolder}/dsc/dsc.csproj",
                 "-r", "win-x64",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
@@ -32,7 +32,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/dsc.csproj",
+                "${workspaceFolder}/dsc/dsc.csproj",
                 "-r", "osx-x64",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
