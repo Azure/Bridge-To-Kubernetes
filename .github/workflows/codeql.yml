@@ -54,6 +54,16 @@ jobs:
         
     - name: Build dotnet
       run: |
-        dotnet build /p:UseSharedCompilation=false
+        dotnet build src/dsc/dsc.csproj /p:UseSharedCompilation=false
+        dotnet build src/dsc.tests/dsc.tests.csproj /p:UseSharedCompilation=false
+        dotnet build src/LocalAgent/localagent.csproj /p:UseSharedCompilation=false
+        dotnet build src/LocalAgent/localagent.csproj /p:UseSharedCompilation=false
+        dotnet build src/endpointmanagerlauncher/endpointmanagerlauncher.csproj /p:UseSharedCompilation=false
+        dotnet build src/devhostAgent.restorationjob.tests/devhostAgent.restorationjob.tests.csproj /p:UseSharedCompilation=false
+        dotnet build src/routingmanager/routingmanager.csproj /p:UseSharedCompilation=false
+        dotnet build src/testhelpers/testhelpers.csproj /p:UseSharedCompilation=false
+        dotnet build src/library.tests/library.tests.csproj /p:UseSharedCompilation=false
+        dotnet build src/library/library.csproj /p:UseSharedCompilation=false
+        dotnet build src/endpointmanager/endpointmanager.csproj /p:UseSharedCompilation=false
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
