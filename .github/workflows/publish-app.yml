@@ -23,17 +23,16 @@ jobs:
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: Test
       run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
-    - name: Build endpointmanagerlauncher
-      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
-    - name: Copy endpointmanagerlauncher
-      uses: andstor/copycat-action@v3
-      with:
-        personal_token: ${{ secrets.PERSONAL_TOKEN }}
-        src_path: ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/
-        dst_path: src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher
     - name: dotnet Publish for Windows
       id: dotnet_publish_windows
       run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
+    - name: Build endpointmanagerlauncher
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+    - name: Copy endpointmanagerlauncher
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: |
+          Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude '**/*.pdb   
     - name: dotnet Publish for Linux
       run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
     - name: dotnet Publish for Mac OS
