@@ -17,18 +17,15 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
-      with:
-        msbuild-architecture: x86
-#     - name: Sign files
-#       run: msbuild src/client.signproj /t:SignFiles /p:SignType=real /p:configuration=Release
+
     - name: Setup NuGet.exe for use with actions
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: Test
       run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
+    - name: Build endointmanagerlauncher
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: dotnet Publish for Windows
       id: dotnet_publish_windows
       run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
