@@ -44,15 +44,14 @@ jobs:
       uses: einaregilsson/build-number@v3
       with:
         token: ${{secrets.github_token}}
-        prefix: "1.0."
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.buildnumber.outputs.build_number }}
-        release_name: ${{ steps.buildnumber.outputs.build_number }}
+        tag_name: ${{ steps.build_number.outputs.build_number }}
+        release_name: ${{ steps.build_number.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
@@ -97,15 +96,14 @@ jobs:
       uses: einaregilsson/build-number@v3
       with:
         token: ${{secrets.github_token}}
-        prefix: "1.0."
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.buildnumber.outputs.build_number }}
-        release_name: ${{ steps.buildnumber.outputs.build_number }}
+        tag_name: ${{ steps.build_number.outputs.build_number }}
+        release_name: ${{ steps.build_number.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
@@ -150,15 +148,14 @@ jobs:
       uses: einaregilsson/build-number@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        prefix: "1.0."
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.buildnumber.outputs.build_number }}
-        release_name: ${{ steps.buildnumber.outputs.build_number }}
+        tag_name: ${{ steps.build_number.outputs.build_number }}
+        release_name: ${{ steps.build_number.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
