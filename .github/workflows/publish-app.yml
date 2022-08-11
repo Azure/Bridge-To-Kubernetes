@@ -51,8 +51,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${env:BUILD_NUMBER}
-        release_name: ${env:BUILD_NUMBER}
+        tag_name: ${{ steps.buildnumber.outputs.build_number }}
+        release_name: ${{ steps.buildnumber.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
@@ -104,8 +104,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${env:BUILD_NUMBER}
-        release_name: ${env:BUILD_NUMBER}
+        tag_name: ${{ steps.buildnumber.outputs.build_number }}
+        release_name: ${{ steps.buildnumber.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
@@ -157,8 +157,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${env:BUILD_NUMBER}
-        release_name: ${env:BUILD_NUMBER}
+        tag_name: ${{ steps.buildnumber.outputs.build_number }}
+        release_name: ${{ steps.buildnumber.outputs.build_number }}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
