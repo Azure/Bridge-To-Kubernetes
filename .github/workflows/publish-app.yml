@@ -7,69 +7,123 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # windows-binaries:
-  #   runs-on: windows-latest
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: Setup .NET
-  #     uses: actions/setup-dotnet@v2
-  #     with:
-  #       dotnet-version: 6.0.x
-  #   - name: Setup NuGet.exe for use with actions
-  #     uses: NuGet/setup-nuget@v1.0.6
-  #   - name: Restore dependencies using Nuget
-  #     run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
-  #   - name: Test
-  #     run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
-  #   - name: dotnet Publish for Windows
-  #     id: dotnet_publish_windows
-  #     run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
-  #   - name: Build endpointmanagerlauncher
-  #     run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
-  #   - name: Copy endpointmanagerlauncher
-  #     uses: Azure/powershell@v1
-  #     with:
-  #       inlineScript: |
-  #         Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
-  #       azPSVersion: '3.1.0'
-  #   - name: Create .Zip files (Windows)
-  #     uses: TheDoctor0/zip-release@0.6.2
-  #     with:
-  #       type: 'zip'
-  #       filename: 'lpk-win.zip'
-  #       directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
-  #       exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
-  #   - name: Upload Release
-  #     uses: actions/upload-artifact@v3
-  #     with:
-  #       name: lpk-win-artifact
-  #       path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
-  # linux-binaries:
-  #   runs-on: windows-latest
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: Setup .NET
-  #     uses: actions/setup-dotnet@v2
-  #     with:
-  #       dotnet-version: 6.0.x
-  #   - name: Setup NuGet.exe for use with actions
-  #     uses: NuGet/setup-nuget@v1.0.6
-  #   - name: Restore dependencies using Nuget
-  #     run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
-  #   - name: dotnet Publish for Linux
-  #     run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
-  #   - name: Create .Zip files (Linux)
-  #     uses: TheDoctor0/zip-release@0.6.2
-  #     with:
-  #       type: 'zip'
-  #       filename: 'lpk-linux.zip'
-  #       directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish
-  #       exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
-  #   - name: Upload Release
-  #     uses: actions/upload-artifact@v3
-  #     with:
-  #       name: lpk-linux-artifact
-  #       path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
+  windows-binaries:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: Test
+      run: dotnet test src/dsc.tests/dsc.tests.csproj --no-build --verbosity normal
+    - name: dotnet Publish for Windows
+      id: dotnet_publish_windows
+      run: dotnet publish src/dsc/dsc.csproj -c Release -r win-x64 --no-restore --self-contained true --verbosity normal
+    - name: Build endpointmanagerlauncher
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+    - name: Copy endpointmanagerlauncher
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: |
+          Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
+        azPSVersion: '3.1.0'
+    - name: Create .Zip files (Windows)
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-win.zip'
+        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Create Build Number
+      id: build_number
+      uses: einaregilsson/build-number@v3
+      with:
+        token: ${{secrets.github_token}}
+        prefix: "1.0."
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${env:BUILD_NUMBER}
+        release_name: ${env:BUILD_NUMBER}
+        draft: false
+        prerelease: true
+        # body_path: CHANGELOG.md
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-win.zip
+        asset_name: lpk-win.zip
+        asset_content_type: application/zip
+    # - name: Upload Release
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: lpk-win-artifact
+    #     path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
+  linux-binaries:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for Linux
+      run: dotnet publish src/dsc/dsc.csproj -c Release -r linux-x64 --no-restore --self-contained true --verbosity normal
+    - name: Create .Zip files (Linux)
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-linux.zip'
+        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Create Build Number
+      id: build_number
+      uses: einaregilsson/build-number@v3
+      with:
+        token: ${{secrets.github_token}}
+        prefix: "1.0."
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${env:BUILD_NUMBER}
+        release_name: ${env:BUILD_NUMBER}
+        draft: false
+        prerelease: true
+        # body_path: CHANGELOG.md
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-linux.zip
+        asset_name: lpk-linux.zip
+        asset_content_type: application/zip
+    # - name: Upload Release
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: lpk-linux-artifact
+    #     path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
   macOS-binaries:
     runs-on: windows-latest
     steps:
@@ -91,14 +145,20 @@ jobs:
         filename: 'lpk-osx.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Create Build Number
+      id: build_number
+      uses: einaregilsson/build-number@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        prefix: "1.0."
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 1.0.20220811.1
-        release_name: 1.0.20220811.1
+        tag_name: ${env:BUILD_NUMBER}
+        release_name: ${env:BUILD_NUMBER}
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
