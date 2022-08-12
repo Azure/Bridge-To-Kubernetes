@@ -32,18 +32,35 @@ jobs:
         inlineScript: |
           Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
         azPSVersion: '3.1.0'
-    - name: Create .Zip files (${{ matrix.mode }})
-      uses: TheDoctor0/zip-release@0.6.2
-      with:
-        type: 'zip'
-        filename: 'lpk-${{ matrix.mode }}.zip'
-        path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish
-        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    # - name: Create .Zip files (${{ matrix.mode }})
+    #   uses: TheDoctor0/zip-release@0.6.2
+    #   with:
+    #     type: 'zip'
+    #     filename: 'lpk-${{ matrix.mode }}.zip'
+    #     path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish
+    #     exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
     - name: Upload Release
       uses: actions/upload-artifact@v3
       with:
         name: lpk-${{ matrix.mode }}-artifact
-        path: lpk-${{ matrix.mode }}.zip
+        path: |
+          **/*
+          !**/*.pdb
+          !**/*.xml
+          !**/*.nuspec
+          !**/cs/*
+          !**/de/*
+          !**/es/*
+          !**/fr/*
+          !**/it/*
+          !**/ja/*
+          !**/ko/*
+          !**/pl/*
+          !**/pt-BR/*
+          !**/ru/*
+          !**/tr/*
+          !**/zh-Hans/*
+          !**/zh-Hant/*
   release:
     runs-on: windows-latest
     needs: build
@@ -67,15 +84,14 @@ jobs:
     - name: Download All artifacts
       uses: actions/download-artifact@v3
     - name: Upload All Release Assets
-      uses: softprops/action-gh-release@v1
+      uses: actions/upload-release-asset@v1 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: |
-          lpk-linux.zip
-          lpk-win.zip
-          lpk-osx.zip
-
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: *.zip
+        asset_name: lpk
+        asset_content_type: application/zip
     
 
    
