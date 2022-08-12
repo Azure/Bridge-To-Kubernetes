@@ -1,4 +1,4 @@
-name: publish_app
+name: build_and_release
 
 on:
   push:
@@ -22,8 +22,8 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
-    - name: dotnet Publish for Mac OS/Linux/Windows
-      run: dotnet publish src/dsc/dsc.csproj -c Release -r {{ matrix.mode }} --no-restore --self-contained true --verbosity normal
+    - name: dotnet Publish for {{ matrix.mode }}
+      run: dotnet publish src/dsc/dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Copy endpointmanagerlauncher
@@ -36,8 +36,8 @@ jobs:
       uses: TheDoctor0/zip-release@0.6.2
       with:
         type: 'zip'
-        filename: 'lpk-{{ matrix.mode }}.zip'
-        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/{{ matrix.mode }}/publish
+        filename: 'lpk-${{ matrix.mode }}.zip'
+        directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
     - name: Create Build Number
       id: build_number
@@ -61,7 +61,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/{{ matrix.mode }}/publish/lpk-{{ matrix.mode }}.zip
-        asset_name: lpk-{{ matrix.mode }}.zip
+        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish/lpk-${{ matrix.mode }}.zip
+        asset_name: lpk-${{ matrix.mode }}.zip
         asset_content_type: application/zip
 
