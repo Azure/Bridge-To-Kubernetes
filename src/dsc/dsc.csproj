@@ -121,7 +121,7 @@
   <ItemGroup>
     <None
       Include="
-        $(MSBuildThisFileDirectory)..\vscode\ThirdPartyNotices\ThirdPartyNotices.txt;
+        $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
         $(MSBuildThisFileDirectory)..\resources\license.rtf">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
