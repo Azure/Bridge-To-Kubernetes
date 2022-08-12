@@ -195,7 +195,7 @@ jobs:
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
-    - name: Upload Release Asset
+    - name: Upload Windows Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
@@ -205,7 +205,7 @@ jobs:
         asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
         asset_name: lpk-win.zip
         asset_content_type: application/zip
-    - name: Upload Release Asset
+    - name: Upload Linux Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
@@ -215,7 +215,7 @@ jobs:
         asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
         asset_name: lpk-linux.zip
         asset_content_type: application/zip
-    - name: Upload Release Asset
+    - name: Upload OSX Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
