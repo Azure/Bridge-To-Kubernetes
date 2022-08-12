@@ -8,11 +8,11 @@
             "name": "bridge",
             "type": "coreclr",
             "request": "launch",
-            //"preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
+            "preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
             // If you have changed target frameworks, make sure to update the program path.
             // Replace osx-x64 with win-x64 if you are running in windows
             "program": "${workspaceFolder}/dsc/bin/Debug/netcoreapp3.1/osx-x64/dsc.dll",
-            "args": ["connect", "--service", "stats-api", "--local-port", "3001", "--use-kubernetes-service-environment-variables", "--namespace", "todo-app", "--routing", "elvilla-8474"], //,
+            "args": ["connect", "--service", "stats-api", "--local-port", "3001", "--use-kubernetes-service-environment-variables", "--namespace", "todo-app"],
             //"args": ["prep-connect", "--service", "stats-api"],// "--local-port", "3001", "--use-kubernetes-service-environment-variables"],
             "env": {
                 "BRIDGE_ENVIRONMENT":"dev",
