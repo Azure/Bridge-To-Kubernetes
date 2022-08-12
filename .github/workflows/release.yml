@@ -28,6 +28,7 @@ jobs:
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Copy endpointmanagerlauncher
       uses: Azure/powershell@v1
+      if: ${{ matrix.mode }} == 'win-x64'
       with:
         inlineScript: |
           Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
@@ -42,9 +43,9 @@ jobs:
     - name: Upload Release
       uses: actions/upload-artifact@v3
       with:
-        name: lpk-${{ matrix.mode }}-artifact
+        name: lpk-${{ matrix.mode }}
         path: |
-          **/*
+          **/src/dsc/bin/Release/**/**/publish/*
           !**/*.pdb
           !**/*.xml
           !**/*.nuspec
@@ -83,14 +84,32 @@ jobs:
         # body_path: CHANGELOG.md
     - name: Download All artifacts
       uses: actions/download-artifact@v3
-    - name: Upload All Release Assets
+    - name: Upload Window Release Assets
       uses: actions/upload-release-asset@v1 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./*.zip
-        asset_name: lpk
+        asset_path: lpk-win
+        asset_name: lpk-win.zip
+        asset_content_type: application/zip
+    - name: Upload Linux Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: lpk-linux
+        asset_name: lpk-linux.zip
+        asset_content_type: application/zip
+    - name: Upload OSX Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: lpk-osx
+        asset_name: lpk-osx.zip
         asset_content_type: application/zip
     
 
