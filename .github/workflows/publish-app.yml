@@ -65,11 +65,11 @@ jobs:
     #     asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
     #     asset_name: lpk-win.zip
     #     asset_content_type: application/zip
-    # - name: Upload Release
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: lpk-win-artifact
-    #     path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
+    - name: Upload Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: lpk-win-artifact
+        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
   linux-binaries:
     runs-on: windows-latest
     steps:

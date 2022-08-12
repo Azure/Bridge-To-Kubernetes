@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build_and_release:
+  build:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -22,7 +22,7 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
       run: nuget restore src/client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
-    - name: dotnet Publish for {{ matrix.mode }}
+    - name: dotnet Publish for ${{ matrix.mode }}
       run: dotnet publish src/dsc/dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
@@ -32,14 +32,26 @@ jobs:
         inlineScript: |
           Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
         azPSVersion: '3.1.0'
-    - name: Create .Zip files ({{ matrix.mode }})
+    - name: Create .Zip files (${{ matrix.mode }})
       uses: TheDoctor0/zip-release@0.6.2
       with:
         type: 'zip'
         filename: 'lpk-${{ matrix.mode }}.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
-    - name: Create Build Number
+    - name: Upload Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: lpk-${{ matrix.mode }}-artifact
+        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}-x64/publish/lpk-${{ matrix.mode }}.zip
+  release:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [osx-x64,linux-x64,win-x64]
+    needs: build
+    steps:
+    - name: Create Release Number
       id: build_number
       uses: einaregilsson/build-number@v3
       with:
@@ -55,13 +67,20 @@ jobs:
         draft: false
         prerelease: true
         # body_path: CHANGELOG.md
-    - name: Upload Windows Release Asset
+    - name: Download ${{ matrix.mode }} artifact
+      uses: actions/download-artifact@v3
+      with:
+          name: lpk-${{ matrix.mode }}-artifact
+    - name: Upload ${{ matrix.mode }} Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        name: lpk-${{ matrix.mode }}-artifact
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish/lpk-${{ matrix.mode }}.zip
         asset_name: lpk-${{ matrix.mode }}.zip
         asset_content_type: application/zip
+
+   
 
