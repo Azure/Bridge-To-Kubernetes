@@ -196,7 +196,6 @@ jobs:
         prerelease: true
         # body_path: CHANGELOG.md
     - name: Upload Windows Release Asset
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -206,7 +205,6 @@ jobs:
         asset_name: lpk-win.zip
         asset_content_type: application/zip
     - name: Upload Linux Release Asset
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -216,7 +214,6 @@ jobs:
         asset_name: lpk-linux.zip
         asset_content_type: application/zip
     - name: Upload OSX Release Asset
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
