@@ -28,7 +28,7 @@ jobs:
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Copy endpointmanagerlauncher
       uses: Azure/powershell@v1
-      if: ${{ matrix.mode }} == 'win-x64'
+      if: ${{ matrix.mode == 'win-x64' }}
       with:
         inlineScript: |
           Copy-Item -Path ${{ github.workspace }}/src/EndpointManagerLauncher/bin/Release/netcoreapp3.1/win-x64/publish/ -Destination ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
@@ -45,7 +45,7 @@ jobs:
       with:
         name: lpk-${{ matrix.mode }}
         path: |
-          **/src/dsc/bin/Release/**/**/publish/*
+          **/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish/
           !**/*.pdb
           !**/*.xml
           !**/*.nuspec
@@ -90,7 +90,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: lpk-win
+        asset_path: lpk-win-x64
         asset_name: lpk-win.zip
         asset_content_type: application/zip
     - name: Upload Linux Release Assets
@@ -99,7 +99,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: lpk-linux
+        asset_path: lpk-linux-x64
         asset_name: lpk-linux.zip
         asset_content_type: application/zip
     - name: Upload OSX Release Assets
@@ -108,7 +108,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: lpk-osx
+        asset_path: lpk-osx-x64
         asset_name: lpk-osx.zip
         asset_content_type: application/zip
     
