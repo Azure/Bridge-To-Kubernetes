@@ -39,32 +39,32 @@ jobs:
         filename: 'lpk-win.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
-    - name: Create Build Number
-      id: build_number
-      uses: einaregilsson/build-number@v3
-      with:
-        token: ${{secrets.github_token}}
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.build_number.outputs.build_number }}
-        release_name: ${{ steps.build_number.outputs.build_number }}
-        draft: false
-        prerelease: true
-        # body_path: CHANGELOG.md
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
-        asset_name: lpk-win.zip
-        asset_content_type: application/zip
+    # - name: Create Build Number
+    #   id: build_number
+    #   uses: einaregilsson/build-number@v3
+    #   with:
+    #     token: ${{secrets.github_token}}
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ steps.build_number.outputs.build_number }}
+    #     release_name: ${{ steps.build_number.outputs.build_number }}
+    #     draft: false
+    #     prerelease: true
+    #     # body_path: CHANGELOG.md
+    # - name: Upload Release Asset
+    #   id: upload-release-asset 
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
+    #     asset_name: lpk-win.zip
+    #     asset_content_type: application/zip
     # - name: Upload Release
     #   uses: actions/upload-artifact@v3
     #   with:
@@ -91,32 +91,32 @@ jobs:
         filename: 'lpk-linux.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
-    - name: Create Build Number
-      id: build_number
-      uses: einaregilsson/build-number@v3
-      with:
-        token: ${{secrets.github_token}}
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.build_number.outputs.build_number }}
-        release_name: ${{ steps.build_number.outputs.build_number }}
-        draft: false
-        prerelease: true
-        # body_path: CHANGELOG.md
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
-        asset_name: lpk-linux.zip
-        asset_content_type: application/zip
+    # - name: Create Build Number
+    #   id: build_number
+    #   uses: einaregilsson/build-number@v3
+    #   with:
+    #     token: ${{secrets.github_token}}
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ steps.build_number.outputs.build_number }}
+    #     release_name: ${{ steps.build_number.outputs.build_number }}
+    #     draft: false
+    #     prerelease: true
+    #     # body_path: CHANGELOG.md
+    # - name: Upload Release Asset
+    #   id: upload-release-asset 
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
+    #     asset_name: lpk-linux.zip
+    #     asset_content_type: application/zip
     # - name: Upload Release
     #   uses: actions/upload-artifact@v3
     #   with:
@@ -143,6 +143,42 @@ jobs:
         filename: 'lpk-osx.zip'
         directory:   ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    # - name: Create Build Number
+    #   id: build_number
+    #   uses: einaregilsson/build-number@v3
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ steps.build_number.outputs.build_number }}
+    #     release_name: ${{ steps.build_number.outputs.build_number }}
+    #     draft: false
+    #     prerelease: true
+    #     # body_path: CHANGELOG.md
+    # - name: Upload Release Asset
+    #   id: upload-release-asset 
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-osx.zip
+    #     asset_name: lpk-osx.zip
+    #     asset_content_type: application/zip
+    # - name: Upload Release
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: lpk-osx-artifact
+    #     path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-osx.zip
+  
+  Release-Binaries:
+    runs-on: windows-latest
+    needs: [windows-binaries, linux-binaries, macOS-binaries]
+    steps:
     - name: Create Build Number
       id: build_number
       uses: einaregilsson/build-number@v3
@@ -166,11 +202,27 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/win-x64/publish/lpk-win.zip
+        asset_name: lpk-win.zip
+        asset_content_type: application/zip
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/linux-x64/publish/lpk-linux.zip
+        asset_name: lpk-linux.zip
+        asset_content_type: application/zip
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-osx.zip
         asset_name: lpk-osx.zip
         asset_content_type: application/zip
-    # - name: Upload Release
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: lpk-osx-artifact
-    #     path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/osx-x64/publish/lpk-osx.zip
+
