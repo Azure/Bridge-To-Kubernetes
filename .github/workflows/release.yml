@@ -43,7 +43,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: lpk-${{ matrix.mode }}-artifact
-        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}-x64/publish/lpk-${{ matrix.mode }}.zip
+        path:  ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish/lpk-${{ matrix.mode }}.zip
   release:
     runs-on: windows-latest
     strategy:
