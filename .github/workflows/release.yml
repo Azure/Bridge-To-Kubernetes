@@ -76,7 +76,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: lpk-${{ matrix.mode }}-artifact
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}/src/dsc/bin/Release/netcoreapp3.1/${{ matrix.mode }}/publish/lpk-${{ matrix.mode }}.zip
         asset_name: lpk-${{ matrix.mode }}.zip
