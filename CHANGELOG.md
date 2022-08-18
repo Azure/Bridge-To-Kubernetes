@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.120220818]
+## [1.0.120220819]
 
 - Initial Release from internal repo
 - Add github workflows for code ql, release binaries
