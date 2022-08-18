@@ -77,29 +77,22 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v3
-    - name: Get version from tag
-      id: tag_name
-      run: |
-          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
-      shell: bash
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v2
       with:
-        validation_level: warn
-        version: ${{ steps.tag_name.outputs.current_version }}
-        path: CHANGELOG.md
+        path: ./CHANGELOG.md
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.tag_name.outputs.current_version  }}
-        release_name: ${{ steps.tag_name.outputs.current_version  }}
+        tag_name: ${{ steps.changelog_reader.outputs.current_version  }}
+        release_name: ${{ steps.changelog_reader.outputs.current_version  }}
+        body: ${{ steps.changelog_reader.outputs.changes }}
         draft: false
         prerelease: false
-        body_path: CHANGELOG.md
     - name: Download All artifacts
       uses: actions/download-artifact@v3
     - name: Upload Window Release Assets
