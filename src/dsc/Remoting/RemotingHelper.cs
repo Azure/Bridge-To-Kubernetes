@@ -41,7 +41,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
         {
             try
             {
-                _appCancellationTokenSource?.Cancel();
+                _appCancellationTokenSource?.CancelAfter(1500);
             }
             catch (Exception e)
             {
