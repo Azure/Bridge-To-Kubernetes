@@ -1,9 +1,22 @@
-# Bridge-To-Kubernetes
+# Bridge to Kubernetes
 
-Welcome to Bridge-To-Kubernetes!
+Welcome to Bridge-To-Kubernetes! Bridge to Kubernetes extends the Kubernetes perimeter to your development computer allowing you to write, test, and debug microservice code while connected to your Kubernetes cluster with the rest of your application or services. With this workflow, there is no need for extra assets, such as a Dockerfile or Kubernetes manifests. You can simply run your code natively on your development workstation while connected to the Kubernetes cluster, allowing you to test your code changes in the context of the larger application.
 
-## Project Overview
-https://docs.microsoft.com/en-us/visualstudio/bridge/overview-bridge-to-kubernetes
+## Key Features:
+
+### Simplifying Microservice Development 
+- Eliminate the need to manually source, configure and compile external dependencies on your development computer.  
+
+### Easy Debugging 
+- Run your usual debug profile with the added cluster configuration. You can debug your code as you normally would while taking advantage of the speed and flexibility of local debugging. 
+
+### Developing and Testing End-to-End 
+- Test end-to-end during development time. Select an existing service in the cluster to route to your development machine where an instance of that service is running locally. Request initiated through the frontend of the application running in Kubernetes will route between services running in the cluster until the service you specified to redirect is called. 
+
+## Documentation
+- [Overview](https://docs.microsoft.com/en-us/visualstudio/bridge/overview-bridge-to-kubernetes)
+- [Visual Studio](https://docs.microsoft.com/en-us/visualstudio/bridge/bridge-to-kubernetes-vs)
+- [Visual Studio Code](https://docs.microsoft.com/en-us/visualstudio/bridge/bridge-to-kubernetes-vs-codeart)
 
 ## Microsoft Open Source Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/)
