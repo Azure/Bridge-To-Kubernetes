@@ -423,7 +423,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
                 this.ReportProgress(EventLevel.LogAlways, $"##################### {Resources.Progress_EnvironmentStarted} #############################################################");
                 if (string.IsNullOrEmpty(_updateScript))
                 {
-                    var consoleProcess = _consoleLauncher.Value.LaunchTerminalWithEnv(envVars, _envScriptPath);
+                    var consoleProcess = _consoleLauncher.Value.LaunchTerminalWithEnv(envVars, _envScriptPath, launchCommand: _commandLineArgumentsManager.CommandExecuteArguments);
                     _waitProcesses.Add(consoleProcess);
                 }
                 else
