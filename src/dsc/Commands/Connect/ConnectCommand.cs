@@ -96,7 +96,16 @@ namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
         {
             this._command = app;
             this._command.ShowInHelpText = true;
-            base.ConfigureHelp(description: $"Redirect traffic from a service, deployment or pod running in your cluster to your local machine.");
+            this._command.AllowArgumentSeparator = true;
+            base.ConfigureHelp(
+                description: "Redirect traffic from a service, deployment or pod running in your cluster to your local machine.",
+                extendedHelpText: @"
+Additional Arguments
+  Any arguments passed following the argument separator ""--"" will be interpreted as a command to execute in the Bridge
+  environment. This can be used to connect to Kubernetes and start a service in one command line invocation.
+  Example: 
+  dsc connect --service my-service --local-port 8000 --routing me -y -- dotnet watch --project MyService.API
+");
 
             base.Configure(app);
 
