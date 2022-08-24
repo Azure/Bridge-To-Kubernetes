@@ -12,7 +12,7 @@ on:
 jobs:
   analyze:
     name: BinSkim Binary Analyze
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         mode: [osx-x64,linux-x64,win-x64]
@@ -35,6 +35,6 @@ jobs:
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Run BinSkim analysis
-      run: binskim analyze *.exe *.dll --recurse
+      run: binskim.exe analyze *.exe *.dll --recurse
 
     
