@@ -35,6 +35,6 @@ jobs:
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Run BinSkim analysis
-      run: binskim.exe analyze *.exe *.dll --recurse
+      run: ${{ github.workspace }}\binskim.exe analyze *.exe *.dll --recurse
 
     
