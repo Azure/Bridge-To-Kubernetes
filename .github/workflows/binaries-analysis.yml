@@ -27,7 +27,7 @@ jobs:
     - name: Setup NuGet.exe for use with actions
       uses: NuGet/setup-nuget@v1.0.6
     - name: Install BinSkim analysis tool
-      run: nuget install Microsoft.CodeAnalysis.BinSkim -Version 1.9.5
+      run: nuget install Microsoft.CodeAnalysis.BinSkim -Version 1.9.5 -OutputDirectory ${{ github.workspace }}
     - name: Restore dependencies using Nuget
       run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for ${{ matrix.mode }}
