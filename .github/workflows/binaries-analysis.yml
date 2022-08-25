@@ -34,7 +34,9 @@ jobs:
       run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
-    - name: Run BinSkim analysis
-      run: ${{ github.workspace }}\binskim.exe analyze *.exe *.dll --recurse
+    - name: Install and Run BinSkim analysis
+      run: |
+        Install-Package Microsoft.CodeAnalysis.BinSkim
+        ${{ github.workspace }}\binskim.exe analyze *.exe *.dll --recurse
 
     
