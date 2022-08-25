@@ -39,7 +39,7 @@ jobs:
       with: 
         inlineScript: |
           Install-Package Microsoft.CodeAnalysis.BinSkim -Force
-          ${{ github.workspace }}\binskim.exe analyze *.exe *.dll --recurse
+          ${{ github.workspace }}\tools\netcoreapp3.1\win-x64\BinSkim.exe analyze *.exe *.dll --recurse
         azPSVersion: '3.1.0'
 
     
