@@ -40,5 +40,6 @@ jobs:
         inlineScript: |
           Install-Package Microsoft.CodeAnalysis.BinSkim
           ${{ github.workspace }}\binskim.exe analyze *.exe *.dll --recurse
+        azPSVersion: '3.1.0'
 
     
