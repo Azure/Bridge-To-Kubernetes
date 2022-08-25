@@ -38,9 +38,7 @@ jobs:
       uses: Azure/powershell@v1
       with: 
         inlineScript: |
-          Rename-Item -Path  ${{ github.workspace }}\microsoft.codeanalysis.binskim.1.9.5.nupkg -NewName microsoft.codeanalysis.binskim.1.9.5.zip
-          Expand-Archive  ${{ github.workspace }}\microsoft.codeanalysis.binskim.1.9.5.zip
-          ${{ github.workspace }}\tools\netcoreapp3.1\win-x64\BinSkim.exe analyze *.exe *.dll --recurse
+          ${{ github.workspace }}\ Microsoft.CodeAnalysis.BinSkim.1.9.5\tools\netcoreapp3.1\win-x64\BinSkim.exe analyze *.exe *.dll --recurse
         azPSVersion: '3.1.0'
 
     
