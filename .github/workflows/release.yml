@@ -1,0 +1,119 @@
+name: release binaries
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [osx-x64,linux-x64,win-x64]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for ${{ matrix.mode }}
+      run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
+    - name: Build endpointmanagerlauncher
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+    - name: Copy endpointmanagerlauncher
+      uses: Azure/powershell@v1
+      if: ${{ matrix.mode == 'win-x64' }}
+      with:
+        inlineScript: |
+          Copy-Item -Path ${{ github.workspace }}\src\EndpointManagerLauncher\bin\Release\netcoreapp3.1\win-x64\publish\ -Destination ${{ github.workspace }}\src\dsc\bin\Release\netcoreapp3.1\win-x64\publish\EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
+        azPSVersion: '3.1.0'
+    - name: Download Kubectl
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: |
+          if ('${{ matrix.mode }}' -eq 'win-x64') {
+            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/windows/amd64/kubectl.exe'
+            $dir = 'win'
+            $file = 'kubectl.exe'
+          } elseif ('${{ matrix.mode }}' -eq 'osx-x64') {
+            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/darwin/amd64/kubectl'
+            $dir = 'osx'
+            $file = 'kubectl'
+          } else {
+            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/linux/amd64/kubectl'
+            $dir = 'linux'
+            $file = 'kubectl'
+          }
+          Write-Output "url is: "$url
+          Write-Output "directory is: "$dir
+          Write-Output "file is: "$file
+          New-Item -Path '${{ github.workspace }}\src\dsc\bin\Release\netcoreapp3.1\${{ matrix.mode }}\publish\kubectl' -ItemType Directory
+          $filePath = '${{ github.workspace }}\src\dsc\bin\Release\netcoreapp3.1\${{ matrix.mode }}\publish\kubectl\'+$dir
+          Write-Output "file path is: "$filePath
+          New-Item -Path $filePath -ItemType Directory
+          $fileName = $filePath + '\' + $file
+          Write-Output "file name is: "$fileName 
+          curl.exe $url -o $fileName
+        azPSVersion: '3.1.0'
+    - name: Create .Zip files (${{ matrix.mode }})
+      uses: TheDoctor0/zip-release@0.6.2
+      with:
+        type: 'zip'
+        filename: 'lpk-${{ matrix.mode }}.zip'
+        path: ${{ github.workspace }}\src\dsc\bin\Release\netcoreapp3.1\${{ matrix.mode }}\publish\**
+        exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
+    - name: Upload Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: lpk-${{ matrix.mode }}
+        path: |
+          ${{ github.workspace }}\lpk-${{ matrix.mode }}.zip
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v3
+    - name: Get Changelog Entry
+      id: changelog_reader
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        path: ./CHANGELOG.md
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.changelog_reader.outputs.version  }}
+        release_name: ${{ steps.changelog_reader.outputs.version  }}
+        body: ${{ steps.changelog_reader.outputs.changes }}
+    - name: Download All artifacts
+      uses: actions/download-artifact@v3
+    - name: Upload Window Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-win-x64/lpk-win-x64.zip
+        asset_name: lpk-win.zip
+        asset_content_type: application/zip
+    - name: Upload Linux Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-linux-x64/lpk-linux-x64.zip
+        asset_name: lpk-linux.zip
+        asset_content_type: application/zip
+    - name: Upload OSX Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-osx-x64/lpk-osx-x64.zip
+        asset_name: lpk-osx.zip
+        asset_content_type: application/zip
