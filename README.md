@@ -29,3 +29,9 @@ Checkout the SECURITY.md file in this repo for details.
 
 ## Data Collection
 The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+## Support
+
+Bridge to Kubernetes is an open source project that is not covered by the [Microsoft Azure support policy](https://docs.microsoft.com/en-US/troubleshoot/azure/cloud-services/support-linux-open-source-technology). [Please search open issues here](https://github.com/Azure/Bridge-To-Kubernetes/issues), and if your issue isn't already represented [please open a new one](https://github.com/Azure/Bridge-To-Kubernetes/issues/new). The project maintainers will respond to the best of their abilities and triage the most urgent bugs.
+
+
