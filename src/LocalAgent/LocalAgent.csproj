@@ -30,4 +30,8 @@
     <ProjectReference Include="..\common\common.csproj" />
     <ProjectReference Include="..\library\library.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
 </Project>
