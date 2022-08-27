@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
-    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64</RuntimeIdentifiers>
     <DebugType>portable</DebugType>
     <AssemblyName>dsc</AssemblyName>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -54,8 +54,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1" />
-    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.38.1" />
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -92,10 +92,10 @@
     <Copy SourceFiles="@(EndpointManagerFiles)" DestinationFolder="$(PublishDir)\$(EndpointManagerSubDirName)\%(RecursiveDir)" />
   </Target>
 
-  <Target Name="PublishKubectl" BeforeTargets="Publish" >
+  <Target Name="PublishKubectl" BeforeTargets="Publish">
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'osx-x64' '$(Configuration)' 'osx'}&quot;" Condition="'$(IsOSX)'=='true' And '$(Configuration)'=='Debug'" />
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'linux-x64' '$(Configuration)' 'linux'}&quot;" Condition="'$(IsLinux)'=='true' And '$(Configuration)'=='Debug'" />
-    <Exec Command="powershell.exe -Command &quot;&amp; {.\downloadkubectl.ps1 'win-x64' '$(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'"/>
+    <Exec Command="powershell.exe -Command &quot;&amp; {.\downloadkubectl.ps1 'win-x64' '$(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'" />
   </Target>
 
   <!-- During an explicit clean, delete EndpointManager.exe to force it to re-publish on the next build -->
@@ -120,10 +120,10 @@
 
   <ItemGroup>
     <None
-      Include="
-        $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
-        $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        Include="
+            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
+            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
