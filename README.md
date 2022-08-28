@@ -32,6 +32,6 @@ The software may collect information about you and your use of the software and 
 
 ## Support
 
-Bridge to Kubernetes is an open source project that is not covered by the [Microsoft Azure support policy](https://docs.microsoft.com/en-US/troubleshoot/azure/cloud-services/support-linux-open-source-technology). [Please search open issues here](https://github.com/Azure/Bridge-To-Kubernetes/issues), and if your issue isn't already represented [please open a new one](https://github.com/Azure/Bridge-To-Kubernetes/issues/new). The project maintainers will respond to the best of their abilities and triage the most urgent bugs.
+Bridge to Kubernetes is an open source project that is not covered by the [Microsoft Azure support policy](https://docs.microsoft.com/en-US/troubleshoot/azure/cloud-services/support-linux-open-source-technology). [Please search open issues here](https://github.com/Azure/Bridge-To-Kubernetes/issues), and if your issue isn't already represented [please open a new one](https://github.com/Azure/Bridge-To-Kubernetes/issues/new/choose). The project maintainers will respond to the best of their abilities and triage the most urgent bugs.
 
 
