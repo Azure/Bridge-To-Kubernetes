@@ -1,0 +1,42 @@
+name: "Binaries Analysis"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '21 17 * * 0'
+
+jobs:
+  analyze:
+    name: BinSkim Binary Analyze
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [osx-x64,linux-x64,win-x64]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Get BinSkim package from nuget
+      run: nuget install Microsoft.CodeAnalysis.BinSkim -Version 1.9.5 -OutputDirectory ${{ github.workspace }}
+    - name: Restore dependencies using Nuget
+      run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for ${{ matrix.mode }}
+      run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
+    - name: Build endpointmanagerlauncher
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+    - name: Install and Run BinSkim analysis
+      uses: Azure/powershell@v1
+      with: 
+        inlineScript: |
+          ${{ github.workspace }}\Microsoft.CodeAnalysis.BinSkim.1.9.5\tools\netcoreapp3.1\win-x64\BinSkim.exe analyze *.exe *.dll --recurse
+        azPSVersion: '3.1.0'
