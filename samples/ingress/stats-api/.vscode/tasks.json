@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "bridge-to-kubernetes.resource",
+            "type": "bridge-to-kubernetes.resource",
+            "resource": "stats-api",
+            "resourceType": "service",
+            "ports": [
+                3001
+            ],
+            "targetCluster": "bridgeTesting-0812",
+            "targetNamespace": "todo-app",
+            "useKubernetesServiceEnvironmentVariables": false,
+            "isolateAs": "elvilla-7f7e"
+        }
+    ]
+}
