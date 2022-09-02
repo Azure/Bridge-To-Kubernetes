@@ -17,10 +17,10 @@ COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /src/publish -r linux-musl-x64 devhostAgent.csproj
+RUN dotnet publish -c ${Configuration} -o /src/publish devhostAgent.csproj
 
 # Final container
-FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine3.16 as final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
 WORKDIR /src/devhostagent
 COPY --from=build-alpine /src/publish /src/devhostagent
 ENTRYPOINT ["dotnet", "/src/devhostagent/Microsoft.BridgeToKubernetes.DevHostAgent.dll"]
