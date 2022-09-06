@@ -1,5 +1,18 @@
 {
     "version": "2.0.0",
     "tasks": [
+        {
+            "label": "bridge-to-kubernetes.resource",
+            "type": "bridge-to-kubernetes.resource",
+            "resource": "frontend",
+            "resourceType": "service",
+            "ports": [
+                3000
+            ],
+            "targetCluster": "hari-aks",
+            "targetNamespace": "todo-app",
+            "useKubernetesServiceEnvironmentVariables": false,
+            "isolateAs": "hsubrama-7919"
+        }
     ]
 }

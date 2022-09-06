@@ -19,7 +19,8 @@
         "styled-jsx": "^5.0.1"
     },
     "overrides": {
-        "amqplib": "0.10.3"
+        "amqplib": "0.10.3",
+        "postcss": "7.0.36"
     },
     "main": "server.js",
     "scripts": {
