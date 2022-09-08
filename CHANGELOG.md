@@ -2,7 +2,7 @@
 
 ## [1.0.120220906]
 
-- Sample release
+- Updating the code samples for CLI.
 
 ## [1.0.120220819]
 
