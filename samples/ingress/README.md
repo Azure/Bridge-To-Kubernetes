@@ -16,6 +16,7 @@ In all, this extended TODO application is composed of six inter-related componen
 
 - Kubectl CLI (connected to a cluster)
 - [Bridge to Kubernetes VS Code extension](https://aka.ms/bridge-to-k8s-vsc-extension)
+- Nginx Ingress Controller deployed to the cluster. Sample instructions for deploying Nginx ingress controller - https://kubernetes.github.io/ingress-nginx/deploy/
 
 ## Deploy the application
 
