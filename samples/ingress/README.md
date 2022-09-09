@@ -53,7 +53,8 @@ NAME           CLASS   HOSTS                 ADDRESS          PORTS   AGE
 todo-ingress   nginx   todoapp.ingress.com   20.237.125.234   80      8m30s
 ```
 
-Browse to the application using the ingress `todoapp.ingress.com` and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics
+Browse to the application using the ingress `todoapp.ingress.com` and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics.
+
 Note if your ingress route doesn't load please add them to your `host` files 
 
 ## Debug the stats-api service
