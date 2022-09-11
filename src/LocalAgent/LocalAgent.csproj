@@ -5,7 +5,7 @@
     <TieredCompilation>true</TieredCompilation>
     <AssemblyName>Microsoft.BridgeToKubernetes.LocalAgent</AssemblyName>
     <RootNamespace>Microsoft.BridgeToKubernetes.LocalAgent</RootNamespace>
-    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>portable</DebugType>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
