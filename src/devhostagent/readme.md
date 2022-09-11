@@ -16,6 +16,9 @@ To make changes to this tool, follow these steps:
    docker build -t **yourDockerHub**/**devhostimageName**:**yourTag** --build-arg Configuration=Debug .
    and push it  
    docker push **yourDockerHub**/**devhostimageName**:**yourTag**  
+For building a multi-platform image
+   docker buildx create --platform linux/amd64,linux/arm64 --use
+   docker buildx build -t **yourDockerHub**/**devhostimageName**:**yourTag** --push --platform linux/arm64,linux/amd64 -f src/devhostagent/Dockerfile .
 
 Running/Debugging
 -------

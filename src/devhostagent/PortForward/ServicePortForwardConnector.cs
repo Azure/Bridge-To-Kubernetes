@@ -183,7 +183,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// \nsecret: placeholder
         /// \nx-ms-client-request-id: e6aadc2a-bb98-4714-bc4c-719676e0d4cf
         /// \nx-ms-return-client-request-id: true
-        /// \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET Core 3.1.12; Microsoft Windows 10.0.19042)
+        /// \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET 6.0.8; Microsoft Windows 10.0.19042)
         ///
         /// we would modify it to something like below:
         /// GET /metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fstorage.azure.com&client_id=<guid> HTTP/1.1
@@ -192,7 +192,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// \nMetadata: true
         /// \nx-ms-client-request-id: 8569c7c4-2411-400f-9d92-5b2e78ec7ec6
         /// \nx-ms-return-client-request-id: true
-        /// \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET Core 3.1.12; Microsoft Windows 10.0.19042)
+        /// \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET 6.0.8; Microsoft Windows 10.0.19042)
         /// </remarks>
         private byte[] GetModifiedBytesForManagedIdentity(byte[] data)
         {
