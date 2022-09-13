@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
@@ -28,7 +29,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
         /// <summary>
         /// Launch a terminal window locally with desired environment variables.
         /// </summary>
-        public Process LaunchTerminalWithEnv(IDictionary<string, string> envVars, string envScriptPath, bool performLaunch = true)
+        public Process LaunchTerminalWithEnv(IDictionary<string, string> envVars, string envScriptPath, bool performLaunch = true, string[] launchCommand = null)
         {
             if (_currentConsoleProcess != null && !_currentConsoleProcess.HasExited)
             {
@@ -37,16 +38,16 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
             }
             if (_platform.IsWindows)
             {
-                _currentConsoleProcess = this.LaunchTerminalWithEnvWindows(envVars, envScriptPath, performLaunch);
+                _currentConsoleProcess = this.LaunchTerminalWithEnvWindows(envVars, envScriptPath, performLaunch, launchCommand);
             }
             else
             {
-                _currentConsoleProcess = this.LaunchTerminalWithEnvBash(envVars, envScriptPath, performLaunch);
+                _currentConsoleProcess = this.LaunchTerminalWithEnvBash(envVars, envScriptPath, performLaunch, launchCommand);
             }
             return _currentConsoleProcess;
         }
 
-        private Process LaunchTerminalWithEnvWindows(IDictionary<string, string> envVars, string scriptCmd, bool performLaunch)
+        private Process LaunchTerminalWithEnvWindows(IDictionary<string, string> envVars, string scriptCmd, bool performLaunch, string[] launchCommand)
         {
             StringBuilder b = new StringBuilder();
             b.AppendLine($"title {Product.Name} Environment");
@@ -57,6 +58,12 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
             b.AppendLine("@echo ####################################################################");
             b.AppendLine("@echo Use this terminal to run your application.");
             b.AppendLine("@echo ####################################################################");
+
+            bool isLaunchCommandSpecified = launchCommand != null && launchCommand.Length > 0;
+            if (isLaunchCommandSpecified)
+            {
+                b.AppendLine(string.Join(" ", launchCommand));
+            }
 
             File.WriteAllText(scriptCmd, b.ToString());
             _log.Verbose("Script {0} created.", new PII(scriptCmd));
@@ -78,7 +85,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
             }
         }
 
-        private Process LaunchTerminalWithEnvBash(IDictionary<string, string> envVars, string scriptCmd, bool performLaunch)
+        private Process LaunchTerminalWithEnvBash(IDictionary<string, string> envVars, string scriptCmd, bool performLaunch, string[] launchCommand)
         {
             StringBuilder b = new StringBuilder();
             foreach (var v in envVars)
@@ -90,11 +97,20 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
 
             if (performLaunch)
             {
+                bool isLaunchCommandSpecified = launchCommand != null && launchCommand.Length > 0;
+                string fileName = isLaunchCommandSpecified ? launchCommand[0] : "/bin/bash";
+
                 ProcessStartInfo psi = new ProcessStartInfo()
                 {
                     UseShellExecute = false,
-                    FileName = "/bin/bash"
+                    FileName = fileName,
                 };
+
+                if (isLaunchCommandSpecified && launchCommand.Length > 1)
+                {
+                    psi.Arguments = string.Join(" ", launchCommand.Skip(1));
+                }
+
                 foreach (var envValue in envVars)
                 {
                     psi.EnvironmentVariables[envValue.Key] = envValue.Value;
