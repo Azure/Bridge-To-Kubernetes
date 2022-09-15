@@ -127,7 +127,7 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 
 ## <b id="bridge-vscode">Bridge to Kubernetes</b>
 **Connect a service**
-1. Open `Bridge-To-Kubernetes/samples/todo-app` from the Todo sample application in Visual Studio Code. 
+1. Open `Bridge-To-Kubernetes/samples/todo-app/stats-api` from the Todo sample application in Visual Studio Code. 
 2. Open the Azure Kubernetes Service extension and select the _todo-app_ namespace in the _MyAKS_ cluster.
 3. Open the terminal and use the `npm install` command to install the application.
 4. Select the _Debug_ icon on the left and select _Bridge to Kubernetes_ at the top.
