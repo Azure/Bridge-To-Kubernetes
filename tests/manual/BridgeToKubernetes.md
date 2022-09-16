@@ -64,7 +64,7 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 6. Remove the breakpoint at line 25.
 
 **Update application**
-1. Right before line 26 enter below line:
+1. Right after line 30 enter below line:
     ```
     created = 20;
     ```
@@ -387,7 +387,7 @@ Clone this repo locally: https://github.com/dapr/quickstarts
 **Motivation** We want Bridge to work for customers who are also using Dapr (you can read more about Dapr [here](https://dapr.io/)). This sample tests two things: 1) that Bridge works for people who are using Dapr, and 2) that Bridge works for people who are using headless services (there is a Redis headless service in this sample app).
 
 **Instructions**
-1. Change into the nodeapp directory: `cd tutorials/hello-kubernetes/node`
+1. Change into the nodeapp directory: `cd quickstarts/tutorials/hello-kubernetes/node`
 2. Install the dependencies: `npm install`
 3. In the command palette (ctrl + shift + P), select `Bridge to Kubernetes: Configure`. These are the settings you want to configure for:
     - Service: nodeapp
