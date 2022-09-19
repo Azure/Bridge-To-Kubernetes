@@ -1,6 +1,10 @@
 # Bridge to Kubernetes
 
+[![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/Mindaro/Bridge-to-Kubernetes?branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build/latest?definitionId=17283&branchName=main)
+
 Welcome to Bridge-To-Kubernetes! Bridge to Kubernetes extends the Kubernetes perimeter to your development computer allowing you to write, test, and debug microservice code while connected to your Kubernetes cluster with the rest of your application or services. With this workflow, there is no need for extra assets, such as a Dockerfile or Kubernetes manifests. You can simply run your code natively on your development workstation while connected to the Kubernetes cluster, allowing you to test your code changes in the context of the larger application.
+
+
 
 ## Key Features:
 
