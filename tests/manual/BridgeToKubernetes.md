@@ -36,15 +36,15 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 **Install sample application**
 1. Install the Todo App sample application. Note below assumes you have a local or remote Kubernetes cluster created and it has a todo-app namespace.
     ```
-    git clone https://github.com/microsoft/mindaro.git
-    cd mindaro/samples/todo-app
+    git clone https://github.com/Azure/Bridge-To-Kubernetes
+    cd Bridge-To-Kubernetes/samples/todo-app
     kubectl apply -f deployment.yaml --namespace todo-app
     ```
 2. Navigate to public URL `http://EXTERNAL_IP.nip.io` and verify the app works by entering a task or going to stats page.
 
 ## <b id="bridge-vs">Bridge to Kubernetes</b>
 **Connect a service**
-1. Open `mindaro/samples/todo-app/` folder from the TodoApp sample application in Visual Studio. 
+1. Open `Bridge-To-Kubernetes/samples/todo-app/` folder from the TodoApp sample application in Visual Studio. 
 2. Select _Container in Kubernetes_ option from the debug dropdown menu.
 3. Edit the app properties for the _Container in Kubernetes_ launch profile.
     * Select your subscription and cluster.
@@ -56,15 +56,15 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 4. Hit _Ok_ and save your changes.
 
 **Debug a service**
-1. Open `server.cs` in stats-api and set a breakpoint at line 37.
+1. Open `server.js` in stats-api and set a breakpoint at line 25.
 2. Navigate to the sample application by opening the public URL. 
 3. Click the stats link. 
-4. Return to Visual Studio and observe the breakpoint at line 37 has been hit. Hit _F5_ to resume the service.
+4. Return to Visual Studio and observe the breakpoint at line 25 has been hit. Hit _F5_ to resume the service.
 5. Verify the log statement appears in the output.
-6. Remove the breakpoint at line 37.
+6. Remove the breakpoint at line 25.
 
 **Update application**
-1. Right before line 37 enter below line:
+1. Right after line 30 enter below line:
     ```
     created = 20;
     ```
@@ -79,9 +79,9 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 1. Open the settings go to Tools -> Options -> Kubernetes Debugging Tools -> Settings.
 2. Set _Bridge to Kubernetes_ -> _Disconnect After Debugging_ to False to STOP automatically disconnecting the service in the future.
 3. Click on the start button next to _Bridge to Kubernetes_. Verify you are NOT prompted for service name, port, or launch task.
-4. Click _Run_. Refresh the bike rental page and verify that you see the updated log statement in the output.
-5. Click _Stop Debugging_. Refresh the bike rental page and verify that you see a Bad Gateway error in the output.
-6. Click on the _Kubernetes_ icon in the bottom bar, and select _Disconnect your service_. Refresh the bike rental page and verify you see the original log statement in the output.
+4. Click _Run_. Refresh the Todo app page and verify that you see the updated log statement in the output.
+5. Click _Stop Debugging_. Refresh the Todo app page and verify that you see a Bad Gateway error in the output.
+6. Click on the _Kubernetes_ icon in the bottom bar, and select _Disconnect your service_. Refresh the Todo app page and verify you see the original log statement in the output.
 
 ## <b id="custom-vs">KubernetesLocalProcessConfig.yaml</b>
 **Customize environment with KubernetesLocalProcessConfig.yaml**
@@ -118,7 +118,7 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 1. The [Bridge to Kubernetes](https://aka.ms/mindaro-marketplace-vscode) latest extension version
 
 **Install Todoapp sample application**
-1. Inside the same "mindaro" directory that you cloned above, create a new namespace and deploy the todoapp:
+1. Inside the same "Bridge-To-Kubernetes" directory that you cloned above, create a new namespace and deploy the todoapp:
     ```
     kubectl create ns todoapp
     kubectl apply -f ./samples/todo-app/deployment.yaml -n todoapp
@@ -127,7 +127,7 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 
 ## <b id="bridge-vscode">Bridge to Kubernetes</b>
 **Connect a service**
-1. Open `mindaro/samples/todo-app` from the Bike Sharing sample application in Visual Studio Code. 
+1. Open `Bridge-To-Kubernetes/samples/todo-app/stats-api` from the Todo sample application in Visual Studio Code. 
 2. Open the Azure Kubernetes Service extension and select the _todo-app_ namespace in the _MyAKS_ cluster.
 3. Open the terminal and use the `npm install` command to install the application.
 4. Select the _Debug_ icon on the left and select _Bridge to Kubernetes_ at the top.
@@ -166,12 +166,12 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 3. When prompted to allow Endpoint Manager to run as root, say yes.
     * Confirm this works on BOTH Windows 10 and MacOS.
 4. Click _Run_. Refresh the stats page and verify that your local change of 20 shows up under created.
-5. Click _Stop Debugging_. Refresh the bike rental page and verify that you see a Bad Gateway error on the bike rental page.
-6. Click on the _Kubernetes_ icon in the bottom bar, and select _Disconnect your service_. Refresh the bike rental page and verify that you see regular (not overriden) value.
+5. Click _Stop Debugging_. Refresh the Todo sample app page and verify that you see a Bad Gateway error or 404 page.
+6. Click on the _Kubernetes_ icon in the bottom bar, and select _Disconnect your service_. Refresh the todo app page and verify that you see regular (not overriden) value.
 
 ## <b id="bridge-routing-vscode">Bridge to Kubernetes with Routing</b>
 **Connect a service**
-1. Open `mindaro/samples/todo-app/stats-api` from the Todo-App sample application in Visual Studio Code. 
+1. Open `Bridge-To-Kubernetes/samples/todo-app/stats-api` from the Todo-App sample application in Visual Studio Code. 
 2. Open the Azure Kubernetes Service extension and select the _todo-app_ namespace in the _MyAKS_ cluster.
 3. Open the terminal and use the `npm install` command to install the application.
 4. Select the _Debug_ icon on the left and select _Bridge to Kubernetes_ at the top.
@@ -224,7 +224,7 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 
 ## <b id="external-vscode">External Endpoints</b>
 **Prerequisites**
-A K8s cluster, and a local copy of the Mindaro-Connect\samples\ConnectSQLDatabase sample app. Set your BRIDGE_ENVIRONMENT to "dev" or "staging", as this feature has not yet been released.
+A K8s cluster, and a local copy of the Bridge-To-Kubernetes\samples\ConnectSQLDatabase sample app. Set your BRIDGE_ENVIRONMENT to "dev" or "staging", as this feature has not yet been released.
 
 **Motivation**
 Sometimes customers may want to debug applications that talk to databases or other endpoints that are outside the cluster, but which are locked down for IP ranges specific to the cluster. In this case, it is normally impossible for them to debug the app locally without mocking this dependency. However, we offer a solution to them. When this endpoint is declared in the KubernetesLocalProcessConfig.yaml file, we proxy all calls to it via the cluster. This way, the customer is able to debug their application locally while communicating with the external endpoint.
@@ -279,23 +279,17 @@ Going to sleep...
 
 ## <b id="https-vscode">Test with https ingresses (cert-manager & letsencrypt)</b>
 **Pre-requisites**
-There is an existing AKS cluster with Bikesharingapp already installed on this machine and setup for https ingresses. Please do not make changes to this deployment and let us know if you find any issues in accessing the application.
-| Parameter | Value |
-| --- | --- |
-| AKS cluster subscription Id | Mindaro Testing (c2e0f009-a61a-4578-8a6d-5715ee782648) |
-| AKS cluster Resource group name | bikesharingapp-https |
-| AKS cluster name | bikesharingapp-https |
-| Namespace | bikeapp |
+1. An existing AKS cluster or local cluster is required. 
+2. Please follow the instructions here https://github.com/Azure/Bridge-To-Kubernetes/tree/main/samples/ingress
 
 Please test [Bridge to Kubernetes with routing](#bridge-routing-vscode) with this application in the given namespace.
 Please make sure that while testing this scenario, the value of routeAs in tasks.json is not more than 6 characters long.
 
-*After Testing* : Please make sure to delete any ingresses that start with the prefix "cm-acme-http-solver". To do this run the below commands:
+*After Testing* : Please make sure to delete any ingresses. To do this run the below commands:
 1. `kubectl get ingresses`
-2. For every ingress whose name starts with "cm-acme-http-solver", copy their name and run the below
+2. For every ingress, copy their name and run the below
 `kubectl delete ingress <ingress-name>`
 
-This step is because Cert manager does not clean up these temporary ingresses always and they can end up cluttering the namespace.
 
 ## <b id="k8s-svc-env-vars-vscode">Test Use Kubernetes Service Environment Variables</b>
 **Platforms:**  
@@ -310,7 +304,7 @@ This step is because Cert manager does not clean up these temporary ingresses al
     - [Install the pre-requisities](https://code.visualstudio.com/docs/azure/kubernetes#_before-you-begin) for Kubernetes VS Code extension.
 
 **Scenarios**  
-    - Deploy the todo sample app by following the instruction from [todo app readme](https://github.com/microsoft/mindaro/tree/master/samples/todo-app)  
+    - Deploy the todo sample app by following the instruction from [todo app readme](https://github.com/Azure/Bridge-To-Kubernetes/tree/main/samples/todo-app)  
     - Set the kubeconfig in Kubernetes extension by [adding a path to a kubeconfig](https://github.com/Azure/vscode-kubernetes-tools/blob/master/README.md#configuration-commands).  
     - Open the stats-api folder in a VS Code.  
     - Run `npm install` in VS Code's terminal window.  
@@ -337,7 +331,7 @@ For the first time, the breakpoints take time to hit due to network issue. Try a
 ## <b id="podidentity">Test with Pod Identity/Managed Identity</b>
 **Pre-requisites**
 There is an existing AKS cluster with the Managed Identity sample app already installed. Please do not make changes to this deployment and let us know if you find any issues in accessing the application.
-The code for this application is in this repository at path `samples\managed-identity\mi-webapp.csproj`
+The code for this application is in this repository at path `Bridge-To-Kubernetes\samples\managed-identity\mi-webapp.csproj`
 | Parameter | Value |
 | --- | --- |
 | AKS cluster subscription Id | Mindaro Testing (c2e0f009-a61a-4578-8a6d-5715ee782648) |
@@ -393,7 +387,7 @@ Clone this repo locally: https://github.com/dapr/quickstarts
 **Motivation** We want Bridge to work for customers who are also using Dapr (you can read more about Dapr [here](https://dapr.io/)). This sample tests two things: 1) that Bridge works for people who are using Dapr, and 2) that Bridge works for people who are using headless services (there is a Redis headless service in this sample app).
 
 **Instructions**
-1. Change into the nodeapp directory: `cd quickstarts/hello-kubernetes/node`
+1. Change into the nodeapp directory: `cd quickstarts/tutorials/hello-kubernetes/node`
 2. Install the dependencies: `npm install`
 3. In the command palette (ctrl + shift + P), select `Bridge to Kubernetes: Configure`. These are the settings you want to configure for:
     - Service: nodeapp

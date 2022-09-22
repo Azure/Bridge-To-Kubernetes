@@ -10,6 +10,6 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
 {
     internal interface IConsoleLauncher
     {
-        Process LaunchTerminalWithEnv(IDictionary<string, string> envVars, string envScriptPath, bool performLaunch = true);
+        Process LaunchTerminalWithEnv(IDictionary<string, string> envVars, string envScriptPath, bool performLaunch = true, string[] launchCommand = null);
     }
 }

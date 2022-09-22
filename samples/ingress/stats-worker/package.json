@@ -6,7 +6,10 @@
     },
     "dependencies": {
         "redis": "^4.0.2",
-        "servicebus": "^2.3.3"
+        "servicebus": "^2.3.0"
+    },
+    "overrides": {
+        "amqplib": "0.10.3"
     },
     "main": "worker.js",
     "scripts": {

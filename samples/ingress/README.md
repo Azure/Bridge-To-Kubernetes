@@ -16,6 +16,7 @@ In all, this extended TODO application is composed of six inter-related componen
 
 - Kubectl CLI (connected to a cluster)
 - [Bridge to Kubernetes VS Code extension](https://aka.ms/bridge-to-k8s-vsc-extension)
+- Nginx Ingress Controller deployed to the cluster, without this below tutorial will not work. Sample instructions for deploying Nginx ingress controller can be found below https://kubernetes.github.io/ingress-nginx/deploy/
 
 ## Deploy the application
 
@@ -52,7 +53,9 @@ NAME           CLASS   HOSTS                 ADDRESS          PORTS   AGE
 todo-ingress   nginx   todoapp.ingress.com   20.237.125.234   80      8m30s
 ```
 
-Browse to the application using the ingress `todoapp.ingress.com` and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics
+Browse to the application using the ingress `todoapp.ingress.com` and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics.
+
+Note if your ingress route doesn't load please add them to your `host` files 
 
 ## Debug the stats-api service
 
