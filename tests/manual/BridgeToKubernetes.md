@@ -394,4 +394,4 @@ Clone this repo locally: https://github.com/dapr/quickstarts
     - "Create a new launch configuration" (if you don't have one), otherwise "Launch Program".
     - Isolated: no
 4. Start debugging with Bridge.
-5. Set a breakpoint on line 40. If everything is working, you should see the breakpoint get hit. This should happen without you needing to do anything, since the python app hosted on the same cluster will be pinging the node app that we are debugging.
+5. Set a breakpoint on line 47. If everything is working, you should see the breakpoint get hit. This should happen without you needing to do anything, since the python app hosted on the same cluster will be pinging the node app that we are debugging.
