@@ -46,14 +46,17 @@ if [ -z "${DISTRIB_ID}" ]; then
     log INFO "Trying to identify using OSTYPE var $OSTYPE "
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         DISTRIB_ID="$OSTYPE"
+        B2KOS="linux"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         DISTRIB_ID="$OSTYPE"
+        B2KOS="osx"
     elif [[ "$OSTYPE" == "cygwin" ]]; then
         DISTRIB_ID="$OSTYPE"
     elif [[ "$OSTYPE" == "msys" ]]; then
        DISTRIB_ID="$OSTYPE"
     elif [[ "$OSTYPE" == "win32" ]]; then
         DISTRIB_ID="$OSTYPE"
+        B2KOS="win"
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
         DISTRIB_ID="$OSTYPE"
     else
@@ -61,8 +64,6 @@ if [ -z "${DISTRIB_ID}" ]; then
         exit 1
     fi
 fi
-
-
 
 if [ -z "${DISTRIB_ID}" ]; then
     log ERROR "Unknown DISTRIB_ID or DISTRIB_RELEASE."
@@ -110,15 +111,18 @@ check_jq_processor_present(){
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
 download_bridge_stable_version(){
   log INFO "Starting B2K Download"
-  curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+  log INFO "$B2KOS"
+  if [ $B2KOS == "linux" ]; then
+      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+  elif [[ $B2KOS == "osx" ]]; then
+      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
+  elif [ $B2KOS == "win" ]; then
+      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
+  else
+    log WARNING "$DISTRIB_ID not supported for $B2KOS"
+  fi
   log INFO "Finished B2K Download"
 }
 
 check_jq_processor_present
 download_bridge_stable_version
-# Download bridge via CURL will be one of the easy and best options.
-# Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
-# Download a particular version for linux operating system, this can be also done via CURL curl -LO https://bridgetokubernetes.azureedge.net/zip/<version>/lpk-<arch>.zip
-# write a shell script and power shell script to download them so it will be easier for the user to just run this script.
-# Update the public documentation for this which gives more adoption towards this tool.
-# Update the help menu for the CLI tool
