@@ -7,8 +7,8 @@
 #| |_) | |  | | (_| | (_| |  __/ | || (_) | | . \ |_| | |_) |  __/ |  | | | |  __/ ||  __/\__ \
 #|____/|_|  |_|\__,_|\__, |\___|  \__\___/  |_|\_\__,_|_.__/ \___|_|  |_| |_|\___|\__\___||___/
 #                    |___/                                                                     
-#
-#
+# usage: 
+#    curl -fsSL https://github.com/Tatsinnit/Bridge-To-Kubernetes/blob/feature/b2k-installer/scripts/install.sh | sh
 set -e
 set -o pipefail
 set -f
@@ -49,6 +49,8 @@ DISTRIB_ID=${DISTRIB_ID,,}
 DISTRIB_RELEASE=${DISTRIB_RELEASE,,}
 DISTRIB_CODENAME=${DISTRIB_CODENAME,,}
 
+log INFO "Distro Information as $DISTRIB_ID - $DISTRIB_RELEASE - $DISTRIB_CODENAME"
+
 # set distribution specific vars
 PACKAGER=
 SYSTEMD_PATH=/lib/systemd/system
@@ -65,6 +67,8 @@ fi
 if [ "$PACKAGER" == "apt" ]; then
     export DEBIAN_FRONTEND=noninteractive
 fi
+
+log INFO "Pckager Information as $PACKAGER"
 
 check_jq_processor_present(){
 
