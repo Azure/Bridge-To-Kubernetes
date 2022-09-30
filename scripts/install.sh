@@ -97,6 +97,7 @@ fi
 
 log INFO "Pckager Information as $PACKAGER"
 
+# Check JQ Processor and download if not present
 check_jq_processor_present(){
   log INFO "Checking locally installed JQ Processor version"
   jqversion=$(jq --version)
@@ -106,8 +107,15 @@ check_jq_processor_present(){
   fi
 }
 
-check_jq_processor_present
+# Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+download_bridge_stable_version(){
+  log INFO "Starting B2K Download"
+  curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+  log INFO "Finished B2K Download"
+}
 
+check_jq_processor_present
+download_bridge_stable_version
 # Download bridge via CURL will be one of the easy and best options.
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
 # Download a particular version for linux operating system, this can be also done via CURL curl -LO https://bridgetokubernetes.azureedge.net/zip/<version>/lpk-<arch>.zip
