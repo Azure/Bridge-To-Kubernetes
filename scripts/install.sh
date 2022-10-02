@@ -22,20 +22,14 @@ log() {
 # dump uname immediately
 uname -ar
 
-log INFO "Information"
+log INFO "Information logged for bridge to kubernetes."
 
-# try to get os release vars
+# Try to get os release vars
 # https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html
 # https://stackoverflow.com/questions/394230/how-to-detect-the-os-from-a-bash-script
 if [ -e /etc/os-release ]; then
     . /etc/os-release
     DISTRIB_ID=$ID
-    DISTRIB_CODENAME=$VERSION_CODENAME
-    if [ -z "$DISTRIB_CODENAME" ]; then
-        if [ "$DISTRIB_ID" == "debian" ] && [ "$DISTRIB_RELEASE" == "9" ]; then
-            DISTRIB_CODENAME=stretch
-        fi
-    fi
 else
     if [ -e /etc/lsb-release ]; then
         . /etc/lsb-release
@@ -69,13 +63,8 @@ if [ -z "${DISTRIB_ID}" ]; then
     log ERROR "Unknown DISTRIB_ID or DISTRIB_RELEASE."
     exit 1
 fi
-if [ -z "${DISTRIB_CODENAME}" ]; then
-    log WARNING "Unknown DISTRIB_CODENAME."
-fi
-# DISTRIB_ID=${DISTRIB_ID,,}
-# DISTRIB_CODENAME=${DISTRIB_CODENAME,,}
 
-log INFO "Distro Information as $DISTRIB_ID  - $DISTRIB_CODENAME"
+log INFO "Distro Information as $DISTRIB_ID"
 
 # set distribution specific vars
 PACKAGER=
@@ -96,8 +85,6 @@ if [ "$PACKAGER" == "apt" ]; then
     export DEBIAN_FRONTEND=noninteractive
 fi
 
-log INFO "Pckager Information as $PACKAGER"
-
 # Check JQ Processor and download if not present
 check_jq_processor_present(){
   log INFO "Checking locally installed JQ Processor version"
@@ -111,18 +98,63 @@ check_jq_processor_present(){
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
 download_bridge_stable_version(){
   log INFO "Starting B2K Download"
-  log INFO "$B2KOS"
+  CURLPROCESS=
   if [ $B2KOS == "linux" ]; then
-      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+      curl -o /tmp/bridgetokubernetes -fsSLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
   elif [[ $B2KOS == "osx" ]]; then
-      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
+      curl -o /tmp/bridgetokubernetes -fLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
   elif [ $B2KOS == "win" ]; then
-      curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
+      curl -o /tmp/bridgetokubernetes -fsSL0 $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
   else
     log WARNING "$DISTRIB_ID not supported for $B2KOS"
   fi
-  log INFO "Finished B2K Download"
+  chmod +x /tmp/bridgetokubernetes
+  log INFO "Finished B2K download complete."
 }
 
-check_jq_processor_present
-download_bridge_stable_version
+file_issue_prompt() {
+  echo "If you wish us to support your platform, please file an issue"
+  echo "https://github.com/Azure/Bridge-To-Kubernetes/issues/new/choose"
+  exit 1
+}
+
+copy_b2k_files() {
+  # unzip "filename.zip" -d tmp/bridgetokubernetes && mv "filename.zip" "tmp/bridgetokubernetes" && rmdir "tmp/bridgetokubernetes"
+  # I am not sure where the actual binary in the .zip file is.
+  if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+      if [ ! -d "$HOME/.local/bin" ]; then
+        mkdir -p "$HOME/.local/bin"
+      fi
+      mv /tmp/bridgetokubernetes "$HOME/.local/bin/bridgetokubernetes"
+  else
+      echo "installation target directory is write protected, run as root to override"
+      sudo mv /tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
+  fi
+}
+
+install() {
+  if [[ "$OSTYPE" == "linux"* ]]; then
+      ARCH=$(uname -m);
+      OS="linux";
+      if [[ "$ARCH" != "x86_64" ]]; then
+          echo "bridge to kubernetes is only available for linux x86_64 architecture"
+          file_issue_prompt
+          exit 1
+      fi
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+      ARCH="universal";
+      OS="mac";
+  else
+      echo "bridge to kubernetes isn't supported for your platform - $OSTYPE"
+      file_issue_prompt
+      exit 1
+  fi
+
+  check_jq_processor_present
+  download_bridge_stable_version
+  copy_b2k_files
+  echo "Bridge to kubernetes installed."
+}
+
+
+install
