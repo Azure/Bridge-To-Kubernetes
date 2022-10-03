@@ -1,13 +1,13 @@
 #!/bin/bash
 # Bridge to kubernetes installer
 #
-#  ____       _     _              _          _  __     _                          _            
-# | __ ) _ __(_) __| | __ _  ___  | |_ ___   | |/ /   _| |__   ___ _ __ _ __   ___| |_ ___  ___ 
+#  ____       _     _              _          _  __     _                          _
+# | __ ) _ __(_) __| | __ _  ___  | |_ ___   | |/ /   _| |__   ___ _ __ _ __   ___| |_ ___  ___
 # |  _ \| '__| |/ _` |/ _` |/ _ \ | __/ _ \  | ' / | | | '_ \ / _ \ '__| '_ \ / _ \ __/ _ \/ __|
 # | |_) | |  | | (_| | (_| |  __/ | || (_) | | . \ |_| | |_) |  __/ |  | | | |  __/ ||  __/\__ \
 # |____/|_|  |_|\__,_|\__, |\___|  \__\___/  |_|\_\__,_|_.__/ \___|_|  |_| |_|\___|\__\___||___/
-#                    |___/                                                                     
-# usage: 
+#                    |___/
+# usage:
 #    curl -fsSL https://raw.githubusercontent.com/Tatsinnit/Bridge-To-Kubernetes/feature/b2k-installer/scripts/install.sh | sh
 set -e
 set -o pipefail
@@ -41,17 +41,17 @@ if [ -z "${DISTRIB_ID}" ]; then
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="osx"
-    elif [[ "$OSTYPE" == "cygwin" ]]; then
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
         DISTRIB_ID="$OSTYPE"
-    elif [[ "$OSTYPE" == "msys" ]]; then
-       DISTRIB_ID="$OSTYPE"
-    elif [[ "$OSTYPE" == "win32" ]]; then
+        elif [[ "$OSTYPE" == "msys" ]]; then
+        DISTRIB_ID="$OSTYPE"
+        elif [[ "$OSTYPE" == "win32" ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="win"
-    elif [[ "$OSTYPE" == "freebsd"* ]]; then
+        elif [[ "$OSTYPE" == "freebsd"* ]]; then
         DISTRIB_ID="$OSTYPE"
     else
         log ERROR "Unknown DISTRIB_ID or DISTRIB_RELEASE."
@@ -71,12 +71,14 @@ PACKAGER=
 SYSTEMD_PATH=/lib/systemd/system
 if [ "$DISTRIB_ID" == "ubuntu" ]; then
     PACKAGER=apt
-elif [ "$DISTRIB_ID" == "debian" ]; then
+    elif [ "$DISTRIB_ID" == "debian" ]; then
     PACKAGER=apt
-elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
+    elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
     PACKAGER=yum
-elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
+    elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
     PACKAGER=brew
+    elif [[ "$DISTRIB_ID" == "win32" ]]; then
+    PACKAGER=choco
 else
     PACKAGER=zypper
     SYSTEMD_PATH=/usr/lib/systemd/system
@@ -87,73 +89,64 @@ fi
 
 # Check JQ Processor and download if not present
 check_jq_processor_present(){
-  log INFO "Checking locally installed JQ Processor version"
-  jqversion=$(jq --version)
-  log INFO "Locally installed JQ Processor version is $jqversion"
-  if [ -z "${jqversion}" ]; then
-    $PACKAGER install jq
-  fi
+    log INFO "Checking locally installed JQ Processor version"
+    jqversion=$(jq --version)
+    log INFO "Locally installed JQ Processor version is $jqversion"
+    if [ -z "${jqversion}" ]; then
+        $PACKAGER install jq
+    fi
 }
 
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
 download_bridge_stable_version(){
-  log INFO "Starting B2K Download"
-  CURLPROCESS=
-  if [ $B2KOS == "linux" ]; then
-      curl -o /tmp/bridgetokubernetes -fsSLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
-  elif [[ $B2KOS == "osx" ]]; then
-      curl -o /tmp/bridgetokubernetes -fLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
-  elif [ $B2KOS == "win" ]; then
-      curl -o /tmp/bridgetokubernetes -fsSL0 $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
-  else
-    log WARNING "$DISTRIB_ID not supported for $B2KOS"
-  fi
-  chmod +x /tmp/bridgetokubernetes
-  log INFO "Finished B2K download complete."
+    log INFO "Starting B2K Download"
+    CURLPROCESS=
+    if [[ $B2KOS == "linux" ]]; then
+        curl -o /tmp/bridgetokubernetes -fsSLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+        DOWNLOAD_FILE_NAME = "lpk-linux.zip"
+        elif [[ $B2KOS == "osx" ]]; then
+        curl -o /tmp/bridgetokubernetes -fLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
+        DOWNLOAD_FILE_NAME = "lpk-osx.zip"
+        elif [[ $B2KOS == "win" ]] || [[ "$OSTYPE" == "msys" ]]; then
+        curl -o /tmp/bridgetokubernetes -fsSL0 $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
+    else
+        log WARNING "$DISTRIB_ID not supported for $B2KOS"
+    fi
+    chmod +x /tmp/bridgetokubernetes
+    log INFO "Finished B2K download complete."
 }
 
 file_issue_prompt() {
-  echo "If you wish us to support your platform, please file an issue"
-  echo "https://github.com/Azure/Bridge-To-Kubernetes/issues/new/choose"
-  exit 1
+    echo "If you wish us to support your platform, please file an issue"
+    echo "https://github.com/Azure/Bridge-To-Kubernetes/issues/new/choose"
+    exit 1
 }
 
 copy_b2k_files() {
-  # unzip "filename.zip" -d tmp/bridgetokubernetes && mv "filename.zip" "tmp/bridgetokubernetes" && rmdir "tmp/bridgetokubernetes"
-  # I am not sure where the actual binary in the .zip file is.
-  if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
-      if [ ! -d "$HOME/.local/bin" ]; then
-        mkdir -p "$HOME/.local/bin"
-      fi
-      mv /tmp/bridgetokubernetes "$HOME/.local/bin/bridgetokubernetes"
-  else
-      echo "installation target directory is write protected, run as root to override"
-      sudo mv /tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
-  fi
+    unzip lpk*.zip -d tmp/bridgetokubernetes && mv lpk*.zip "tmp/bridgetokubernetes" && rmdir "tmp/bridgetokubernetes"
+    if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+        if [ ! -d "$HOME/.local/bin" ]; then
+            mkdir -p "$HOME/.local/bin"
+        fi
+        mv /tmp/bridgetokubernetes "$HOME/.local/bin/bridgetokubernetes"
+    else
+        echo "installation target directory is write protected, run as root to override"
+        sudo mv /tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
+    fi
 }
 
 install() {
-  if [[ "$OSTYPE" == "linux"* ]]; then
-      ARCH=$(uname -m);
-      OS="linux";
-      if [[ "$ARCH" != "x86_64" ]]; then
-          echo "bridge to kubernetes is only available for linux x86_64 architecture"
-          file_issue_prompt
-          exit 1
-      fi
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-      ARCH="universal";
-      OS="mac";
-  else
-      echo "bridge to kubernetes isn't supported for your platform - $OSTYPE"
-      file_issue_prompt
-      exit 1
-  fi
-
-  check_jq_processor_present
-  download_bridge_stable_version
-  copy_b2k_files
-  echo "Bridge to kubernetes installed."
+    if [[ "$OSTYPE" == "linux"* ]] || [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
+        echo "bridge to kubernetes is supported for your platform - $OSTYPE"
+    else
+        echo "bridge to kubernetes isn't supported for your platform - $OSTYPE"
+        file_issue_prompt
+        exit 1
+    fi
+    check_jq_processor_present
+    download_bridge_stable_version
+    copy_b2k_files
+    echo "Bridge to kubernetes installed."
 }
 
 
