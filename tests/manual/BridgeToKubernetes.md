@@ -206,20 +206,20 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 ## <b id="custom-vscode">KubernetesLocalProcessConfig.yaml</b>
 **Customize environment with KubernetesLocalProcessConfig.yaml**
 1. Create a new file at the root of the project called `KubernetesLocalProcessConfig.yaml`
-2. Add the following content to this file and save:
+2. Add the following content to this file and save, replace "kube-api-access-9knc4" with value seen when you run kubectl describe pod <stats-api pod> under Monut section:
     ```yaml
     version: 0.1
     env:
         - name: FOO
           value: bar
-        - name: DEFAULT_TOKEN_PATH
-          value: $(volumeMounts:default-token-*)
+        - name: STATS_API_VOLUME_PATH
+          value: $(volumeMounts:kube-api-access-9knc4)
     ```
 3. Connect to the service as in the **Connect a service** step above
 4. Open the Kubernetes status bar menu and select "Show connection diagnostics information"
-5. Verify the existence of the following. NOTE: You can use Ctrl+F in this window.
+5. Verify the existence of the following path. NOTE: You can use Ctrl+F in this window.
     1. `FOO=bar`
-    1. `DEFAULT_TOKEN_PATH=<tmpdir>`
+    1. `STATS_API_VOLUME_PATH=<tmpdir>`
 
 ## <b id="external-vscode">External Endpoints</b>
 **Prerequisites**
