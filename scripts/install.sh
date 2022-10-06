@@ -38,7 +38,7 @@ fi
 
 if [ -z "${DISTRIB_ID}" ]; then
     log INFO "Trying to identify using OSTYPE var $OSTYPE "
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ "$OSTYPE" == "linux"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="linux"
         elif [[ "$OSTYPE" == "darwin"* ]]; then
