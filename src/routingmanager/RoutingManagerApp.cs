@@ -327,8 +327,9 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                     {
                         var serviceName = path?.Backend?.Service?.Name;
                         var servicePort = path?.Backend?.Service?.Port?.Name;
-                        if (!string.IsNullOrWhiteSpace(servicePort)) {
-                            servicePort = path?.Backend?.Service?.Port?.Number;
+                        if (string.IsNullOrEmpty(servicePort)) {
+                            servicePort = path?.Backend?.Service?.Port?.Number.ToString();
+                            _log.Info("service port name not found for ingress, port number is {0}", servicePort);
                         }
                         if (!string.IsNullOrWhiteSpace(serviceName))
                         {
