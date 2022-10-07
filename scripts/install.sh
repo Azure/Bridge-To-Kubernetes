@@ -97,16 +97,64 @@ check_jq_processor_present(){
     fi
 }
 
+check_kubectl_present(){
+    log INFO "Checking if kubectl library is present locally"
+    if [[ -f "$HOME/.local/bin/bridgetokubernetes/kubectl/linux/kubectl" ]]; then
+        log INFO "kubectl library present, skipping download"
+    else 
+        download_kubectl_stable_version
+    fi
+}
+
+check_dotnet_present(){
+     log INFO "Checking if dotnet runtime library is present locally"
+    if [[ -f $HOME/.local/bin/bridgetokubernetes/Microsoft.AspNetCore.* ]]; then
+        log INFO "dotnet runtime library present, skipping download"
+    else 
+        download_dotnet_stable_version
+    fi
+}
+
+download_dotnet_stable_version(){
+    log INFO "Starting dotnet runtime Download"
+    if [[ $OSTYPE == "linux"* ]]; then
+        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/dotnetruntime-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.dotnetruntime.url')
+        elif [[ $OSTYPE == "osx"* ]]; then
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.dotnetruntime.url')
+        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.dotnetruntime.url')
+    else
+        log WARNING "$DISTRIB_ID not supported for $OSTYPE"
+    fi
+    chmod +x $HOME/tmp/bridgetokubernetes
+    log INFO "Finished dotnet runtime download complete."
+}
+
+download_kubectl_stable_version(){
+    log INFO "Starting Kubectl Download"
+    if [[ $OSTYPE == "linux"* ]]; then
+        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/kubectl-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.kubectl.url')
+        elif [[ $OSTYPE == "osx"* ]]; then
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/kubectl-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.kubectl.url')
+        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/kubectl-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.kubectl.url')
+    else
+        log WARNING "$DISTRIB_ID not supported for $OSTYPE"
+    fi
+    chmod +x $HOME/tmp/bridgetokubernetes
+    log INFO "Finished Kubectl download complete."
+}
+
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
 download_bridge_stable_version(){
     log INFO "Starting B2K Download"
     CURLPROCESS=
     if [[ $OSTYPE == "linux"* ]]; then
-        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.bridge.url')
         elif [[ $OSTYPE == "osx"* ]]; then
-        curl -o $HOME/tmp/bridgetokubernetes -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.bridge.url')
         elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
-        curl -o $HOME/tmp/bridgetokubernetes -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
+        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.bridge.url')
     else
         log WARNING "$DISTRIB_ID not supported for $OSTYPE"
     fi
@@ -122,12 +170,13 @@ file_issue_prompt() {
 
 copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
-    unzip lpk*.zip
+    unzip *.zip
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
+        chmod +x $HOME/.local/bin/bridgetokubernetes/
     else
         echo "installation target directory is write protected, run as root to override"
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
@@ -143,6 +192,8 @@ install() {
         exit 1
     fi
     check_jq_processor_present
+    check_kubectl_present
+    check_dotnet_present
     download_bridge_stable_version
     copy_b2k_files
     echo "Bridge to kubernetes installed."
