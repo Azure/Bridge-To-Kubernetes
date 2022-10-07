@@ -101,18 +101,16 @@ check_jq_processor_present(){
 download_bridge_stable_version(){
     log INFO "Starting B2K Download"
     CURLPROCESS=
-    if [[ $B2KOS == "linux" ]]; then
-        curl -o /tmp/bridgetokubernetes -fsSLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
-        DOWNLOAD_FILE_NAME = "lpk-linux.zip"
-        elif [[ $B2KOS == "osx" ]]; then
-        curl -o /tmp/bridgetokubernetes -fLO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
-        DOWNLOAD_FILE_NAME = "lpk-osx.zip"
-        elif [[ $B2KOS == "win" ]] || [[ "$OSTYPE" == "msys" ]]; then
-        curl -o /tmp/bridgetokubernetes -fsSL0 $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
+    if [[ $OSTYPE == "linux"* ]]; then
+        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
+        elif [[ $OSTYPE == "osx"* ]]; then
+        curl -o $HOME/tmp/bridgetokubernetes -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.osx.url')
+        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+        curl -o $HOME/tmp/bridgetokubernetes -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.win.url')
     else
-        log WARNING "$DISTRIB_ID not supported for $B2KOS"
+        log WARNING "$DISTRIB_ID not supported for $OSTYPE"
     fi
-    chmod +x /tmp/bridgetokubernetes
+    chmod +x $HOME/tmp/bridgetokubernetes
     log INFO "Finished B2K download complete."
 }
 
@@ -123,23 +121,24 @@ file_issue_prompt() {
 }
 
 copy_b2k_files() {
-    unzip lpk*.zip -d tmp/bridgetokubernetes && mv lpk*.zip "tmp/bridgetokubernetes" && rmdir "tmp/bridgetokubernetes"
+    cd $HOME/tmp/bridgetokubernetes
+    unzip lpk*.zip
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
-        mv /tmp/bridgetokubernetes "$HOME/.local/bin/bridgetokubernetes"
+        mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
     else
         echo "installation target directory is write protected, run as root to override"
-        sudo mv /tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
+        sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
     fi
 }
 
 install() {
-    if [[ "$OSTYPE" == "linux"* ]] || [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-        echo "bridge to kubernetes is supported for your platform - $OSTYPE"
+    if [[ "$OSTYPE" == "linux"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+        log INFO "bridge to kubernetes is supported for your platform - $OSTYPE"
     else
-        echo "bridge to kubernetes isn't supported for your platform - $OSTYPE"
+        log INFO "bridge to kubernetes isn't supported for your platform - $OSTYPE"
         file_issue_prompt
         exit 1
     fi
