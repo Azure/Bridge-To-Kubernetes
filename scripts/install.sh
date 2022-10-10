@@ -8,7 +8,7 @@
 # |____/|_|  |_|\__,_|\__, |\___|  \__\___/  |_|\_\__,_|_.__/ \___|_|  |_| |_|\___|\__\___||___/
 #                    |___/
 # usage:
-#    curl -fsSL https://raw.githubusercontent.com/Tatsinnit/Bridge-To-Kubernetes/feature/b2k-installer/scripts/install.sh | bash
+#    curl -fsSL https://raw.githubusercontent.com/Azure/Bridge-To-Kubernetes/main/scripts/install.sh | bash
 set -e
 set -o pipefail
 set -f
