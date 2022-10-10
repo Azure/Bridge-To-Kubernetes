@@ -327,6 +327,9 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                     {
                         var serviceName = path?.Backend?.Service?.Name;
                         var servicePort = path?.Backend?.Service?.Port?.Name;
+                        if (!string.IsNullOrWhiteSpace(servicePort)) {
+                            servicePort = path?.Backend?.Service?.Port?.Number;
+                        }
                         if (!string.IsNullOrWhiteSpace(serviceName))
                         {
                             V1Service serviceToAdd;
