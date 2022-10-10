@@ -106,29 +106,29 @@ check_kubectl_present(){
     fi
 }
 
-check_dotnet_present(){
-     log INFO "Checking if dotnet runtime library is present locally"
-    if [[ -f $HOME/.local/bin/bridgetokubernetes/Microsoft.AspNetCore.* ]]; then
-        log INFO "dotnet runtime library present, skipping download"
-    else 
-        download_dotnet_stable_version
+check_dotnet_runtime_present(){
+    log INFO "Checking if dotnet runtime library is present locally"
+    dotnetruntime=$(dotnet --version)
+    log INFO "Locally installed dotnet runtime version is $dotnetruntime"
+    if [[ -z "${dotnetruntime}" || "${dotnetruntime}" != '3.1.0' ]]; then 
+        sudo $PACKAGER install aspnetcore-runtime-3.1
     fi
 }
 
-download_dotnet_stable_version(){
-    log INFO "Starting dotnet runtime Download"
-    if [[ $OSTYPE == "linux"* ]]; then
-        curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/dotnetruntime-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.dotnetruntime.url')
-        elif [[ $OSTYPE == "osx"* ]]; then
-        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.dotnetruntime.url')
-        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
-        curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.dotnetruntime.url')
-    else
-        log WARNING "$DISTRIB_ID not supported for $OSTYPE"
-    fi
-    chmod +x $HOME/tmp/bridgetokubernetes
-    log INFO "Finished dotnet runtime download complete."
-}
+# download_dotnet_stable_version(){
+#     log INFO "Starting dotnet runtime Download"
+#     if [[ $OSTYPE == "linux"* ]]; then
+#         curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/dotnetruntime-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.dotnetruntime.url')
+#         elif [[ $OSTYPE == "osx"* ]]; then
+#         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.dotnetruntime.url')
+#         elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+#         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/dotnetruntime-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.dotnetruntime.url')
+#     else
+#         log WARNING "$DISTRIB_ID not supported for $OSTYPE"
+#     fi
+#     chmod +x $HOME/tmp/bridgetokubernetes
+#     log INFO "Finished dotnet runtime download complete."
+# }
 
 download_kubectl_stable_version(){
     log INFO "Starting Kubectl Download"
@@ -175,12 +175,18 @@ copy_b2k_files() {
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
+        if [-d "$HOME/.local/bin/bridgetokubernetes" ]; then 
+            rm -rf "$HOME/.local/bin/bridgetokubernetes"
+        fi
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
-        chmod +x $HOME/.local/bin/bridgetokubernetes/
+        chmod +x *
     else
         echo "installation target directory is write protected, run as root to override"
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
     fi
+    cd ~
+    log INFO "removing the temp folder"
+    rm -rf $HOME/tmp/bridgetokubernetes
 }
 
 install() {
@@ -193,7 +199,7 @@ install() {
     fi
     check_jq_processor_present
     check_kubectl_present
-    check_dotnet_present
+    check_dotnet_runtime_present
     download_bridge_stable_version
     copy_b2k_files
     echo "Bridge to kubernetes installed."
