@@ -98,7 +98,7 @@ check_jq_processor_present() {
 check_kubectl_present() {
     log INFO "Checking if kubectl library is present locally"
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
-    log INFO "Locally installed dotnet runtime version is $kubectlversion"
+    log INFO "Locally installed kubectl version is $kubectlversion"
     if [[ -z "${kubectlversion}" ]]; then
         sudo $PACKAGER install kubectl
     fi
