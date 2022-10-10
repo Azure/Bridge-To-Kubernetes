@@ -9,9 +9,7 @@
 #                    |___/
 # usage:
 #    curl -fsSL https://raw.githubusercontent.com/Azure/Bridge-To-Kubernetes/main/scripts/install.sh | bash
-set -e
-set -o pipefail
-set -f
+set -ef
 
 log() {
     local level=$1
@@ -41,17 +39,17 @@ if [ -z "${DISTRIB_ID}" ]; then
     if [[ "$OSTYPE" == "linux"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="linux"
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="osx"
-        elif [[ "$OSTYPE" == "cygwin" ]]; then
+    elif [[ "$OSTYPE" == "cygwin" ]]; then
         DISTRIB_ID="$OSTYPE"
-        elif [[ "$OSTYPE" == "msys" ]]; then
+    elif [[ "$OSTYPE" == "msys" ]]; then
         DISTRIB_ID="$OSTYPE"
-        elif [[ "$OSTYPE" == "win32" ]]; then
+    elif [[ "$OSTYPE" == "win32" ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="win"
-        elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    elif [[ "$OSTYPE" == "freebsd"* ]]; then
         DISTRIB_ID="$OSTYPE"
     else
         log ERROR "Unknown DISTRIB_ID or DISTRIB_RELEASE."
@@ -71,13 +69,13 @@ PACKAGER=
 SYSTEMD_PATH=/lib/systemd/system
 if [ "$DISTRIB_ID" == "ubuntu" ]; then
     PACKAGER=apt
-    elif [ "$DISTRIB_ID" == "debian" ]; then
+elif [ "$DISTRIB_ID" == "debian" ]; then
     PACKAGER=apt
-    elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
+elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
     PACKAGER=yum
-    elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
+elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
     PACKAGER=brew
-    elif [[ "$DISTRIB_ID" == "win32" ]]; then
+elif [[ "$DISTRIB_ID" == "win32" ]]; then
     PACKAGER=choco
 else
     PACKAGER=zypper
@@ -88,7 +86,7 @@ if [ "$PACKAGER" == "apt" ]; then
 fi
 
 # Check JQ Processor and download if not present
-check_jq_processor_present(){
+check_jq_processor_present() {
     log INFO "Checking locally installed JQ Processor version"
     jqversion=$(jq --version)
     log INFO "Locally installed JQ Processor version is $jqversion"
@@ -97,33 +95,33 @@ check_jq_processor_present(){
     fi
 }
 
-check_kubectl_present(){
+check_kubectl_present() {
     log INFO "Checking if kubectl library is present locally"
-    kubectlversion=$(kubectl version --client=true --short)
+    kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed dotnet runtime version is $kubectlversion"
-    if [[ -z "${kubectlversion}" ]]; then 
+    if [[ -z "${kubectlversion}" ]]; then
         sudo $PACKAGER install kubectl
     fi
 }
 
-check_dotnet_runtime_present(){
+check_dotnet_runtime_present() {
     log INFO "Checking if dotnet runtime library is present locally"
     dotnetruntime=$(dotnet --version)
     log INFO "Locally installed dotnet runtime version is $dotnetruntime"
-    if [[ -z "${dotnetruntime}" || "${dotnetruntime}" != '3.1.0' ]]; then 
+    if [[ -z "${dotnetruntime}" || "${dotnetruntime}" != '3.1.0' ]]; then
         sudo $PACKAGER install aspnetcore-runtime-3.1
     fi
 }
 
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
-download_bridge_stable_version(){
+download_bridge_stable_version() {
     log INFO "Starting B2K Download"
     CURLPROCESS=
     if [[ $OSTYPE == "linux"* ]]; then
         curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.bridge.url')
-        elif [[ $OSTYPE == "osx"* ]]; then
+    elif [[ $OSTYPE == "osx"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.bridge.url')
-        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+    elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.bridge.url')
     else
         log WARNING "$DISTRIB_ID not supported for $OSTYPE"
@@ -145,7 +143,7 @@ copy_b2k_files() {
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
-        if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then 
+        if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then
             rm -rf "$HOME/.local/bin/bridgetokubernetes"
         fi
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
@@ -155,7 +153,6 @@ copy_b2k_files() {
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
     fi
     cd ~
-    log INFO "removing the temp folder"
     rm -rf $HOME/tmp/bridgetokubernetes
 }
 
