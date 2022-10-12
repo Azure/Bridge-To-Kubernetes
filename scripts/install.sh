@@ -39,17 +39,17 @@ if [ -z "${DISTRIB_ID}" ]; then
     if [[ "$OSTYPE" == "linux"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="osx"
-    elif [[ "$OSTYPE" == "cygwin" ]]; then
+        elif [[ "$OSTYPE" == "cygwin" ]]; then
         DISTRIB_ID="$OSTYPE"
-    elif [[ "$OSTYPE" == "msys" ]]; then
+        elif [[ "$OSTYPE" == "msys" ]]; then
         DISTRIB_ID="$OSTYPE"
-    elif [[ "$OSTYPE" == "win32" ]]; then
+        elif [[ "$OSTYPE" == "win32" ]]; then
         DISTRIB_ID="$OSTYPE"
         B2KOS="win"
-    elif [[ "$OSTYPE" == "freebsd"* ]]; then
+        elif [[ "$OSTYPE" == "freebsd"* ]]; then
         DISTRIB_ID="$OSTYPE"
     else
         log ERROR "Unknown DISTRIB_ID or DISTRIB_RELEASE."
@@ -69,13 +69,13 @@ PACKAGER=
 SYSTEMD_PATH=/lib/systemd/system
 if [ "$DISTRIB_ID" == "ubuntu" ]; then
     PACKAGER=apt
-elif [ "$DISTRIB_ID" == "debian" ]; then
+    elif [ "$DISTRIB_ID" == "debian" ]; then
     PACKAGER=apt
-elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
+    elif [[ $DISTRIB_ID == centos* ]] || [ "$DISTRIB_ID" == "rhel" ]; then
     PACKAGER=yum
-elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
+    elif [[ "$DISTRIB_ID" == "darwin"* ]]; then
     PACKAGER=brew
-elif [[ "$DISTRIB_ID" == "win32" ]]; then
+    elif [[ "$DISTRIB_ID" == "win32" ]] || [[ "$DISTRIB_ID" == "msys" ]]; then
     PACKAGER=choco
 else
     PACKAGER=zypper
@@ -88,29 +88,55 @@ fi
 # Check JQ Processor and download if not present
 check_jq_processor_present() {
     log INFO "Checking locally installed JQ Processor version"
-    jqversion=$(jq --version)
-    log INFO "Locally installed JQ Processor version is $jqversion"
-    if [ -z "${jqversion}" ]; then
+    isjqexists=check_if_exists jq
+    if [[ isjqexists != 0 ]]; then
         $PACKAGER install jq
     fi
+    jqversion=$(jq --version)
+    log INFO "Locally installed JQ Processor version is $jqversion"
 }
 
 check_kubectl_present() {
     log INFO "Checking if kubectl library is present locally"
+    iskubectlexists=check_if_exists kubectl
+    if [[ iskubectlexists != 0 ]]; then
+        $PACKAGER install kubectl
+    fi
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed kubectl version is $kubectlversion"
-    if [[ -z "${kubectlversion}" ]]; then
-        sudo $PACKAGER install kubectl
-    fi
 }
 
 check_dotnet_runtime_present() {
     log INFO "Checking if dotnet runtime library is present locally"
+    dotnetexists=check_if_exists dotnet
+    # if dotnet doesn't exist install it
+    if [[ $dotnetexists != 0 ]]; then
+        install_dot_net
+        return;
+    fi
+    #if dotnet exists, check the version required and install it.
     dotnetruntime=$(dotnet --version)
     log INFO "Locally installed dotnet runtime version is $dotnetruntime"
     if [[ -z "${dotnetruntime}" || "${dotnetruntime}" != '3.1.0' ]]; then
+        install_dot_net
+    fi 
+}
+
+install_dot_net() {
+    if [[ $OSTYPE == "msys"* ]]; then
+        $PACKAGER install dotnetcore-3.1-aspnetruntime -y
+    else
         sudo $PACKAGER install aspnetcore-runtime-3.1
     fi
+}
+
+check_if_exists() {
+    log INFO "checking if $1 exists"
+    if [[ "$(command -v $1)" ]]; then
+        return 0
+    fi
+    return 1
+    
 }
 
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
@@ -119,9 +145,9 @@ download_bridge_stable_version() {
     CURLPROCESS=
     if [[ $OSTYPE == "linux"* ]]; then
         curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.bridge.url')
-    elif [[ $OSTYPE == "osx"* ]]; then
+        elif [[ $OSTYPE == "osx"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.bridge.url')
-    elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
+        elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.bridge.url')
     else
         log WARNING "$DISTRIB_ID not supported for $OSTYPE"
@@ -139,25 +165,27 @@ file_issue_prompt() {
 copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
     unzip *.zip
-    if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+    if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
         if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then
             rm -rf "$HOME/.local/bin/bridgetokubernetes"
         fi
+        chmod -R +x "$HOME/.local/bin/"
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
         chmod -R +x "$HOME/.local/bin/bridgetokubernetes/"
     else
-        echo "installation target directory is write protected, run as root to override"
+        log WARNING "installation target directory is write protected, run as root to override"
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
     fi
     cd ~
+    echo "removing temp"
     rm -rf $HOME/tmp/bridgetokubernetes
 }
 
 install() {
-    if [[ "$OSTYPE" == "linux"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ "$OSTYPE" == "linux"* ]] || [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "msys"* ]]; then
         log INFO "bridge to kubernetes is supported for your platform - $OSTYPE"
     else
         log INFO "bridge to kubernetes isn't supported for your platform - $OSTYPE"
