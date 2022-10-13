@@ -122,28 +122,28 @@ check_dotnet_runtime_present() {
 
 install_kubectl() {
     log INFO "installing kubectl..."
-    if [[ $OSTYPE == "msys"* ]]; then
-        $PACKAGER install kubectl
-    else
+    if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install kubectl
+    else
+        $PACKAGER install kubectl
     fi
 }
 
 install_jq() {
     log INFO "installing jq.."
-    if [[ $OSTYPE == "msys"* ]]; then
-        $PACKAGER install jq
-    else
+    if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install jq
+    else
+        $PACKAGER install jq
     fi
 }
 
 install_dot_net() {
     log INFO "installing dotnet.."
-    if [[ $OSTYPE == "msys"* ]]; then
-        $PACKAGER install dotnetcore-3.1-aspnetruntime -y
+    if [[ $OSTYPE == "linux"* ]]; then
+        sudo $PACKAGER install dotnetcore-3.1-aspnetruntime -y
     else
-        sudo $PACKAGER install aspnetcore-runtime-3.1
+        $PACKAGER install aspnetcore-runtime-3.1
     fi
 }
 
