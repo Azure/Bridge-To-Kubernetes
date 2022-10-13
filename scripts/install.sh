@@ -87,42 +87,59 @@ fi
 
 # Check JQ Processor and download if not present
 check_jq_processor_present() {
-    log INFO "Checking locally installed JQ Processor version"
-    isjqexists=check_if_exists jq
-    if [[ isjqexists != 0 ]]; then
-        $PACKAGER install jq
+    check_if_exists jq
+    if [[ $result != 0 ]]; then
+        install_jq
     fi
     jqversion=$(jq --version)
     log INFO "Locally installed JQ Processor version is $jqversion"
 }
 
 check_kubectl_present() {
-    log INFO "Checking if kubectl library is present locally"
-    iskubectlexists=check_if_exists kubectl
-    if [[ iskubectlexists != 0 ]]; then
-        $PACKAGER install kubectl
+    check_if_exists kubectl
+    if [[ $result != 0 ]]; then
+        sudo $PACKAGER install kubectl
     fi
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed kubectl version is $kubectlversion"
 }
 
 check_dotnet_runtime_present() {
-    log INFO "Checking if dotnet runtime library is present locally"
-    dotnetexists=check_if_exists dotnet
+    check_if_exists dotnet
     # if dotnet doesn't exist install it
-    if [[ $dotnetexists != 0 ]]; then
+    if [[ $result != 0 ]]; then
         install_dot_net
         return;
     fi
-    #if dotnet exists, check the version required and install it.
-    dotnetruntime=$(dotnet --version)
-    log INFO "Locally installed dotnet runtime version is $dotnetruntime"
-    if [[ -z "${dotnetruntime}" || "${dotnetruntime}" != '3.1.0' ]]; then
+    #if dotnet exists, check the version required for b2k and install it.
+    dotnetruntimes=$(dotnet --list-runtimes)
+    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '3.1'* ]]; then
         install_dot_net
-    fi 
+    else 
+        log INFO "dotnet version is $(dotnet --version)"
+    fi
+}
+
+install_kubectl() {
+    log INFO "installing kubectl..."
+    if [[ $OSTYPE == "msys"* ]]; then
+        $PACKAGER install kubectl
+    else
+        sudo $PACKAGER install kubectl
+    fi
+}
+
+install_jq() {
+    log INFO "installing jq.."
+    if [[ $OSTYPE == "msys"* ]]; then
+        $PACKAGER install jq
+    else
+        sudo $PACKAGER install jq
+    fi
 }
 
 install_dot_net() {
+    log INFO "installing dotnet.."
     if [[ $OSTYPE == "msys"* ]]; then
         $PACKAGER install dotnetcore-3.1-aspnetruntime -y
     else
@@ -132,11 +149,12 @@ install_dot_net() {
 
 check_if_exists() {
     log INFO "checking if $1 exists"
-    if [[ "$(command -v $1)" ]]; then
-        return 0
+    if ! [[ -x "$(command -v $1)" ]]; then
+        log INFO "Error: $1 is not installed." >&2
+        result=1
+    else 
+        result=0
     fi
-    return 1
-    
 }
 
 # Download bridge stable version, this can be done via following command curl -LO $(curl -L -s https://aka.ms/bridge-lks | jq -r '.linux.url')
@@ -197,7 +215,7 @@ install() {
     check_dotnet_runtime_present
     download_bridge_stable_version
     copy_b2k_files
-    echo "Bridge to kubernetes installed."
+    echo "Bridge to kubernetes installed in $HOME/.local/bin/bridgetokubernetes"
 }
 
 
