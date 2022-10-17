@@ -89,7 +89,7 @@ fi
 check_jq_processor_present() {
     check_if_exists jq
     if [[ $result != 0 ]]; then
-        install_jq
+        install jq
     fi
     jqversion=$(jq --version)
     log INFO "Locally installed JQ Processor version is $jqversion"
@@ -98,7 +98,7 @@ check_jq_processor_present() {
 check_kubectl_present() {
     check_if_exists kubectl
     if [[ $result != 0 ]]; then
-        install_kubectl
+        install kubectl
     fi
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed kubectl version is $kubectlversion"
@@ -108,42 +108,71 @@ check_dotnet_runtime_present() {
     check_if_exists dotnet
     # if dotnet doesn't exist install it
     if [[ $result != 0 ]]; then
-        install_dot_net
+        install dotnet
         return;
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
     if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '3.1'* ]]; then
-        install_dot_net
+        install dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
     fi
 }
 
-install_kubectl() {
-    log INFO "installing kubectl..."
-    if [[ $OSTYPE == "linux"* ]]; then
-        sudo $PACKAGER install kubectl
-    else
-        $PACKAGER install kubectl
-    fi
+# install_kubectl() {
+#     log INFO "installing kubectl..."
+#     if [[ $OSTYPE == "linux"* ]]; then
+#         sudo $PACKAGER install kubectl
+#     else
+#         $PACKAGER install kubectl
+#     fi
+# }
+
+# install_jq() {
+#     log INFO "installing jq.."
+#     if [[ $OSTYPE == "linux"* ]]; then
+#         sudo $PACKAGER install jq
+#     else
+#         $PACKAGER install jq
+#     fi
+# }
+
+# install_dot_net() {
+#     log INFO "installing dotnet.."
+#     if [[ $OSTYPE == "linux"* ]]; then
+#         sudo $PACKAGER install dotnetcore-3.1-aspnetruntime -y
+#     else
+#         $PACKAGER install aspnetcore-runtime-3.1
+#     fi
+# }
+
+install() {
+    log INFO "installing $1.."
+
+    case $1 in 
+
+        kubectl)
+            install_with_sudo kubectl
+            ;;
+        dotnet)
+            install_with_sudo aspnetcore-runtime-3.1
+            ;;
+        jq)
+            install_with_sudo jq
+            ;;
+        *)
+            log INFO "Unknown option for install $1"
+            exit 1
+            ;;
+    esac
 }
 
-install_jq() {
-    log INFO "installing jq.."
+install_with_sudo() {
     if [[ $OSTYPE == "linux"* ]]; then
-        sudo $PACKAGER install jq
+        sudo $PACKAGER install $1 -y
     else
-        $PACKAGER install jq
-    fi
-}
-
-install_dot_net() {
-    log INFO "installing dotnet.."
-    if [[ $OSTYPE == "linux"* ]]; then
-        sudo $PACKAGER install dotnetcore-3.1-aspnetruntime -y
-    else
-        $PACKAGER install aspnetcore-runtime-3.1
+        $PACKAGER install $1
     fi
 }
 
