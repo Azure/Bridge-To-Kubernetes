@@ -89,7 +89,7 @@ fi
 check_jq_processor_present() {
     check_if_exists jq
     if [[ $result != 0 ]]; then
-        install jq
+        install_tool jq
     fi
     jqversion=$(jq --version)
     log INFO "Locally installed JQ Processor version is $jqversion"
@@ -98,7 +98,7 @@ check_jq_processor_present() {
 check_kubectl_present() {
     check_if_exists kubectl
     if [[ $result != 0 ]]; then
-        install kubectl
+        install_tool kubectl
     fi
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed kubectl version is $kubectlversion"
@@ -108,13 +108,13 @@ check_dotnet_runtime_present() {
     check_if_exists dotnet
     # if dotnet doesn't exist install it
     if [[ $result != 0 ]]; then
-        install dotnet
+        install_tool dotnet
         return;
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
     if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '3.1'* ]]; then
-        install dotnet
+        install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
     fi
@@ -147,7 +147,7 @@ check_dotnet_runtime_present() {
 #     fi
 # }
 
-install() {
+install_tool() {
     log INFO "installing $1.."
 
     case $1 in 
