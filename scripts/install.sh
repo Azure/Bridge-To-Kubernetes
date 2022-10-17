@@ -98,7 +98,7 @@ check_jq_processor_present() {
 check_kubectl_present() {
     check_if_exists kubectl
     if [[ $result != 0 ]]; then
-        sudo $PACKAGER install kubectl
+        install_kubectl
     fi
     kubectlversion=$(kubectl version --client=true -o json | jq ".clientVersion.gitVersion")
     log INFO "Locally installed kubectl version is $kubectlversion"
