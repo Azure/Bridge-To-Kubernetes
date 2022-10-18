@@ -216,29 +216,34 @@ file_issue_prompt() {
 }
 
 copy_b2k_files() {
-    cd $HOME/tmp/bridgetokubernetes
-    unzip *.zip
+    # cd $HOME/tmp/bridgetokubernetes
+    unzip *.zip -o $HOME/tmp/bridgetokubernetes
+    remove_tmp_dirs
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
-        fi
-        if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then
-            rm -rf "$HOME/.local/bin/bridgetokubernetes"
         fi
         chmod -R +x "$HOME/.local/bin/"
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
         chmod -R +x "$HOME/.local/bin/bridgetokubernetes/"
     else
         log WARNING "installation target directory is write protected, run as root to override"
-        if [ -d usr/local/bin/bridgetokubernetes ]; then
-            rm -rf usr/local/bin/bridgetokubernetes
-        fi
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
         chmod -R +x usr/local/bin/bridgetokubernetes
     fi
     cd ~
     echo "removing temp"
     rm -rf $HOME/tmp/bridgetokubernetes
+}
+
+remove_tmp_dirs() {
+    if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then
+        rm -rf "$HOME/.local/bin/bridgetokubernetes"
+    fi
+
+    if [ -d usr/local/bin/bridgetokubernetes ]; then
+        rm -rf usr/local/bin/bridgetokubernetes
+    fi
 }
 
 install() {
