@@ -196,12 +196,13 @@ download_bridge_stable_version() {
     CURLPROCESS=
     if [[ $OSTYPE == "linux"* ]]; then
         curl --create-dirs -# -o $HOME/tmp/bridgetokubernetes/lpk-linux.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.linux.bridge.url')
-        elif [[ $OSTYPE == "osx"* ]]; then
+        elif [[ $OSTYPE == "darwin"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-osx.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.osx.bridge.url')
         elif [[ $OSTYPE == "win"* ]] || [[ $OSTYPE == "msys"* ]]; then
         curl --create-dirs -o $HOME/tmp/bridgetokubernetes/lpk-win.zip -LO $(curl -L -s https://aka.ms/bridge-lks-v2 | jq -r '.win.bridge.url')
     else
         log WARNING "$DISTRIB_ID not supported for $OSTYPE"
+        exit 1
     fi
     chmod +x $HOME/tmp/bridgetokubernetes
     log INFO "Finished B2K download complete."
