@@ -156,7 +156,11 @@ install_tool() {
             install_with_sudo kubectl
             ;;
         dotnet)
-            install_with_sudo aspnetcore-runtime-3.1
+            if [[ $OSTYPE == "darwin"* ]]; then 
+                install_with_sudo dotnet --cask
+            else 
+                install_with_sudo aspnetcore-runtime-3.1
+            fi
             ;;
         jq)
             install_with_sudo jq
@@ -172,7 +176,7 @@ install_with_sudo() {
     if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install $1 -y
     else
-        $PACKAGER install $1
+        $PACKAGER install $2 $1
     fi
 }
 
