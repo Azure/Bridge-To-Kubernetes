@@ -217,7 +217,7 @@ file_issue_prompt() {
 
 copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
-    unzip *.zip -o $HOME/tmp/bridgetokubernetes
+    unzip -o $HOME/tmp/bridgetokubernetes/*.zip
     remove_tmp_dirs "$HOME/.local/bin/bridgetokubernetes"
     remove_tmp_dirs usr/local/bin/bridgetokubernetes
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
