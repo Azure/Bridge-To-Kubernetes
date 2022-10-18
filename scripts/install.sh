@@ -156,8 +156,9 @@ install_tool() {
             install_with_sudo kubectl
             ;;
         dotnet)
-            if [[ $OSTYPE == "darwin"* ]]; then 
-                install_with_sudo dotnet --cask
+            if [[ $OSTYPE == "darwin"* ]]; then
+                $PACKAGER tap isen-ng/dotnet-sdk-versions
+                install_with_sudo dotnet-sdk3-1-400 --cask
             else 
                 install_with_sudo aspnetcore-runtime-3.1
             fi
