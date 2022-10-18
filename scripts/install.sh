@@ -218,7 +218,8 @@ file_issue_prompt() {
 copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
     unzip *.zip -o $HOME/tmp/bridgetokubernetes
-    remove_tmp_dirs
+    remove_tmp_dirs "$HOME/.local/bin/bridgetokubernetes"
+    remove_tmp_dirs usr/local/bin/bridgetokubernetes
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
@@ -232,17 +233,13 @@ copy_b2k_files() {
         chmod -R +x usr/local/bin/bridgetokubernetes
     fi
     cd ~
-    echo "removing temp"
-    rm -rf $HOME/tmp/bridgetokubernetes
+    remove_tmp_dirs $HOME/tmp/bridgetokubernetes
 }
 
 remove_tmp_dirs() {
-    if [ -d "$HOME/.local/bin/bridgetokubernetes" ]; then
-        rm -rf "$HOME/.local/bin/bridgetokubernetes"
-    fi
-
-    if [ -d usr/local/bin/bridgetokubernetes ]; then
-        rm -rf usr/local/bin/bridgetokubernetes
+    log INFO "removing temp directory:$1"
+    if [ -d $1 ]; then
+        rm -rf $1
     fi
 }
 
