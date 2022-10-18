@@ -38,17 +38,14 @@ if [ -z "${DISTRIB_ID}" ]; then
     log INFO "Trying to identify using OSTYPE var $OSTYPE "
     if [[ "$OSTYPE" == "linux"* ]]; then
         DISTRIB_ID="$OSTYPE"
-        B2KOS="linux"
         elif [[ "$OSTYPE" == "darwin"* ]]; then
         DISTRIB_ID="$OSTYPE"
-        B2KOS="osx"
         elif [[ "$OSTYPE" == "cygwin" ]]; then
         DISTRIB_ID="$OSTYPE"
         elif [[ "$OSTYPE" == "msys" ]]; then
         DISTRIB_ID="$OSTYPE"
         elif [[ "$OSTYPE" == "win32" ]]; then
         DISTRIB_ID="$OSTYPE"
-        B2KOS="win"
         elif [[ "$OSTYPE" == "freebsd"* ]]; then
         DISTRIB_ID="$OSTYPE"
     else
@@ -119,33 +116,6 @@ check_dotnet_runtime_present() {
         log INFO "dotnet version is $(dotnet --version)"
     fi
 }
-
-# install_kubectl() {
-#     log INFO "installing kubectl..."
-#     if [[ $OSTYPE == "linux"* ]]; then
-#         sudo $PACKAGER install kubectl
-#     else
-#         $PACKAGER install kubectl
-#     fi
-# }
-
-# install_jq() {
-#     log INFO "installing jq.."
-#     if [[ $OSTYPE == "linux"* ]]; then
-#         sudo $PACKAGER install jq
-#     else
-#         $PACKAGER install jq
-#     fi
-# }
-
-# install_dot_net() {
-#     log INFO "installing dotnet.."
-#     if [[ $OSTYPE == "linux"* ]]; then
-#         sudo $PACKAGER install dotnetcore-3.1-aspnetruntime -y
-#     else
-#         $PACKAGER install aspnetcore-runtime-3.1
-#     fi
-# }
 
 install_tool() {
     log INFO "installing $1.."
@@ -218,17 +188,17 @@ file_issue_prompt() {
 copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
     unzip -o $HOME/tmp/bridgetokubernetes/*.zip
-    remove_tmp_dirs "$HOME/.local/bin/bridgetokubernetes"
-    remove_tmp_dirs /usr/local/bin/bridgetokubernetes
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
         fi
         chmod -R +x "$HOME/.local/bin/"
+        remove_tmp_dirs "$HOME/.local/bin/bridgetokubernetes"
         mv $HOME/tmp/bridgetokubernetes/ "$HOME/.local/bin/bridgetokubernetes/"
         chmod -R +x "$HOME/.local/bin/bridgetokubernetes/"
     else
         log WARNING "installation target directory is write protected, run as root to override"
+        remove_tmp_dirs /usr/local/bin/bridgetokubernetes
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
         chmod -R +x /usr/local/bin/bridgetokubernetes
     fi
