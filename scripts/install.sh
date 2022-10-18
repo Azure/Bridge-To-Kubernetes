@@ -231,7 +231,7 @@ copy_b2k_files() {
     else
         log WARNING "installation target directory is write protected, run as root to override"
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
-        chmod -R +x usr/local/bin/bridgetokubernetes/
+        chmod -R +x usr/local/bin/bridgetokubernetes
     fi
     cd ~
     echo "removing temp"
