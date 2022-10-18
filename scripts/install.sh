@@ -230,6 +230,9 @@ copy_b2k_files() {
         chmod -R +x "$HOME/.local/bin/bridgetokubernetes/"
     else
         log WARNING "installation target directory is write protected, run as root to override"
+        if [ -d usr/local/bin/bridgetokubernetes ]; then
+            rm -rf usr/local/bin/bridgetokubernetes
+        fi
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
         chmod -R +x usr/local/bin/bridgetokubernetes
     fi
