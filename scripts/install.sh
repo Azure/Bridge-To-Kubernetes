@@ -219,7 +219,7 @@ copy_b2k_files() {
     cd $HOME/tmp/bridgetokubernetes
     unzip -o $HOME/tmp/bridgetokubernetes/*.zip
     remove_tmp_dirs "$HOME/.local/bin/bridgetokubernetes"
-    remove_tmp_dirs usr/local/bin/bridgetokubernetes
+    remove_tmp_dirs /usr/local/bin/bridgetokubernetes
     if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || [[ $OSTYPE == "msys"* ]]; then
         if [ ! -d "$HOME/.local/bin" ]; then
             mkdir -p "$HOME/.local/bin"
@@ -230,7 +230,7 @@ copy_b2k_files() {
     else
         log WARNING "installation target directory is write protected, run as root to override"
         sudo mv $HOME/tmp/bridgetokubernetes /usr/local/bin/bridgetokubernetes
-        chmod -R +x usr/local/bin/bridgetokubernetes
+        chmod -R +x /usr/local/bin/bridgetokubernetes
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
