@@ -29,7 +29,7 @@ Welcome to Bridge-To-Kubernetes! Bridge to Kubernetes extends the Kubernetes per
 
 ## How to use the CLI
 -  cd into the installation folder for linux or WSL ex: ``` $HOME/.local/bin/bridgetokubernetes``` for darwin cd into installation folder here ```/usr/local/bin/bridgetokubernetes```
-- run the following command ``` ./dsc --service <service-name> --local-port <port-number> --namespace <namespace> --use-kubernetes-service-environment-variables ```
+- run the following command ``` ./dsc connect --service <service-name> --local-port <port-number> --namespace <namespace> --use-kubernetes-service-environment-variables ```
 - ```example is ./dsc connect --service stats-api --local-port 3001 --namespace todo-app```
 - for help  ``` ./dsc --help```
 - for version ```./dsc --version```
