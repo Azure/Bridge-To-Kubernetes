@@ -440,8 +440,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 var isInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(endpoint.Metadata.Namespace(), workloadNamespace);
                 foreach (var subset in endpoint.Subsets)
                 {
-                    ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { };
-
                     // Next, endpoint addresses can also specify their own host names. We add these as well
                     var addresses = subset.Addresses?.Where(a => !string.IsNullOrWhiteSpace(a?.Hostname));
                     if (addresses == null || !addresses.Any())
@@ -456,7 +454,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             DnsName = isInWorkloadNamespace ?
                                         $"{address.Hostname}.{endpoint.Metadata.Name}" :
                                         $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = ports,
+                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }
