@@ -194,13 +194,12 @@ copy_b2k_files() {
         fi
         chmod -R +x "$HOME/.local/bin/"
         remove_tmp_dirs $HOME/.local/bin/bridgetokubernetes
-        echo "PWD -->" $PWD
-        cp -r "$HOME/tmp/bridgetokubernetes/*" $HOME/.local/bin
-        chmod -R +x "$HOME/.local/bin/*"
+        cp -r $HOME/tmp/bridgetokubernetes/ $HOME/.local/bin
+        chmod -R +x $HOME/.local/bin/
     else
         log WARNING "installation target directory is write protected, run as root to override"
-        sudo cp -i $HOME/tmp/bridgetokubernetes/*.dll $HOME/tmp/bridgetokubernetes/*.txt $HOME/tmp/bridgetokubernetes/*.rtf $HOME/tmp/bridgetokubernetes/*.json  /usr/local/bin
-        chmod -R +x /usr/local/bin/*
+        sudo cp -r $HOME/tmp/bridgetokubernetes/  /usr/local/bin
+        sudo chmod -R +x /usr/local/bin/bridgetokubernetes
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
