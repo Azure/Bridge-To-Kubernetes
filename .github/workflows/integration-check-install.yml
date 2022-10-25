@@ -1,0 +1,21 @@
+name: Install Script Integration Test
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Install Script 
+        run: ./scripts/install.sh
+      - name: Validate Command is Installed
+        run: |
+          if ! command -v /usr/local/bin/bridgetokubernetes &> /dev/null
+          then
+              echo "B2K could not be found"
+              exit 1
+          fi
+      - name: Validate B2k Command Runs
+        run: /usr/local/bin/bridgetokubernetes
