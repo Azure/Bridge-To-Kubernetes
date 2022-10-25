@@ -12,7 +12,7 @@ jobs:
         run: ./scripts/install.sh
       - name: Validate Command is Installed
         run: |
-          if ! command -v /usr/local/bin/bridgetokubernetes/dsc &> /dev/null
+          if ! command -v ${{ github.workspace }}/.local/bin/bridgetokubernetes/dsc &> /dev/null
           then
               echo "B2K could not be found"
               exit 1
