@@ -18,4 +18,4 @@ jobs:
               exit 1
           fi
       - name: Validate B2k Command Runs
-        run: /home/runner/.local/bin/bridgetokubernetes/dsc connect
+        run: /home/runner/.local/bin/bridgetokubernetes/dsc connect --help
