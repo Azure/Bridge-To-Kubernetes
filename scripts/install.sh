@@ -196,10 +196,12 @@ copy_b2k_files() {
         remove_tmp_dirs $HOME/.local/bin/bridgetokubernetes
         cp -r $HOME/tmp/bridgetokubernetes/ $HOME/.local/bin
         chmod -R +x $HOME/.local/bin/
+        installdir=$HOME/.local/bin/bridgetokubernetes
     else
         log WARNING "installation target directory is write protected, run as root to override"
         sudo cp -r $HOME/tmp/bridgetokubernetes/  /usr/local/bin
         sudo chmod -R +x /usr/local/bin/bridgetokubernetes
+        installdir=/usr/local/bin/bridgetokubernetes
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
@@ -225,7 +227,7 @@ install() {
     check_dotnet_runtime_present
     download_bridge_stable_version
     copy_b2k_files
-    echo "Bridge to kubernetes installed in $HOME/.local/bin/bridgetokubernetes"
+    echo "Bridge to kubernetes installed in $installdir"
 }
 
 
