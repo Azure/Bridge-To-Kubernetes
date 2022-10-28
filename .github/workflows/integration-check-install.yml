@@ -5,7 +5,10 @@ on:
 
 jobs:
   install:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Run Install Script 
@@ -19,3 +22,4 @@ jobs:
           fi
       - name: Validate B2k Command Runs
         run: /home/runner/.local/bin/bridgetokubernetes/dsc connect --help
+    
