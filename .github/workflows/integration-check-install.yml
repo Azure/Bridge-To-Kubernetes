@@ -11,6 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install git bash for windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          inlineScript: |
+            winget install --id Git.Git -e --source winget
+          azPSVersion: '3.1.0'
       - name: Run Install Script 
         run: ./scripts/install.sh
       - name: Validate Command is Installed
