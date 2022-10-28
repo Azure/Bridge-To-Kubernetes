@@ -15,6 +15,7 @@ jobs:
         shell: bash
         run: ./scripts/install.sh
       - name: Validate Command is Installed
+        shell: bash
         run: |
           if command -v /home/runner/.local/bin/bridgetokubernetes/dsc &> /dev/null
           then
@@ -22,6 +23,9 @@ jobs:
           elif command -v /usr/local/bin/bridgetokubernetes/dsc &> /dev/null 
           then
             echo "install_dir=/usr/local/bin/bridgetokubernetes/dsc" >> $GITHUB_ENV
+          elif command -v /c/Users/runneradmin/.local/bin/bridgetokubernetes/dsc &> /dev/null
+          then
+            echo "install_dir=/c/Users/runneradmin/.local/bin/bridgetokubernetes/dsc" >> $GITHUB_ENV
           else 
             echo "B2k CLI is not found"
             exit 1
