@@ -197,14 +197,14 @@ copy_b2k_files() {
         remove_tmp_dirs $installdir
         cp -r $HOME/tmp/bridgetokubernetes/ $installdir
         chmod -R +x $installdir/dsc $installdir/kubectl $installdir/EndpointManager/EndpointManager
-        sudo ln -sf $installdir/dsc $HOME/.local/bin/dsc
+        create_sym_link $installdir/dsc $HOME/.local/bin/dsc
     else
         log WARNING "installation target directory is write protected, run as root to override"
         installdir=/usr/local/bin/bridgetokubernetes
         remove_tmp_dirs $installdir sudo
         sudo cp -r $HOME/tmp/bridgetokubernetes/  $installdir
         sudo chmod -R +x $installdir/dsc $installdir/kubectl $installdir/EndpointManager/EndpointManager
-        sudo ln -sf $installdir/dsc /usr/local/bin/dsc
+        create_sym_link $installdir/dsc /usr/local/bin/dsc
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
@@ -214,6 +214,15 @@ remove_tmp_dirs() {
     log INFO "removing directory:$1"
     if [ -d $1 ]; then
         $2 rm -rf $1
+    fi
+}
+
+create_sym_link() {
+    log INFO "creating or overwriting sym link for :$1"
+    if [[ $OSTYPE == "msys"* ]]; then
+        ln -sf $1 $2
+    else 
+        sudo ln -sf $1 $2
     fi
 }
 
