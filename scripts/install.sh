@@ -197,14 +197,14 @@ copy_b2k_files() {
         remove_tmp_dirs $installdir
         cp -r $HOME/tmp/bridgetokubernetes/ $installdir
         chmod -R +x $installdir/dsc $installdir/kubectl $installdir/EndpointManager/EndpointManager
-        sudo ln -s $installdir/dsc $HOME/.local/bin/dsc
+        sudo ln -sf $installdir/dsc $HOME/.local/bin/dsc
     else
         log WARNING "installation target directory is write protected, run as root to override"
         installdir=/usr/local/bin/bridgetokubernetes
-        remove_tmp_dirs $installdir
+        remove_tmp_dirs $installdir sudo
         sudo cp -r $HOME/tmp/bridgetokubernetes/  $installdir
         sudo chmod -R +x $installdir/dsc $installdir/kubectl $installdir/EndpointManager/EndpointManager
-        sudo ln -s $installdir/dsc /usr/local/bin/dsc
+        sudo ln -sf $installdir/dsc /usr/local/bin/dsc
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
@@ -213,7 +213,7 @@ copy_b2k_files() {
 remove_tmp_dirs() {
     log INFO "removing directory:$1"
     if [ -d $1 ]; then
-        rm -rf $1
+        $2 rm -rf $1
     fi
 }
 
