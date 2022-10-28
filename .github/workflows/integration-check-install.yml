@@ -11,11 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install git bash for windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: winget install --id Git.Git -e --source winget
       - name: Run Install Script 
-        run: ./scripts/install.sh
+        run: ./scripts/install.sh | bash
       - name: Validate Command is Installed
         run: |
           if command -v /home/runner/.local/bin/bridgetokubernetes/dsc &> /dev/null
