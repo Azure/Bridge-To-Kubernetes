@@ -219,6 +219,7 @@ remove_tmp_dirs() {
 
 create_sym_link() {
     log INFO "creating or overwriting sym link for :$1"
+    # ln -sf source destination - creates symlink for dsc command to run from anywhere ex: any folder or location in the file system.
     if [[ $OSTYPE == "msys"* ]]; then
         ln -sf $1 $2
     else 
