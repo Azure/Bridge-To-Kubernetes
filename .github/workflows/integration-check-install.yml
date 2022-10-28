@@ -11,8 +11,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: Run Install Script 
-        run: ./scripts/install.sh | bash
+      - name: Run Install Script
+        shell: bash
+        run: ./scripts/install.sh
       - name: Validate Command is Installed
         run: |
           if command -v /home/runner/.local/bin/bridgetokubernetes/dsc &> /dev/null
