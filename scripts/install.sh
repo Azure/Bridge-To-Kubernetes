@@ -130,7 +130,7 @@ install_tool() {
                 $PACKAGER tap isen-ng/dotnet-sdk-versions
                 install_with_sudo dotnet-sdk3-1-400 --cask
             else 
-                install_with_sudo aspnetcore-runtime-3.1
+                install_with_sudo dotnetcore-3.1-aspnetruntime
             fi
             ;;
         jq)
