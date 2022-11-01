@@ -37,7 +37,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         {
             ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
             var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
-            Assert.Equal(numServices * (numAddresses + 1), result.Count());
+            Assert.Equal(numServices * (numAddresses), result.Count());
             foreach (var endpoint in result) {
                 if (endpoint.Ports.Any()) {
                     Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);

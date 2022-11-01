@@ -47,7 +47,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             endpoints = _portMappingManager.GetRemoteToFreeLocalPortMappings(endpoints);
 
             // Verification
-            Assert.Equal(numServices * (numAddresses + 1), endpoints.Count());
+            Assert.Equal(numServices * (numAddresses), endpoints.Count());
             var assignedPorts = new HashSet<int>();
             foreach (var endpoint in endpoints) {
                 foreach (var port in endpoint.Ports) {
