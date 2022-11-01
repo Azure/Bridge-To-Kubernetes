@@ -129,8 +129,10 @@ install_tool() {
             if [[ $OSTYPE == "darwin"* ]]; then
                 $PACKAGER tap isen-ng/dotnet-sdk-versions
                 install_with_sudo dotnet-sdk3-1-400 --cask
-            else 
+            else if [[ $OSTYPE == "msys"* ]]; then
                 install_with_sudo dotnetcore-3.1-aspnetruntime
+            else 
+                install_with_sudo aspnetcore-runtime-3.1
             fi
             ;;
         jq)
@@ -147,6 +149,7 @@ install_with_sudo() {
     if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install $1 -y
     else
+        echo "$PACKAGER install $2 $1"
         $PACKAGER install $2 $1
     fi
 }
