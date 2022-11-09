@@ -88,5 +88,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// Stop the workload and service routers.
         /// </summary>
         Task StopAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Re-create the Kubernetes service related environment variables.
+        /// </summary>
+        public IDictionary<string, string> CreateEnvVariablesForK8s(
+            WorkloadInfo workloadInfo);
     }
 }
