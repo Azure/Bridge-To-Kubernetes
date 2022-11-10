@@ -198,7 +198,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         private byte[] GetModifiedBytesForManagedIdentity(byte[] data)
         {
             const string headerToInsert = "Metadata: true";
-            var stringContent = Encoding.Default.GetString(data);
+            var stringContent = Encoding.UTF8.GetString(data);
             // This log may not work as expected depending on the character on the string, adding print line inside 
             // the for lop below to avoid wrong information while debugging
             _log.Verbose($"{loggingPrefix} Original data : {stringContent}");
@@ -224,8 +224,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
 
             _log.Verbose($"{loggingPrefix} Sending data : {modifiedRequestString}");
 
-            return Encoding.Default.GetBytes(modifiedRequestString);
-
+            return Encoding.UTF8.GetBytes(modifiedRequestString);
         }
 
         #endregion private members
