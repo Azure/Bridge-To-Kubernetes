@@ -128,28 +128,27 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 ## <b id="bridge-vscode">Bridge to Kubernetes</b>
 **Connect a service**
 1. Open `Bridge-To-Kubernetes/samples/todo-app/stats-api` from the Todo sample application in Visual Studio Code. 
-2. Open the Azure Kubernetes Service extension and select the _todo-app_ namespace in the _MyAKS_ cluster.
+2. Open the Azure Kubernetes Service extension and select the _todoapp_ namespace in the _MyAKS_ cluster.
 3. Open the terminal and use the `npm install` command to install the application.
-4. Select the _Debug_ icon on the left and select _Bridge to Kubernetes_ at the top.
-5. Click on the start button next to _Bridge to Kubernetes_.
+4. In the command palette (ctrl + shift + P), select `Bridge to Kubernetes: Configure`.
+5. Configure with Bridge
     * Select the service _stats-api_.
     * Enter the port _3001_.
-    * Select launch task _Launch via Dev..._.
+    * Select launch task _Run Script: dev_.
     * Select _No_ when asked if you want to be isolated from other developers.
-6. When prompted to allow the Endpoint Manager to run as root, say yes.
+6. When prompted to allow the Bridge to Kubernetes to use administrator permissions to update your machine's hosts file, choose continue.
     * Confirm this works on BOTH Windows 10 and MacOS.
 
 **Debug a service**
-1. Open `server.js` inside stats-api folder and set a breakpoint at line 37.
+1. Open `server.js` inside stats-api folder and set a breakpoint at line 25.
 2. Navigate to the sample application by opening the public URL. 
 3. Click the stats link.
-4. Return to Visual Studio Code and observe the breakpoint at line 37 has been hit. Hit _F5_ to resume the service.
+4. Return to Visual Studio Code and observe the breakpoint at line 25 has been hit. Hit _F5_ to resume the service.
 5. Return to your browser and verify you see stats page finished loading.
-6. Remove the breakpoint at line 37 in `server.js`.
+6. Remove the breakpoint at line 25 in `server.js`.
 
 **Update application**
-**Update application**
-1. Right before line 37 enter below line:
+1. Right after line 30 enter below line:
     ```
     created = 20;
     ```
@@ -161,9 +160,9 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 2. Return to the browser and refresh the stats page. Verify that your local change is gone and you see regular result for created count.
 
 **Reconnect and manually disconnect the service**
-1. Open the settings for the _Bridge to Kubernetes_ extension and deselect _Disconnect your Debugging_ to STOP automatically disconnecting the service in the future.
-2. Click on the start button next to _Launch via Dev with Kubernetes..._ Verify you are NOT prompted for service name, port, or launch task.
-3. When prompted to allow Endpoint Manager to run as root, say yes.
+1. Open the settings for the _Bridge to Kubernetes_ extension and deselect _Disconnect after Debugging_ to STOP automatically disconnecting the service in the future.
+2. Click on the start button next to _Run Script: dev with Kubernetes_ Verify you are NOT prompted for service name, port, or launch task.
+3. When prompted to allow the Bridge to Kubernetes to use administrator permissions to update your machine's hosts file, choose continue.
     * Confirm this works on BOTH Windows 10 and MacOS.
 4. Click _Run_. Refresh the stats page and verify that your local change of 20 shows up under created.
 5. Click _Stop Debugging_. Refresh the Todo sample app page and verify that you see a Bad Gateway error or 404 page.
@@ -174,26 +173,26 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 1. Open `Bridge-To-Kubernetes/samples/todo-app/stats-api` from the Todo-App sample application in Visual Studio Code. 
 2. Open the Azure Kubernetes Service extension and select the _todo-app_ namespace in the _MyAKS_ cluster.
 3. Open the terminal and use the `npm install` command to install the application.
-4. Select the _Debug_ icon on the left and select _Bridge to Kubernetes_ at the top.
-5. Click on the start button next to _Bridge to Kubernetes_.
+4. In the command palette (ctrl + shift + P), select `Bridge to Kubernetes: Configure`.
+5. Configure with Bridge
     * Select the service _stats-api_.
     * Enter the port _3001_.
-    * Select launch task _Launch via Dev_.
+    * Select launch task _Run Script: dev_.
     * Select _Yes_ when asked if you want to be isolated from other developers.
-6. When prompted to allow the Endpoint Manager to run as root, say yes.
+6. When prompted to allow the Bridge to Kubernetes to use administrator permissions to update your machine's hosts file, choose continue.
     * Confirm this works on BOTH Windows 10 and MacOS.
 
 
 **Debug a service**
-1. Open `server.js` in stats-api folder set a breakpoint at line 37.
+1. Open `server.js` in stats-api folder set a breakpoint at line 25.
 2. Navigate to the sample application (http://(your prefix).EXTERNALIP.nip.io)
 3. Click stats link.
-4. Notice that your Visual Studio Code breakpoint at line 37 has been hit. Hit _F5_ to resume the service.
+4. Notice that your Visual Studio Code breakpoint at line 25 has been hit. Hit _F5_ to resume the service.
 5. Return to your browser and verify page loaded.
-6. Remove the breakpoint at line 37 in `server.js`.
+6. Remove the breakpoint at line 25 in `server.js`.
 
 **Update application**
-1. Right before line 37 enter below line:
+1. Right after line 30 enter below line:
     ```
     created = 20;
     ```
@@ -207,20 +206,20 @@ Please test these scenarios in this order to ensure that the Bridge to Kubernete
 ## <b id="custom-vscode">KubernetesLocalProcessConfig.yaml</b>
 **Customize environment with KubernetesLocalProcessConfig.yaml**
 1. Create a new file at the root of the project called `KubernetesLocalProcessConfig.yaml`
-2. Add the following content to this file and save:
+2. Add the following content to this file and save, replace "kube-api-access-9knc4" with value seen when you run kubectl describe pod <stats-api pod> under Monut section:
     ```yaml
     version: 0.1
     env:
         - name: FOO
           value: bar
-        - name: DEFAULT_TOKEN_PATH
-          value: $(volumeMounts:default-token-*)
+        - name: STATS_API_VOLUME_PATH
+          value: $(volumeMounts:kube-api-access-9knc4)
     ```
 3. Connect to the service as in the **Connect a service** step above
 4. Open the Kubernetes status bar menu and select "Show connection diagnostics information"
-5. Verify the existence of the following. NOTE: You can use Ctrl+F in this window.
+5. Verify the existence of the following path. NOTE: You can use Ctrl+F in this window.
     1. `FOO=bar`
-    1. `DEFAULT_TOKEN_PATH=<tmpdir>`
+    1. `STATS_API_VOLUME_PATH=<tmpdir>`
 
 ## <b id="external-vscode">External Endpoints</b>
 **Prerequisites**
@@ -395,4 +394,4 @@ Clone this repo locally: https://github.com/dapr/quickstarts
     - "Create a new launch configuration" (if you don't have one), otherwise "Launch Program".
     - Isolated: no
 4. Start debugging with Bridge.
-5. Set a breakpoint on line 40. If everything is working, you should see the breakpoint get hit. This should happen without you needing to do anything, since the python app hosted on the same cluster will be pinging the node app that we are debugging.
+5. Set a breakpoint on line 47. If everything is working, you should see the breakpoint get hit. This should happen without you needing to do anything, since the python app hosted on the same cluster will be pinging the node app that we are debugging.
