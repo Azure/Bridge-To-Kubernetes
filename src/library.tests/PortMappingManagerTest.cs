@@ -10,6 +10,7 @@ using System.Threading;
 using Autofac;
 using FakeItEasy;
 using k8s.Models;
+using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -18,14 +19,17 @@ using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Library.Tests
 {
-    public class WorkloadInformationProviderTests : TestsBase
+    public class PortMappingManagerTest : TestsBase
     {
         private IWorkloadInformationProvider _workloadInformationProvider;
+        private IPortMappingManager _portMappingManager;
 
-        public WorkloadInformationProviderTests()
+        public PortMappingManagerTest()
         {
             var remoteContainerConnectionDetails = new AsyncLazy<RemoteContainerConnectionDetails>(async () => _autoFake.Resolve<RemoteContainerConnectionDetails>());
             _workloadInformationProvider = _autoFake.Resolve<WorkloadInformationProvider>(TypedParameter.From(remoteContainerConnectionDetails));
+            A.CallTo(() => _autoFake.Resolve<IPlatform>().IsOSX).Returns(true);
+            _portMappingManager = _autoFake.Resolve<PortMappingManager>();
         }
 
         [Theory]
@@ -35,15 +39,23 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         [InlineData(1, 3)]
         public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses)
         {
+            // Set up
             ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
-            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
-            Assert.Equal(numServices * (numAddresses), result.Count());
-            foreach (var endpoint in result) {
-                if (endpoint.Ports.Any()) {
-                    Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
-                }
-            }
+            var endpoints = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             
+            // Method to be tested
+            endpoints = _portMappingManager.GetRemoteToFreeLocalPortMappings(endpoints);
+
+            // Verification
+            Assert.Equal(numServices * (numAddresses), endpoints.Count());
+            var assignedPorts = new HashSet<int>();
+            foreach (var endpoint in endpoints) {
+                foreach (var port in endpoint.Ports) {
+                    Assert.NotEqual(port.LocalPort, -1);
+                    Assert.False(assignedPorts.Contains(port.LocalPort));
+                    assignedPorts.Add(port.LocalPort);
+                }
+            }   
         }
 
         private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction)
