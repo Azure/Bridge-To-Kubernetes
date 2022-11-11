@@ -23,12 +23,13 @@ RUN dotnet publish -c ${Configuration} -o /output devhostAgent.restorationjob.cs
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
 
 # Setup common tools
-COPY /build/setup-alpine-tools.sh .
-COPY /build/setup-kubectl.sh .
-RUN chmod +x ./setup-alpine-tools.sh ./setup-kubectl.sh \
-    && ./setup-alpine-tools.sh \
-    && ./setup-kubectl.sh \
-    && rm -f ./setup-alpine-tools.sh ./setup-kubectl.sh
+RUN apk update
+RUN apk upgrade
+RUN apk add -u bash
+RUN apk add -u procps
+RUN apk add -u curl
+RUN apk add -u bind-tools
+RUN apk add -u kubectl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 WORKDIR /app
 ENTRYPOINT ["/app/restorationjob"]

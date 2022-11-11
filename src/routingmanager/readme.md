@@ -23,7 +23,7 @@ Code: https://github.com/traefik/whoami
 
  Developing
 ------------
- Requires Dotnet core SDK 3.1.
+ Requires Dotnet core SDK 6.0.
 
  Experimentation using ExP
  -------------------------

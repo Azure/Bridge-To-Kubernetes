@@ -22,17 +22,13 @@ RUN dotnet publish -c ${Configuration} -o /src/publish
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
 
-# Setup common tools
-COPY /build/setup-alpine-tools.sh .
-RUN chmod +x ./setup-alpine-tools.sh \
-    && ./setup-alpine-tools.sh \
-    && rm -f ./setup-alpine-tools.sh
-
-# Setup kubectl
-COPY /build/setup-kubectl.sh .
-RUN chmod +x ./setup-kubectl.sh \
-    && ./setup-kubectl.sh \
-    && rm -f ./setup-kubectl.sh
+RUN apk update
+RUN apk upgrade
+RUN apk add -u bash
+RUN apk add -u procps
+RUN apk add -u curl
+RUN apk add -u bind-tools
+RUN apk add -u kubectl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 WORKDIR /src/routingmanager
 COPY --from=build-alpine /src/publish /src/routingmanager
