@@ -436,13 +436,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             // Add headless services info
             foreach (V1Endpoints endpoint in headlessServiceEndpointsToRouteMap.Values)
             {
-                PortPair[] ports = new PortPair[] { };
                 var isInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(endpoint.Metadata.Namespace(), workloadNamespace);
                 foreach (var subset in endpoint.Subsets)
                 {
-                    ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { };
-
-                    // Next, endpoint addresses can also specify their own host names. We add these as well
+                    // For headless service, we only add entries that specify hostname,
+                    // if hostname its not specify there is no dsn to reach the replicate.
                     var addresses = subset.Addresses?.Where(a => !string.IsNullOrWhiteSpace(a?.Hostname));
                     if (addresses == null || !addresses.Any())
                     {
@@ -456,20 +454,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             DnsName = isInWorkloadNamespace ?
                                         $"{address.Hostname}.{endpoint.Metadata.Name}" :
                                         $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = ports,
+                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }
                 }
-
-                servicesToRouteEndpointInfos.Add(new EndpointInfo()
-                {
-                    DnsName = isInWorkloadNamespace ?
-                                endpoint.Metadata.Name :
-                                $"{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                    Ports = ports,
-                    IsInWorkloadNamespace = isInWorkloadNamespace
-                });
             }
 
             return servicesToRouteEndpointInfos;
