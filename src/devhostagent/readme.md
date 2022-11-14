@@ -10,7 +10,8 @@ This tool is built into **azds**/devhostagent:**tag** image and mounted as an im
 Building
 ---------
 To make changes to this tool, follow these steps:  
-1. On your local machine, run these from src\devhostagent\ directory to build the container images:  
+1. On your local machine, run these from src\devhostagent\ directory to build the container images:
+   docker build -f ./src/devhostagent/Dockerfile -t **yourDockerHub**/**devhostimageName**:**yourTag** .  
    docker build -t **yourDockerHub**/**devhostimageName**:**yourTag** . 
       or
    docker build -t **yourDockerHub**/**devhostimageName**:**yourTag** --build-arg Configuration=Debug .

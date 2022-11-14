@@ -178,6 +178,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// <param name="data"></param>
         /// <remarks>
         /// input data should look like below:
+        /// GET /metadata/identity/oauth2/token?api-version=2017-09-01&mi_res_id=%2Fsubscriptions%2F4be8920b-2978-43d7-ab14-04d8549c1d05%2FresourceGroups%2FAKSE2EInfra%2Fproviders%2FMicrosoft.ManagedIdentity%2FuserAssignedIdentities%2Fakse2ehcp&resource=https%3A%2F%2Fstorage.azure.com%2F
         /// GET /metadata/identity/oauth2/token?api-version=2017-09-01&resource=https%3A%2F%2Fstorage.azure.com&clientid=<guid> HTTP/1.1
         /// \nHost: managedidentity
         /// \nsecret: placeholder
@@ -196,25 +197,34 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// </remarks>
         private byte[] GetModifiedBytesForManagedIdentity(byte[] data)
         {
-            const string headerToInsert = "Metadata: true\n";
-            var stringContent = Encoding.Default.GetString(data.ToList().ToArray());
+            const string headerToInsert = "Metadata: true";
+            var stringContent = Encoding.UTF8.GetString(data);
+            // This log may not work as expected depending on the character on the string, adding print line inside 
+            // the for lop below to avoid wrong information while debugging
             _log.Verbose($"{loggingPrefix} Original data : {stringContent}");
             stringContent = stringContent.Replace("2017-09-01", "2018-02-01").Replace("clientid", "client_id");
             var lines = stringContent.Split(new char[] { '\n' }).ToList();
             int index = -1;
             for (int i = 0; i < lines.Count; i++)
             {
-                if (lines[i].Contains($"secret: {Common.Constants.ManagedIdentity.SecretValue}"))
+                _log.Verbose($"{loggingPrefix} Printing line : {lines[i]}");
+                if (lines[i].Contains($"secret: {Common.Constants.ManagedIdentity.SecretValue}", StringComparison.OrdinalIgnoreCase))
                 {
                     index = i;
                     break;
                 }
             }
-            lines.Insert(index + 1, headerToInsert);
+            if (index != -1) {
+                lines.Insert(index + 1, headerToInsert);
+            }
+            else {
+                lines.Append(headerToInsert);
+            }
             var modifiedRequestString = string.Join('\n', lines);
 
             _log.Verbose($"{loggingPrefix} Sending data : {modifiedRequestString}");
-            return Encoding.ASCII.GetBytes(modifiedRequestString);
+
+            return Encoding.UTF8.GetBytes(modifiedRequestString);
         }
 
         #endregion private members
