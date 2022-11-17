@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "localagent": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:20793;http://localhost:20794"
+    }
+  }
+}

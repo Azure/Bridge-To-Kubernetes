@@ -98,7 +98,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             var result = await ClientInvokeWrapperAsync(async () =>
             {
                 string labelSelector = GetLabelSelectorString(labels);
-                return await RestClient.ListNamespaceAsync(labelSelector: labelSelector, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ListNamespaceAsync(labelSelector: labelSelector, cancellationToken: cancellationToken);
             }, nameof(ListNamespacesAsync), cancellationToken);
 
             return result?.Items == null ? new V1NamespaceList(new List<V1Namespace>()) : result;
@@ -117,12 +117,12 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 try
                 {
-                    return await RestClient.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.AppsV1.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (HttpOperationException e) when (e.Response.StatusCode == HttpStatusCode.Conflict)
                 {
-                    await RestClient.DeleteNamespacedDeploymentAsync(deployment.Metadata.Name, deployment.Metadata.NamespaceProperty);
-                    return await RestClient.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
+                    await RestClient.AppsV1.DeleteNamespacedDeploymentAsync(deployment.Metadata.Name, deployment.Metadata.NamespaceProperty);
+                    return await RestClient.AppsV1.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
                 }
             },
             nameof(CreateOrReplaceV1DeploymentAsync),
@@ -133,7 +133,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.AppsV1.CreateNamespacedDeploymentAsync(deployment, namespaceName, cancellationToken: cancellationToken);
             }, nameof(CreateNamespacedDeploymentAsync), cancellationToken);
         }
 
@@ -141,7 +141,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.DeleteNamespacedDeploymentAsync(name, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.AppsV1.DeleteNamespacedDeploymentAsync(name, namespaceName, cancellationToken: cancellationToken);
             }, nameof(DeleteDeploymentsInNamespaceAsync), cancellationToken);
         }
 
@@ -149,7 +149,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.ReadNamespacedDeploymentStatusAsync(name, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.AppsV1.ReadNamespacedDeploymentStatusAsync(name, namespaceName, cancellationToken: cancellationToken);
             }, nameof(ReadNamespacedDeploymentStatusAsync), cancellationToken);
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.ReplaceNamespacedDeploymentAsync(deployment, name, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.AppsV1.ReplaceNamespacedDeploymentAsync(deployment, name, namespaceName, cancellationToken: cancellationToken);
             }, nameof(ReplaceNamespacedDeploymentAsync), cancellationToken);
         }
 
@@ -169,8 +169,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             var result = await ClientInvokeWrapperAsync(async () =>
             {
                 return string.IsNullOrEmpty(namespaceName) ?
-                    await RestClient.ListDeploymentForAllNamespacesAsync(cancellationToken: cancellationToken) :
-                    await RestClient.ListNamespacedDeploymentAsync(namespaceName, cancellationToken: cancellationToken);
+                    await RestClient.AppsV1.ListDeploymentForAllNamespacesAsync(cancellationToken: cancellationToken) :
+                    await RestClient.AppsV1.ListNamespacedDeploymentAsync(namespaceName, cancellationToken: cancellationToken);
             }, nameof(ListDeploymentsInNamespaceAsync), cancellationToken);
 
             return result?.Items == null ? new V1DeploymentList(new List<V1Deployment>()) : result;
@@ -181,7 +181,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1Deployment> PatchV1DeploymentAsync(string namespaceName, string deploymentName, V1Patch deploymentPatch, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.PatchNamespacedDeploymentAsync(deploymentPatch, deploymentName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1DeploymentAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.PatchNamespacedDeploymentAsync(deploymentPatch, deploymentName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1DeploymentAsync), cancellationToken);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<HttpOperationResponse<V1DeploymentList>> WatchV1DeploymentAsync(string namespaceName, string deploymentName, int timeoutSeconds, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ListNamespacedDeploymentWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={deploymentName}", timeoutSeconds: timeoutSeconds, cancellationToken: cancellationToken), nameof(WatchV1DeploymentAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={deploymentName}", timeoutSeconds: timeoutSeconds, cancellationToken: cancellationToken), nameof(WatchV1DeploymentAsync), cancellationToken);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             var result = await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.ReadNamespacedSecretAsync(secretName, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ReadNamespacedSecretAsync(secretName, namespaceName, cancellationToken: cancellationToken);
             }, nameof(ReadNamespacedSecretAsync), cancellationToken);
 
             return result;
@@ -233,7 +233,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1Secret> CreateNamespacedSecretAsync(string namespaceName, V1Secret secret, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(() => RestClient.CreateNamespacedSecretAsync(secret, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedSecretAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(() => RestClient.CoreV1.CreateNamespacedSecretAsync(secret, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedSecretAsync), cancellationToken);
         }
 
         #endregion Secrets
@@ -245,7 +245,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1Job> CreateNamespacedJobAsync(string namespaceName, V1Job job, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(() => RestClient.CreateNamespacedJobAsync(job, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedJobAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(() => RestClient.BatchV1.CreateNamespacedJobAsync(job, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedJobAsync), cancellationToken);
         }
 
         #endregion Jobs
@@ -257,7 +257,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1Pod> GetV1PodAsync(string namespaceName, string podName, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedPodAsync(podName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1PodAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ReadNamespacedPodAsync(podName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1PodAsync), cancellationToken);
         }
 
         /// <summary>
@@ -269,8 +269,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 string labelSelector = GetLabelSelectorString(labels);
                 return string.IsNullOrEmpty(namespaceName) ?
-                    await RestClient.ListPodForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken)
-                    : await RestClient.ListNamespacedPodAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
+                    await RestClient.CoreV1.ListPodForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken)
+                    : await RestClient.CoreV1.ListNamespacedPodAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
             }, nameof(ListPodsInNamespaceAsync), cancellationToken);
 
             return result?.Items == null ? new V1PodList(new List<V1Pod>()) : result;
@@ -281,7 +281,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1Pod> CreateV1PodAsync(string namespaceName, V1Pod pod, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.CreateNamespacedPodAsync(pod, namespaceName, cancellationToken: cancellationToken), nameof(CreateV1PodAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.CreateNamespacedPodAsync(pod, namespaceName, cancellationToken: cancellationToken), nameof(CreateV1PodAsync), cancellationToken);
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1Pod> PatchV1PodAsync(string namespaceName, string podName, V1Patch podPatch, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.PatchNamespacedPodAsync(podPatch, podName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1PodAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.PatchNamespacedPodAsync(podPatch, podName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1PodAsync), cancellationToken);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task DeleteV1PodAsync(string namespaceName, string podName, CancellationToken cancellationToken)
         {
-            await ClientInvokeWrapperAsync(async () => await RestClient.DeleteNamespacedPodAsync(podName, namespaceName, cancellationToken: cancellationToken), nameof(DeleteV1PodAsync), cancellationToken);
+            await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.DeleteNamespacedPodAsync(podName, namespaceName, cancellationToken: cancellationToken), nameof(DeleteV1PodAsync), cancellationToken);
         }
 
         /// <summary>
@@ -305,7 +305,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<HttpOperationResponse<V1PodList>> WatchV1PodAsync(string namespaceName, string podName, int timeoutSeconds, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ListNamespacedPodWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={podName}", timeoutSeconds: timeoutSeconds, watch: true, cancellationToken: cancellationToken), nameof(WatchV1PodAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={podName}", timeoutSeconds: timeoutSeconds, watch: true, cancellationToken: cancellationToken), nameof(WatchV1PodAsync), cancellationToken);
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                 await WebUtilities.RetryUntilTimeWithWaitAsync(
                     async _ =>
                     {
-                        var pods = await RestClient.ListNamespacedPodAsync(namespaceName, labelSelector: $"{label.Key}={label.Value}", cancellationToken: cancellationToken);
+                        var pods = await RestClient.CoreV1.ListNamespacedPodAsync(namespaceName, labelSelector: $"{label.Key}={label.Value}", cancellationToken: cancellationToken);
                         firstRunningPod = pods.Items.FirstOrDefault(pod => pod.Status.Phase.EqualsIgnoreCase("Running"));
                         var containerStatus = firstRunningPod?.Status?.ContainerStatuses?.FirstOrDefault(c => c.Name.EqualsIgnoreCase(containerName));
                         if (pods == null || pods.Items == null || firstRunningPod == null || containerStatus?.State?.Running == null)
@@ -350,7 +350,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             return ClientInvokeWrapperAsync(async () =>
             {
                 string labelSelector = GetLabelSelectorString(labels);
-                return await RestClient.ListNamespacedPodAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ListNamespacedPodAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
             },
             nameof(ListNamespacedPodAsync),
             cancellationToken);
@@ -365,7 +365,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1Service> GetV1ServiceAsync(string namespaceName, string serviceName, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedServiceAsync(serviceName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1ServiceAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ReadNamespacedServiceAsync(serviceName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1ServiceAsync), cancellationToken);
         }
 
         /// <summary>
@@ -377,8 +377,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 string labelSelector = GetLabelSelectorString(labels);
                 return string.IsNullOrEmpty(namespaceName) ?
-                    await RestClient.ListServiceForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken) :
-                    await RestClient.ListNamespacedServiceAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
+                    await RestClient.CoreV1.ListServiceForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken) :
+                    await RestClient.CoreV1.ListNamespacedServiceAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
             }, nameof(ListServicesInNamespaceAsync), cancellationToken);
 
             return result?.Items == null ? new V1ServiceList(new List<V1Service>()) : result;
@@ -394,12 +394,12 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 try
                 {
-                    return await RestClient.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.CoreV1.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (HttpOperationException e) when (e.Response.StatusCode == HttpStatusCode.Conflict)
                 {
-                    await RestClient.DeleteNamespacedServiceAsync(service.Metadata.Name, namespaceName);
-                    return await RestClient.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
+                    await RestClient.CoreV1.DeleteNamespacedServiceAsync(service.Metadata.Name, namespaceName);
+                    return await RestClient.CoreV1.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
                 }
             }, nameof(CreateOrReplaceV1ServiceAsync), cancellationToken);
         }
@@ -408,7 +408,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.ReplaceNamespacedServiceAsync(service, name, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ReplaceNamespacedServiceAsync(service, name, namespaceName, cancellationToken: cancellationToken);
             }, nameof(ReplaceV1ServiceAsync), cancellationToken);
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.CreateNamespacedServiceAsync(service, namespaceName, cancellationToken: cancellationToken);
             }, nameof(CreateNamespacedServiceAsync), cancellationToken);
         }
 
@@ -424,7 +424,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.DeleteNamespacedServiceAsync(name, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.DeleteNamespacedServiceAsync(name, namespaceName, cancellationToken: cancellationToken);
             }, nameof(DeleteV1ServiceAsync), cancellationToken);
         }
 
@@ -445,7 +445,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         {
             return await ClientInvokeWrapperAsync(async () =>
             {
-                return await RestClient.ReadNamespacedEndpointsAsync(endpointName, namespaceName, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ReadNamespacedEndpointsAsync(endpointName, namespaceName, cancellationToken: cancellationToken);
             }, nameof(GetEndpointInNamespaceAsync), cancellationToken);
         }
 
@@ -457,7 +457,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             var result = await ClientInvokeWrapperAsync(async () =>
             {
                 string labelSelector = GetLabelSelectorString(labels);
-                return await RestClient.ListNamespacedEndpointsAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
+                return await RestClient.CoreV1.ListNamespacedEndpointsAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
             }, nameof(ListEndpointsInNamespaceAsync), cancellationToken);
 
             return result?.Items == null ? new V1EndpointsList(new List<V1Endpoints>()) : result;
@@ -472,7 +472,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1ReplicaSet> GetV1ReplicaSetAsync(string namespaceName, string replicaSetName, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedReplicaSetAsync(replicaSetName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1ReplicaSetAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ReadNamespacedReplicaSetAsync(replicaSetName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1ReplicaSetAsync), cancellationToken);
         }
 
         /// <summary>
@@ -484,8 +484,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 string labelSelector = GetLabelSelectorString(labels);
                 return string.IsNullOrEmpty(namespaceName) ?
-                    await RestClient.ListReplicaSetForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken) :
-                    await RestClient.ListNamespacedReplicaSetAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
+                    await RestClient.AppsV1.ListReplicaSetForAllNamespacesAsync(labelSelector: labelSelector, cancellationToken: cancellationToken) :
+                    await RestClient.AppsV1.ListNamespacedReplicaSetAsync(namespaceName, labelSelector: labelSelector, cancellationToken: cancellationToken);
             }, nameof(ListReplicaSetsInNamespaceAsync), cancellationToken);
 
             return result?.Items == null ? new V1ReplicaSetList(new List<V1ReplicaSet>()) : result;
@@ -500,7 +500,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1StatefulSet> GetV1StatefulSetAsync(string namespaceName, string statefulSetName, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedStatefulSetAsync(statefulSetName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1StatefulSetAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ReadNamespacedStatefulSetAsync(statefulSetName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1StatefulSetAsync), cancellationToken);
         }
 
         /// <summary>
@@ -527,7 +527,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1StatefulSet> PatchV1StatefulSetAsync(string namespaceName, string statefulSetName, V1Patch statefulSetPatch, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.PatchNamespacedStatefulSetAsync(statefulSetPatch, statefulSetName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1StatefulSetAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.PatchNamespacedStatefulSetAsync(statefulSetPatch, statefulSetName, namespaceName, cancellationToken: cancellationToken), nameof(PatchV1StatefulSetAsync), cancellationToken);
         }
 
         #endregion Stateful Sets
@@ -539,23 +539,23 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1IngressList> ListIngressesInNamespaceAsync(string namespaceName, CancellationToken cancellationToken)
         {
-            var result = await ClientInvokeWrapperAsync(async () => await RestClient.ListNamespacedIngressAsync(namespaceName, cancellationToken: cancellationToken), nameof(ListIngressesInNamespaceAsync), cancellationToken);
+            var result = await ClientInvokeWrapperAsync(async () => await RestClient.NetworkingV1.ListNamespacedIngressAsync(namespaceName, cancellationToken: cancellationToken), nameof(ListIngressesInNamespaceAsync), cancellationToken);
             return result?.Items == null ? new V1IngressList(new List<V1Ingress>()) : result;
         }
 
         public async Task<V1Ingress> CreateNamespacedIngressAsync(string namespaceName, V1Ingress body, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.CreateNamespacedIngressAsync(body, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedIngressAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.NetworkingV1.CreateNamespacedIngressAsync(body, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedIngressAsync), cancellationToken);
         }
 
         public async Task<V1Ingress> ReplaceNamespacedIngress1Async(string namespaceName, V1Ingress body, string name, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.ReplaceNamespacedIngressAsync(body, name, namespaceName, cancellationToken: cancellationToken), nameof(ReplaceNamespacedIngress1Async), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.NetworkingV1.ReplaceNamespacedIngressAsync(body, name, namespaceName, cancellationToken: cancellationToken), nameof(ReplaceNamespacedIngress1Async), cancellationToken);
         }
 
         public async Task<V1Status> DeleteNamespacedIngressAsync(string namespaceName, string name, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.DeleteNamespacedIngressAsync(name, namespaceName, cancellationToken: cancellationToken), nameof(DeleteNamespacedIngressAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.NetworkingV1.DeleteNamespacedIngressAsync(name, namespaceName, cancellationToken: cancellationToken), nameof(DeleteNamespacedIngressAsync), cancellationToken);
         }
 
         #endregion Ingresses
@@ -652,27 +652,27 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public async Task<V1ConfigMap> GetConfigMapAsync(string namespaceName, string configMapName, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedConfigMapAsync(configMapName, namespaceName, cancellationToken: cancellationToken), nameof(GetConfigMapAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ReadNamespacedConfigMapAsync(configMapName, namespaceName, cancellationToken: cancellationToken), nameof(GetConfigMapAsync), cancellationToken);
         }
 
         public async Task<V1ConfigMap> CreateNamespacedConfigMapAsync(string namespaceName, V1ConfigMap configMap, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.CreateNamespacedConfigMapAsync(configMap, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedConfigMapAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.CreateNamespacedConfigMapAsync(configMap, namespaceName, cancellationToken: cancellationToken), nameof(CreateNamespacedConfigMapAsync), cancellationToken);
         }
 
         public async Task<V1Status> DeleteNamespacedConfigMapAsync(string namespaceName, string name, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.DeleteNamespacedConfigMapAsync(name, namespaceName, cancellationToken: cancellationToken), nameof(DeleteNamespacedConfigMapAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.DeleteNamespacedConfigMapAsync(name, namespaceName, cancellationToken: cancellationToken), nameof(DeleteNamespacedConfigMapAsync), cancellationToken);
         }
 
         public async Task<V1ConfigMap> ReplaceNamespacedConfigMapAsync(string namespaceName, V1ConfigMap configMap, string name, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.ReplaceNamespacedConfigMapAsync(configMap, name, namespaceName, cancellationToken: cancellationToken), nameof(ReplaceNamespacedConfigMapAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ReplaceNamespacedConfigMapAsync(configMap, name, namespaceName, cancellationToken: cancellationToken), nameof(ReplaceNamespacedConfigMapAsync), cancellationToken);
         }
 
         public async Task<V1ConfigMapList> ListNamespacedConfigMapAsync(string namespaceName, CancellationToken cancellationToken)
         {
-            return await ClientInvokeWrapperAsync(async () => await RestClient.ListNamespacedConfigMapAsync(namespaceName, cancellationToken: cancellationToken), nameof(ListNamespacedConfigMapAsync), cancellationToken);
+            return await ClientInvokeWrapperAsync(async () => await RestClient.CoreV1.ListNamespacedConfigMapAsync(namespaceName, cancellationToken: cancellationToken), nameof(ListNamespacedConfigMapAsync), cancellationToken);
         }
 
         /// <summary>
@@ -680,7 +680,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<V1Deployment> GetV1DeploymentAsync(string namespaceName, string deploymentName, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.ReadNamespacedDeploymentAsync(deploymentName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1DeploymentAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ReadNamespacedDeploymentAsync(deploymentName, namespaceName, cancellationToken: cancellationToken), nameof(GetV1DeploymentAsync), cancellationToken);
         }
 
         /// <summary>
@@ -692,7 +692,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 try
                 {
-                    return await RestClient.CreateNamespacedServiceAccountAsync(v1ServiceAccount, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.CoreV1.CreateNamespacedServiceAccountAsync(v1ServiceAccount, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (HttpOperationException e) when (((HttpOperationException)e).Response.StatusCode == HttpStatusCode.Conflict)
                 {
@@ -719,12 +719,12 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 try
                 {
-                    return await RestClient.CreateNamespacedRoleAsync(v1Role, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.RbacAuthorizationV1.CreateNamespacedRoleAsync(v1Role, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (HttpOperationException e) when (((HttpOperationException)e).Response.StatusCode == HttpStatusCode.Conflict)
                 {
                     // resource already exists, replace it
-                    return await RestClient.ReplaceNamespacedRoleAsync(v1Role, v1Role.Metadata.Name, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.RbacAuthorizationV1.ReplaceNamespacedRoleAsync(v1Role, v1Role.Metadata.Name, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (Exception e)
                 {
@@ -745,12 +745,12 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 try
                 {
-                    return await RestClient.CreateNamespacedRoleBindingAsync(v1RoleBinding, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.RbacAuthorizationV1.CreateNamespacedRoleBindingAsync(v1RoleBinding, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (HttpOperationException e) when (((HttpOperationException)e).Response.StatusCode == HttpStatusCode.Conflict)
                 {
                     // resource already exists, replace it
-                    return await RestClient.ReplaceNamespacedRoleBindingAsync(v1RoleBinding, v1RoleBinding.Metadata.Name, namespaceName, cancellationToken: cancellationToken);
+                    return await RestClient.RbacAuthorizationV1.ReplaceNamespacedRoleBindingAsync(v1RoleBinding, v1RoleBinding.Metadata.Name, namespaceName, cancellationToken: cancellationToken);
                 }
                 catch (Exception e)
                 {

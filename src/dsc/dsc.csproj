@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
-    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
     <DebugType>portable</DebugType>
     <AssemblyName>dsc</AssemblyName>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -20,7 +20,9 @@
     <ConsumeEndpointManager Condition=" '$(ConsumeEndpointManager)' == '' ">true</ConsumeEndpointManager>
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsOSXarm64 Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true' And '$(Configuration)|$(Platform)' == 'arm64'">true</IsOSXarm64>
     <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+    <IsLinuxarm64 Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true' And '$(Configuration)|$(Platform)' == 'arm64'">true</IsLinuxarm64>
     <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -54,8 +56,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.37.1" />
-    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.38.1" />
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -65,12 +67,14 @@
     <EndpointManagerRuntimeIdentifier>$(RuntimeIdentifier)</EndpointManagerRuntimeIdentifier>
     <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsWindows)'=='true'">win-x64</EndpointManagerRuntimeIdentifier>
     <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsOSX)'=='true'">osx-x64</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsOSXarm64)'=='true'">osx-arm64</EndpointManagerRuntimeIdentifier>
     <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsLinux)'=='true'">linux-x64</EndpointManagerRuntimeIdentifier>
+    <EndpointManagerRuntimeIdentifier Condition="'$(EndpointManagerRuntimeIdentifier)'=='' And '$(IsLinuxarm64)'=='true'">linux-arm64</EndpointManagerRuntimeIdentifier>
     <EndpointManagerFileName>EndpointManager</EndpointManagerFileName>
     <EndpointManagerFileName Condition="'$(EndpointManagerRuntimeIdentifier)'=='win-x64'">EndpointManager.exe</EndpointManagerFileName>
     <EndpointManagerSubDirName>EndpointManager</EndpointManagerSubDirName>
     <EndpointManagerProjectDirectory>$(MSBuildThisFileDirectory)..\endpointmanager</EndpointManagerProjectDirectory>
-    <EndpointManagerPublishDirectory>$(EndpointManagerProjectDirectory)\bin\$(Configuration)\netcoreapp3.1\$(EndpointManagerRuntimeIdentifier)\publish</EndpointManagerPublishDirectory>
+    <EndpointManagerPublishDirectory>$(EndpointManagerProjectDirectory)\bin\$(Configuration)\net6.0\$(EndpointManagerRuntimeIdentifier)\publish</EndpointManagerPublishDirectory>
     <EndpointManagerSourcePath>$(EndpointManagerPublishDirectory)\$(EndpointManagerFileName)</EndpointManagerSourcePath>
   </PropertyGroup>
 
@@ -92,10 +96,12 @@
     <Copy SourceFiles="@(EndpointManagerFiles)" DestinationFolder="$(PublishDir)\$(EndpointManagerSubDirName)\%(RecursiveDir)" />
   </Target>
 
-  <Target Name="PublishKubectl" BeforeTargets="Publish" >
+  <Target Name="PublishKubectl" BeforeTargets="Publish">
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'osx-x64' '$(Configuration)' 'osx'}&quot;" Condition="'$(IsOSX)'=='true' And '$(Configuration)'=='Debug'" />
+    <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'osx-arm64' '$(Configuration)' 'osx'}&quot;" Condition="'$(IsOSXarm64)'=='true' And '$(Configuration)'=='Debug'" />
     <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'linux-x64' '$(Configuration)' 'linux'}&quot;" Condition="'$(IsLinux)'=='true' And '$(Configuration)'=='Debug'" />
-    <Exec Command="powershell.exe -Command &quot;&amp; {.\downloadkubectl.ps1 'win-x64' '$(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'"/>
+    <Exec Command="pwsh -Command &quot;&amp; {./downloadkubectl.ps1 'linux-arm64' '$(Configuration)' 'linux'}&quot;" Condition="'$(IsLinuxarm64)'=='true' And '$(Configuration)'=='Debug'" />
+    <Exec Command="powershell.exe -Command &quot;&amp; {.\downloadkubectl.ps1 'win-x64' '$(Configuration)' 'win'}&quot;" Condition="'$(IsWindows)'=='true' And '$(Configuration)'=='Debug'" />
   </Target>
 
   <!-- During an explicit clean, delete EndpointManager.exe to force it to re-publish on the next build -->
@@ -120,10 +126,10 @@
 
   <ItemGroup>
     <None
-      Include="
-        $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
-        $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        Include="
+            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
+            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
