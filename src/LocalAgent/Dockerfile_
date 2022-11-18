@@ -1,5 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
 RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
 
@@ -32,13 +32,16 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -o /src/publish
 
 # Final container
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine3.12 as final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
 
 # Setup common tools
-COPY /build/setup-alpine-tools.sh .
-RUN chmod +x ./setup-alpine-tools.sh \
-    && ./setup-alpine-tools.sh \
-    && rm -f ./setup-alpine-tools.sh
+RUN apk update
+RUN apk upgrade
+RUN apk add -u bash
+RUN apk add -u procps
+RUN apk add -u curl
+RUN apk add -u bind-tools
+RUN apk add -u kubectl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 WORKDIR /src/localagent
 COPY --from=build /src/publish /src/localagent

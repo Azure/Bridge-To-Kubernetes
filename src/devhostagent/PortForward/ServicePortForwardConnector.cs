@@ -178,12 +178,13 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// <param name="data"></param>
         /// <remarks>
         /// input data should look like below:
+        /// GET /metadata/identity/oauth2/token?api-version=2017-09-01&mi_res_id=%2Fsubscriptions%2F4be8920b-2978-43d7-ab14-04d8549c1d05%2FresourceGroups%2FAKSE2EInfra%2Fproviders%2FMicrosoft.ManagedIdentity%2FuserAssignedIdentities%2Fakse2ehcp&resource=https%3A%2F%2Fstorage.azure.com%2F
         /// GET /metadata/identity/oauth2/token?api-version=2017-09-01&resource=https%3A%2F%2Fstorage.azure.com&clientid=<guid> HTTP/1.1
         /// \nHost: managedidentity
         /// \nsecret: placeholder
         /// \nx-ms-client-request-id: e6aadc2a-bb98-4714-bc4c-719676e0d4cf
         /// \nx-ms-return-client-request-id: true
-        /// \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET Core 3.1.12; Microsoft Windows 10.0.19042)
+        /// \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET 6.0.8; Microsoft Windows 10.0.19042)
         ///
         /// we would modify it to something like below:
         /// GET /metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fstorage.azure.com&client_id=<guid> HTTP/1.1
@@ -192,29 +193,38 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.PortForward
         /// \nMetadata: true
         /// \nx-ms-client-request-id: 8569c7c4-2411-400f-9d92-5b2e78ec7ec6
         /// \nx-ms-return-client-request-id: true
-        /// \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET Core 3.1.12; Microsoft Windows 10.0.19042)
+        /// \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET 6.0.8; Microsoft Windows 10.0.19042)
         /// </remarks>
         private byte[] GetModifiedBytesForManagedIdentity(byte[] data)
         {
-            const string headerToInsert = "Metadata: true\n";
-            var stringContent = Encoding.Default.GetString(data.ToList().ToArray());
+            const string headerToInsert = "Metadata: true";
+            var stringContent = Encoding.UTF8.GetString(data);
+            // This log may not work as expected depending on the character on the string, adding print line inside 
+            // the for lop below to avoid wrong information while debugging
             _log.Verbose($"{loggingPrefix} Original data : {stringContent}");
             stringContent = stringContent.Replace("2017-09-01", "2018-02-01").Replace("clientid", "client_id");
             var lines = stringContent.Split(new char[] { '\n' }).ToList();
             int index = -1;
             for (int i = 0; i < lines.Count; i++)
             {
-                if (lines[i].Contains($"secret: {Common.Constants.ManagedIdentity.SecretValue}"))
+                _log.Verbose($"{loggingPrefix} Printing line : {lines[i]}");
+                if (lines[i].Contains($"secret: {Common.Constants.ManagedIdentity.SecretValue}", StringComparison.OrdinalIgnoreCase))
                 {
                     index = i;
                     break;
                 }
             }
-            lines.Insert(index + 1, headerToInsert);
+            if (index != -1) {
+                lines.Insert(index + 1, headerToInsert);
+            }
+            else {
+                lines.Append(headerToInsert);
+            }
             var modifiedRequestString = string.Join('\n', lines);
 
             _log.Verbose($"{loggingPrefix} Sending data : {modifiedRequestString}");
-            return Encoding.ASCII.GetBytes(modifiedRequestString);
+
+            return Encoding.UTF8.GetBytes(modifiedRequestString);
         }
 
         #endregion private members
