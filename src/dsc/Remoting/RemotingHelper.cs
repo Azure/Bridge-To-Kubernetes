@@ -48,13 +48,13 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
         {
             try
             {
-                _log?.Verbose("stop method called")
+                _log?.Verbose("stop method called");
 
                 _appCancellationTokenSource?.CancelAfter(1500);
 
                 _host?.StopAsync();
 
-                _log?.Verbose("successfully stop method executed")
+                _log?.Verbose("successfully stop method executed");
             }
             catch (Exception e)
             {
