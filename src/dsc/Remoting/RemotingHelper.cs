@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.BridgeToKubernetes.Common.Logging;
+using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.BridgeToKubernetes.Exe.Remoting
 {
@@ -44,7 +45,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
             
         }
 
-        public static void Stop()
+        public static void Stop(IHostApplicationLifetime lifetime)
         {
             try
             {
@@ -55,6 +56,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
                 _host?.StopAsync();
 
                 _log?.Verbose("successfully stop method executed");
+                lifetime.
             }
             catch (Exception e)
             {

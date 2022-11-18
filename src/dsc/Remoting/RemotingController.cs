@@ -13,27 +13,17 @@ using Microsoft.BridgeToKubernetes.Common.Logging;
 
 namespace Microsoft.BridgeToKubernetes.Remoting
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class RemotingController : ControllerBase
     {
-        private readonly IHostApplicationLifetime _lifetime;
-        private readonly ILog _log;
 
-        public RemotingController(IHostApplicationLifetime lifetime, ILog log) { 
-            _lifetime = lifetime;
-            _log = log;
-            _log.Info("Remoting Controller Constructor called");
-        }
-
-        [HttpPost("stop")]
+        [HttpGet("stop")]
         public IActionResult Stop()
         {
             try
             {
-                _log.Info("stop controller method is called");
                 RemotingHelper.Stop();
-                //_lifetime.StopApplication();
                 return this.Ok();
             }
             catch (Exception)
