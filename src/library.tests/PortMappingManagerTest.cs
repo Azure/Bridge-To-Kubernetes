@@ -37,7 +37,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         [InlineData(5, 20)]
         [InlineData(10, 3)]
         [InlineData(1, 3)]
-        public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses)
+        public async void GetRemoteToFreeLocalPortMappings_HeadlessService(int numServices, int numAddresses)
         {
             // Set up
             ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
