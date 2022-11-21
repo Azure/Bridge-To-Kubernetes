@@ -441,9 +441,13 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// <summary>
         /// Add Kubernetes environment variables to existing list of environment variables
         /// </summary>
-        private void _AddKubernetesServiceEnv(IDictionary<string, string> envVariables, string serviceName, string host, string protocol, int port)
+        private void _AddKubernetesServiceEnv(IDictionary<string, string> envVariables, string dnsName, string host, string protocol, int port)
         {
-            serviceName = serviceName.ToUpperInvariant();
+            dnsName = dnsName.ToUpperInvariant();
+            // because we are using dns name instead of service we have to retrieve it by splitting when needed
+            // If this ever cause issues we should consider larger refactor where we add serviceName member varaible to EndpointInfo class.
+            string serviceName = dnsName.Split(".").First();
+
             if (string.IsNullOrEmpty(protocol))
             {
                 protocol = "tcp";
