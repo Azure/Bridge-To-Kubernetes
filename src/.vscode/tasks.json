@@ -1,6 +1,31 @@
 {
     "version": "2.0.0",
     "tasks": [
+        // This task is to allow attaching debuger when running dotnet test command, update cwd if you are running UT in a different directory
+        // For more details: https://stackoverflow.com/questions/56290166/how-to-debug-dotnet-test-in-vs-code
+        { 
+            "label": ".NET Core Test with debugger", 
+            "type": "process", 
+            "isBackground": true, 
+            "command": "dotnet", 
+            "args": [ "test" ], 
+            "options": 
+                { 
+                    "cwd": "${workspaceFolder}/library.tests", 
+                    "env": 
+                    { 
+                        "VSTEST_HOST_DEBUG": "1" 
+                    }, 
+                }, 
+            "group": "test", "presentation": 
+                { 
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+            "problemMatcher": [] 
+        },
         {
             "label": "build",
             "command": "dotnet",
