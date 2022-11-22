@@ -408,6 +408,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         continue;
                     }
 
+                    if (endpoint.Subsets == null) {
+                        _log.Info($"Skipping endpoint: '{endpoint.Metadata.Name}' for service '{s.Metadata.Name}' because it has empty subsets.");
+                        continue;
+                    }
+
                     if (!headlessServiceEndpointsToRouteMap.ContainsKey(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty)))
                     {
                         headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);
