@@ -9,10 +9,9 @@
             "ports": [
                 3001
             ],
-            "targetCluster": "bridgeTesting-0812",
+            "targetCluster": "hari-aks",
             "targetNamespace": "todo-app",
-            "useKubernetesServiceEnvironmentVariables": false,
-            "isolateAs": "elvilla-7f7e"
+            "useKubernetesServiceEnvironmentVariables": false
         }
     ]
 }
