@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RuntimeFrameworkVersion>3.1.0</RuntimeFrameworkVersion>
     <TieredCompilation>true</TieredCompilation>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <DebugType>portable</DebugType>

@@ -11,7 +11,8 @@
             ],
             "targetCluster": "hari-aks",
             "targetNamespace": "todo-app",
-            "useKubernetesServiceEnvironmentVariables": false
+            "useKubernetesServiceEnvironmentVariables": false,
+            "isolateAs": "hsubra-21"
         }
     ]
 }
