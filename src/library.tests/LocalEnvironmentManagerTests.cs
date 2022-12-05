@@ -38,7 +38,12 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             endpointInfo2.DnsName = "foo";
             endpointInfo2.LocalIP = System.Net.IPAddress.Parse("127.0.0.2");
             endpointInfo2.Ports = new Common.Models.Settings.PortPair[] { new Common.Models.Settings.PortPair(5049, 80)};
-            workloadInfo.ReachableEndpoints = new List<Common.Models.EndpointInfo>{endpointInfo1, endpointInfo2};
+            Common.Models.EndpointInfo endpointInfo3 = new Common.Models.EndpointInfo();
+            endpointInfo3.DnsName = "kubernetes.default";
+            endpointInfo3.LocalIP = System.Net.IPAddress.Parse("127.0.0.3");
+            endpointInfo3.Ports = new Common.Models.Settings.PortPair[] { new Common.Models.Settings.PortPair(5048, 80)};
+
+            workloadInfo.ReachableEndpoints = new List<Common.Models.EndpointInfo>{endpointInfo1, endpointInfo2, endpointInfo3};
             workloadInfo.EnvironmentVariables = new Dictionary<string, string>();
 
             // Execute
@@ -47,9 +52,10 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             // Validate
             // We should add 8 entries per each service
             // Since one of the services is managed identity for bridge to kubernetes we should also add/update msi_enpoint variable
-            Assert.Equal(8*2 + 1, result.Count());
+            Assert.Equal(8*3 + 1, result.Count());
             ValidateService("foo", result, "tcp", "5049", "127.0.0.2");
             ValidateService(Common.Constants.ManagedIdentity.TargetServiceNameOnLocalMachine, result, "tcp", "5050", "127.0.0.1");
+            ValidateService("kubernetes", result, "tcp", "5048", "");
             Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable], "http://127.0.0.1:5050/metadata/identity/oauth2/token"));
             
         }
