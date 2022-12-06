@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "dsc": {
+      "commandName": "Project",
+      "commandLineArgs": "connect --service stats-api --control-port 51545 --namespace todo-app --local-port 3001",
+      "environmentVariables": {
+        "BRIDGE_ENVIRONMENT": "dev"
+      },
+      "applicationUrl": "C:\\Users\\hsubramanian\\repos\\forked\\Bridge-To-Kubernetes\\src\\dsc\\bin\\Debug\\net6.0\\win-x64\\publish\\"
+    }
+  }
+}
