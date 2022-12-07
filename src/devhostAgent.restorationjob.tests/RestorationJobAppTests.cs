@@ -18,6 +18,7 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
@@ -73,6 +74,31 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
             // Look for all method calls that cast to (dynamic).
             Assert.Equal(knownPatchTypes, allPatchTypes);
         }
+
+        [Fact]
+        public void EnsureCanDeserializePatch1()
+        {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            var deploymentPatch = JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson);
+
+            string name = deploymentPatch.Deployment.Name();
+            string ns = deploymentPatch.Deployment.Namespace();
+
+            Assert.Equal("bikes", name);
+            Assert.Equal("dev", ns);
+        }
+
+        [Fact]
+        public void EnsureCanDeserializePatchType()
+        {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+
+            var propertyName = typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type));
+            string type = JsonHelpers.ParseAndGetProperty<string>(patchStateJson, propertyName);
+
+            Assert.Equal(nameof(DeploymentPatch), type);
+        }
+
 
         [Fact]
         public void EnsureFailedPingsExit()

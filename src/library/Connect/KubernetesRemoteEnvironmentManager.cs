@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
@@ -1032,14 +1033,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             bool dirty = false;
             var patch = new JsonPatchDocument<V1Deployment>();
             var reversePatch = new JsonPatchDocument<V1Deployment>();
-            patch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
-            reversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            patch.ContractResolver = new STJCamelCaseContractResolver();
+            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = deployment.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (deployment.Spec.Replicas != null && deployment.Spec.Replicas.Value != 1)
@@ -1123,14 +1118,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             bool dirty = false;
             var patch = new JsonPatchDocument<V1StatefulSet>();
             var reversePatch = new JsonPatchDocument<V1StatefulSet>();
-            patch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
-            reversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            patch.ContractResolver = new STJCamelCaseContractResolver();
+            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = statefulSet.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (statefulSet.Spec.Replicas != null && statefulSet.Spec.Replicas.Value != 1)
