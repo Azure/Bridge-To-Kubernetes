@@ -25,7 +25,6 @@
     <IsLinuxarm64 Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true' And '$(Configuration)|$(Platform)' == 'arm64'">true</IsLinuxarm64>
     <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
     <IsPackable>true</IsPackable>
-    <NuspecFile>dsc.nuspec</NuspecFile>
   </PropertyGroup>
 
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
