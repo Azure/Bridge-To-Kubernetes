@@ -1,0 +1,445 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  name: 'VSEngSS-MicroBuild2022-1ES'
+  demands:
+  - msbuild
+  - visualstudio
+  - DotNetFramework
+
+variables:
+- name: BuildParameters.dotnetversion
+  value: 6.0.x
+- name: BuildParameters.nugetversion
+  value: 5.9.x
+- name: 'buildConfiguration'
+  value: 'Release'
+- name: 'RunTests'
+  value: 'true'
+
+steps:
+  - checkout: self
+    clean: true
+    fetchTags: false
+    persistCredentials: True
+  - task: PowerShell@2
+    displayName: Set staging/prod build vars for signing and telemetry
+    inputs:
+      targetType: inline
+      script: >-
+        $branchName = $env:BUILD_SOURCEBRANCH
+
+        if ($branchName -eq "refs/heads/main") {
+            Write-Host "##vso[task.setvariable variable=SignTypeToUse]real"
+            Write-Host "Done setting the sign type and telemetry key instance for main branch"
+        }
+
+        else {
+            Write-Host "Not setting the sign type and telemetry key instance for $branchName branch"
+        }
+
+
+        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
+
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
+  - task: MicroBuildSigningPlugin@3
+    displayName: Install Signing Plugin
+    inputs:
+      signType: $(SignTypeToUse)
+      zipSources: false
+  - task: MicroBuildLocalizationPlugin@3
+    displayName: Install Localization Plugin
+  - task: UseDotNet@2
+    displayName: Use .NET Core SDK 6.0.X
+    inputs:
+      version: 6.0.306
+      installationPath: $(Agent.TempDirectory)/dotnet
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager (Windows) (to download runtime pack)
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-x64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: NuGetToolInstaller@1
+    displayName: Use NuGet 6.1.x
+    inputs:
+      versionSpec: 6.1.x
+  - task: NuGetCommand@2
+    displayName: NuGet restore client.sln
+    inputs:
+      solution: src/client.sln
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC (Windows)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c $(BuildConfiguration) -r win-x64 --self-contained false --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: CmdLine@2
+    displayName: Build EndpointManager Launcher using .Net 5
+    inputs:
+      script: >-
+        echo "Publishing EndpointManager Launcher..."
+
+        "C:\Program Files\dotnet\dotnet.exe" publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+
+        echo "Done publishing EndpointManager Launcher..."
+  - task: CopyFiles@2
+    displayName: Copy EndpointManager Launcher to dsc folder
+    inputs:
+      SourceFolder: src/EndpointManagerLauncher/bin/$(BuildConfiguration)/net6.0/win-x64/publish/
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+      TargetFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/EndpointManagerLauncher
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC (OSX)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c $(BuildConfiguration) -r osx-x64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC (Linux)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c $(BuildConfiguration) -r linux-x64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: PowerShell@2
+    displayName: Download kubectl
+    continueOnError: True
+    inputs:
+      targetType: inline
+      script: >
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win/kubectl.exe
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux/kubectl
+  - task: AzurePowerShell@5
+    displayName: 'Azure PowerShell script: InlineScript'
+    enabled: False
+    inputs:
+      ConnectedServiceNameARM: 112cfde4-c0eb-4d77-8a2a-1ae5d6fffed8
+      ScriptType: InlineScript
+      Inline: >
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/kubectl/win' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/win-x64/publish/kubectl/win/kubectl.exe
+
+
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/osx-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/osx-x64/publish/kubectl/osx' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1/linux-x64/publish/kubectl/linux/kubectl
+      errorActionPreference: continue
+      CustomTargetAzurePs: 3.1.0
+  - task: VSBuild@1
+    displayName: Sign Files
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=$(SignTypeToUse)
+      configuration: '$(BuildConfiguration) '
+  - task: CopyFiles@2
+    displayName: Collect files for .zip (Windows)
+    inputs:
+      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/win
+  - task: CopyFiles@2
+    displayName: Collect files for .zip (OSX)
+    inputs:
+      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/osx
+  - task: CopyFiles@2
+    displayName: Collect files for .zip (Linux)
+    inputs:
+      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/linux
+  - task: ArchiveFiles@2
+    displayName: Create .zip file (Windows)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/win
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win.zip
+  - task: ArchiveFiles@2
+    displayName: Create .zip file (OSX)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/osx
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
+  - task: ArchiveFiles@2
+    displayName: Create .zip file (Linux)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/linux
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux.zip
+  - task: PowerShell@2
+    displayName: Generate lks.json for .zip files
+    inputs:
+      targetType: inline
+      script: >
+        $ZipHost = "mindaromaster.blob.core.windows.net"
+
+        if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/staging") {
+            $ZipHost = "mindarostaging.blob.core.windows.net"
+        }
+
+        elseif ($env:BUILD_SOURCEBRANCH -eq "refs/heads/production") {
+            $ZipHost = "bridgetokubernetes.azureedge.net"
+        }
+
+        $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
+
+        $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
+
+        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+
+        # CLI binaries
+
+        $Cli_Win = @{ url="$BlobUrl/lpk-win.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win.zip).Hash)" }
+
+        $Cli_Osx = @{ url="$BlobUrl/lpk-osx.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx.zip).Hash)" }
+
+        $Cli_Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
+
+        # Kubectl binaries
+
+        $Kubectl_Win = @{ url="$BlobLKSUrl/kubectl-win.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+
+        $Kubectl_Osx = @{ url="$BlobLKSUrl/kubectl-osx.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+
+        $Kubectl_Linux = @{ url="$BlobLKSUrl/kubectl-linux.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+
+        #dotnet runtime binaries
+
+        $Dotnet_Win = @{ url="$BlobLKSUrl/dotnetruntime-win.zip"; sha256hash="0FCA9F2AB829C85615007EA646CF436D2E90C9A4095C84C2F9EB3EC0754468A8" }
+
+        $Dotnet_Osx = @{ url="$BlobLKSUrl/dotnetruntime-osx.zip"; sha256hash="D25F8BB708C364678AAA0F3798F5EADD1BE46800376F15D2F12C785C74AF8443" }
+
+        $Dotnet_Linux = @{ url="$BlobLKSUrl/dotnetruntime-linux.zip"; sha256hash="801D9D251D07B9A88195450FCBFD70C7507CEEEF05D5F0E88CC14CEBFCC10F4B" }
+
+        # Win Json
+
+        $Win = @{ dotnetruntime = $Dotnet_Win; kubectl = $Kubectl_Win; bridge = $Cli_Win }
+
+        # OSX Json
+
+        $OSX = @{ dotnetruntime = $Dotnet_Osx; kubectl = $Kubectl_Osx; bridge = $Cli_Osx }
+
+        # Linux Json
+
+        $Linux = @{ dotnetruntime = $Dotnet_Linux; kubectl = $Kubectl_Linux; bridge = $Cli_Linux }
+
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux } | ConvertTo-Json
+
+        $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
+
+        New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+
+        $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+
+        Write-Host $Json
+  - task: ManifestGeneratorTask@0
+    displayName: Manifest Generator for zip
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
+  - task: PublishBuildArtifacts@1
+    displayName: Generate lks.json for .zip files
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
+  - task: DotNetCoreCLI@2
+    displayName: dotnet pack CLI NuGet (Windows)
+    inputs:
+      command: pack
+      publishWebProjects: false
+      projects: >-
+        src/**/client.csproj
+
+        src/**/common.csproj
+
+        src/**/common.auth.csproj
+
+        src/**/common.json.csproj
+
+        src/**/execsvc.client.csproj
+
+        src/**/execsvc.client.autogen.csproj
+
+        src/**/rp.client.csproj
+
+        src/**/common.client.csproj
+      custom: 'pack '
+      arguments: -c $(BuildConfiguration) --no-build --no-restore  /p:outputPath=$(Build.Repository.LocalPath)\src\cli\bin\$(BuildConfiguration)\netcoreapp2.1\publish\ /p:BUILDING_CLIENT_NUGET=true
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+      searchPatternPack: src/dsc/dsc.csproj
+      outputDir: $(Build.ArtifactStagingDirectory)/nuget
+  - task: ManifestGeneratorTask@0
+    displayName: Manifest Generator for nuget
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/nuget
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: nuget'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/nuget
+      ArtifactName: nuget
+      TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
