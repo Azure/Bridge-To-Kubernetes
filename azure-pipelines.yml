@@ -81,6 +81,9 @@ jobs:
     inputs:
       signType: $(SignTypeToUse)
       zipSources: false
+  - task: MicroBuildLocalizationPlugin@3
+    displayName: 'Install Localization Plugin'
+    enabled: True
   - task: UseDotNet@2
     displayName: Use .NET Core SDK 6.0.x
     enabled: True
@@ -138,6 +141,7 @@ jobs:
       rerunFailedTests: true
   - task: CopyFiles@2
     displayName: Collect Loc files
+    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
     enabled: True
     inputs:
       Contents: >-
@@ -154,27 +158,9 @@ jobs:
         src/library/bin/*/*/Microsoft.BridgeToKubernetes.Library.dll
       TargetFolder: $(Build.ArtifactStagingDirectory)/Loc
       OverWrite: true
-  - task: CopyFiles@2
-    displayName: Collect Loc files - bridge
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/production'))
-    enabled: True
-    inputs:
-      Contents: >-
-        src/*/bin/*/*/localize/**/*
-
-        src/*/bin/**/*.lce
-
-        src/bridge/bin/*/*/bridge.dll
-
-        src/endpointmanager/bin/*/*/endpointmanager.dll
-
-        src/common/bin/*/*/Microsoft.BridgeToKubernetes.Common.dll
-
-        src/library/bin/*/*/Microsoft.BridgeToKubernetes.Library.dll
-      TargetFolder: $(Build.ArtifactStagingDirectory)/Loc
-      OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Loc'
+    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/Loc
