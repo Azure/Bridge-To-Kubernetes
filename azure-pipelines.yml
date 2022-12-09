@@ -471,7 +471,7 @@ jobs:
       OverWrite: true
   - task: PublishSymbols@2
     displayName: Enable Source Server
-    condition: and(succeeded())
+    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
     enabled: True
     inputs:
       SymbolsFolder: $(Build.ArtifactStagingDirectory)/symbols
@@ -487,7 +487,7 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: symbols'
-    condition: and(succeeded())
+    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/symbols
