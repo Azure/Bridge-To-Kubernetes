@@ -48,7 +48,7 @@ jobs:
     persistCredentials: True
   - task: PowerShell@2
     displayName: Set staging/prod build vars for signing and telemetry copy
-    enabled: False
+    enabled: True
     inputs:
       targetType: inline
       script: >-
@@ -77,19 +77,19 @@ jobs:
   - task: MicroBuildSigningPlugin@3
     name: ''
     displayName: Install Signing Plugin
-    enabled: False
+    enabled: True
     inputs:
       signType: $(SignTypeToUse)
       zipSources: false
   - task: UseDotNet@2
     displayName: Use .NET Core SDK 6.0.x
-    enabled: False
+    enabled: True
     inputs:
       version: $(BuildParameters.dotnetversion)
       installationPath: $(Agent.TempDirectory)/dotnet
   - task: DotNetCoreCLI@2
     displayName: restore EndpointManager (Windows) (to download runtime pack)
-    enabled: False
+    enabled: True
     inputs:
       command: restore
       projects: src\endpointmanager\endpointmanager.csproj
@@ -100,13 +100,13 @@ jobs:
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x
-    enabled: False
+    enabled: True
     inputs:
       versionSpec: $(BuildParameters.nugetversion)
   - task: NuGetCommand@2
     name: ''
     displayName: NuGet restore client.sln
-    enabled: False
+    enabled: True
     inputs:
       solution: src/client.sln
       selectOrConfig: config
@@ -119,7 +119,7 @@ jobs:
     name: ''
     displayName: Build client.sln for Loc and Tests
     condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-    enabled: False
+    enabled: True
     inputs:
       solution: src/client.sln
       msbuildArgs: -p:Localize=true -p:ConsumeEndpointManager=false
@@ -127,18 +127,18 @@ jobs:
   - task: VSTest@2
     displayName: Run Unit Tests
     condition: and(succeeded(), eq(variables['RunTests'], 'true'))
-    enabled: False
+    enabled: True
     inputs:
       testAssemblyVer2: '**\bin\$(BuildConfiguration)\*\*Tests.dll'
       runSettingsFile: tests/unittests/dotnetcore.runsettings
       runInParallel: true
-      codeCoverageEnabled: false
+      codeCoverageEnabled: True
       testRunTitle: Unit Tests
       failOnMinTestsNotRun: true
       rerunFailedTests: true
   - task: CopyFiles@2
     displayName: Collect Loc files
-    enabled: False
+    enabled: True
     inputs:
       Contents: >-
         src/*/bin/*/*/localize/**/*
@@ -157,7 +157,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect Loc files - bridge
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/production'))
-    enabled: False
+    enabled: True
     inputs:
       Contents: >-
         src/*/bin/*/*/localize/**/*
@@ -175,14 +175,14 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Loc'
-    enabled: False
+    enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/Loc
       ArtifactName: Loc
       TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
   - task: DotNetCoreCLI@2
     displayName: publish DSC (Windows)
-    enabled: False
+    enabled: True
     inputs:
       command: publish
       publishWebProjects: false
@@ -193,7 +193,7 @@ jobs:
       selectOrConfig: config
   - task: CmdLine@2
     displayName: Build EndpointManager Launcher using .Net 5
-    enabled: False
+    enabled: True
     inputs:
       script: >-
         echo "Publishing EndpointManager Launcher..."
@@ -203,7 +203,7 @@ jobs:
         echo "Done publishing EndpointManager Launcher..."
   - task: CopyFiles@2
     displayName: Copy EndpointManager Launcher to dsc folder
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: src/EndpointManagerLauncher/bin/$(BuildConfiguration)/net6.0/win-x64/publish/
       Contents: >-
@@ -214,7 +214,7 @@ jobs:
       OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
-    enabled: False
+    enabled: True
     inputs:
       command: publish
       publishWebProjects: false
@@ -225,7 +225,7 @@ jobs:
       selectOrConfig: config
   - task: DotNetCoreCLI@2
     displayName: publish DSC (Linux)
-    enabled: False
+    enabled: True
     inputs:
       command: publish
       publishWebProjects: false
@@ -237,7 +237,7 @@ jobs:
   - task: PowerShell@2
     displayName: Download kubectl
     continueOnError: True
-    enabled: False
+    enabled: True
     inputs:
       targetType: inline
       script: >
@@ -264,14 +264,14 @@ jobs:
     name: ''
     displayName: Sign Files
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-    enabled: False
+    enabled: True
     inputs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=$(SignTypeToUse)
       configuration: '$(BuildConfiguration) '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish
       Contents: >-
@@ -311,7 +311,7 @@ jobs:
       TargetFolder: $(Agent.TempDirectory)/zip/win
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish
       Contents: >-
@@ -355,7 +355,7 @@ jobs:
       TargetFolder: $(Agent.TempDirectory)/zip/osx
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish
       Contents: >-
@@ -399,7 +399,7 @@ jobs:
       TargetFolder: $(Agent.TempDirectory)/zip/linux
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
-    enabled: False
+    enabled: True
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/win
       includeRootFolder: false
@@ -407,7 +407,7 @@ jobs:
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win.zip
   - task: ArchiveFiles@2
     displayName: Create .zip file (OSX)
-    enabled: False
+    enabled: True
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/osx
       includeRootFolder: false
@@ -415,7 +415,7 @@ jobs:
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
   - task: ArchiveFiles@2
     displayName: Create .zip file (Linux)
-    enabled: False
+    enabled: True
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/linux
       includeRootFolder: false
@@ -423,7 +423,7 @@ jobs:
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux.zip
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
-    enabled: False
+    enabled: True
     inputs:
       targetType: inline
       script: >-
@@ -458,19 +458,19 @@ jobs:
         Write-Host $Json
   - task: ManifestGeneratorTask@0
     displayName: Manifest Generator for zip
-    enabled: False
+    enabled: True
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)/zip
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: zip'
-    enabled: False
+    enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zip
       TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
   - task: CopyFiles@2
     displayName: Collect Build Symbols - dsc
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: src/dsc/bin/$(BuildConfiguration)/netcoreapp3.1
       Contents: >-
@@ -486,14 +486,14 @@ jobs:
   - task: PublishSymbols@2
     displayName: Enable Source Server
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/production'), eq(variables['ForceProductionBuild'], 'true')))
-    enabled: False
+    enabled: True
     inputs:
       SymbolsFolder: $(Build.ArtifactStagingDirectory)/symbols
       SearchPattern: '**/*.pdb'
       SymbolServerType: TeamServices
   - task: CopyFiles@2
     displayName: Copy buildWindowsPDBs.ps1 to artifact directory
-    enabled: False
+    enabled: True
     inputs:
       SourceFolder: build
       Contents: buildWindowsPDBs.ps1
@@ -502,7 +502,7 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: symbols'
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/production'), eq(variables['ForceProductionBuild'], 'true')))
-    enabled: False
+    enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/symbols
       ArtifactName: symbols
@@ -510,7 +510,7 @@ jobs:
   - task: tagBuildOrRelease@0
     displayName: Tag BuildConfiguration
     condition: and(succeeded(), ne(variables['BuildConfiguration'], 'release'))
-    enabled: False
+    enabled: True
     inputs:
       tags: 'BuildConfiguration: $(BuildConfiguration)'
 - job: Pahse_2
@@ -653,7 +653,7 @@ jobs:
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux/kubectl
   - task: AzurePowerShell@5
     displayName: 'Azure PowerShell script: InlineScript'
-    enabled: False
+    enabled: True
     inputs:
       ConnectedServiceNameARM: 112cfde4-c0eb-4d77-8a2a-1ae5d6fffed8
       ScriptType: InlineScript
