@@ -86,7 +86,7 @@ steps:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r win-x64 --self-contained false --no-restore --verbosity detailed
+      arguments: -c $(BuildConfiguration) -r win-x64 --self-contained true --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
@@ -113,7 +113,7 @@ steps:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r osx-x64 --no-restore --self-contained false --verbosity detailed
+      arguments: -c $(BuildConfiguration) -r osx-x64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
@@ -122,7 +122,7 @@ steps:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r linux-x64 --no-restore --self-contained false --verbosity detailed
+      arguments: -c $(BuildConfiguration) -r linux-x64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: PowerShell@2
