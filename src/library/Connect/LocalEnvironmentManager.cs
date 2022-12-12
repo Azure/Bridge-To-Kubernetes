@@ -226,7 +226,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     this._reversePortForwardManager.Start(pfInfo);
                     this._ReportProgress(Resources.ContainerPortAvailableFormat, pfInfo.Port, pfInfo.LocalPort);
+                    if (pfInfo.Port == DevHostConstants.DevHostAgent.Port) {
+                        _log.Warning($"Service to be debug uses same port '{pfInfo.Port}' as Bridge DevHostAgent service does. This can cause conflict. It's recommended to update service to use different port.");
+                    }
                 }
+                perfLogger.SetSucceeded();
             }
         }
 
