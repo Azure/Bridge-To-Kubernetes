@@ -454,6 +454,24 @@ jobs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zip
       TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack CLI NuGet (Windows)'
+    inputs:
+      command: pack
+      feedsToUse: config
+      packagesToPack: src/dsc/dsc.csproj
+      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
+      nobuild: true
+      buildProperties: 'NuspecFile=bin\$(BuildConfiguration)\net6.0\win-x64\publish\dsc.nuspec'
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'Manifest Generator for nuget'
+    inputs:
+      BuildDropPath: '$(Build.ArtifactStagingDirectory)/nuget'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: nuget'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
+      ArtifactName: nuget
   - task: CopyFiles@2
     displayName: Collect Build Symbols - dsc
     enabled: True
@@ -864,42 +882,4 @@ jobs:
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
-  - task: DotNetCoreCLI@2
-    displayName: dotnet pack CLI NuGet (Windows)
-    inputs:
-      command: pack
-      publishWebProjects: false
-      projects: >-
-        src/**/client.csproj
-
-        src/**/common.csproj
-
-        src/**/common.auth.csproj
-
-        src/**/common.json.csproj
-
-        src/**/execsvc.client.csproj
-
-        src/**/execsvc.client.autogen.csproj
-
-        src/**/rp.client.csproj
-
-        src/**/common.client.csproj
-      custom: 'pack '
-      arguments: -c $(BuildConfiguration) --no-build --no-restore  /p:outputPath=$(Build.Repository.LocalPath)\src\cli\bin\$(BuildConfiguration)\netcoreapp2.1\publish\ /p:BUILDING_CLIENT_NUGET=true
-      zipAfterPublish: false
-      modifyOutputPath: false
-      selectOrConfig: config
-      searchPatternPack: src/dsc/dsc.csproj
-      outputDir: $(Build.ArtifactStagingDirectory)/nuget
-  - task: ManifestGeneratorTask@0
-    displayName: Manifest Generator for nuget
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)/nuget
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: nuget'
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/nuget
-      ArtifactName: nuget
-      TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
 ...
