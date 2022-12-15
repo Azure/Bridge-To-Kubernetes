@@ -183,6 +183,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
             // Find a free port to start portforwarding for devhostagent
             _devHostAgentLocalPort = PortManagementUtilities.GetAvailableLocalPort();
+            _log.Verbose("devhost agent local port:", _devHostAgentLocalPort);
             _devHostAgentExecutorClient = _devHostAgentExecutorClientFactory(_devHostAgentLocalPort);
 
             _portForwardManager.StartContainerPortForward(

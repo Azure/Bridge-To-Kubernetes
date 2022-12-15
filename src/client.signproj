@@ -48,6 +48,7 @@
         $(SearchDir)\KubernetesClient.basic.dll;
         $(SearchDir)\KubernetesClient.models.dll;
         $(SearchDir)\kubectl.exe;
+        $(SearchDir)\MessagePack.Annotations.dll;
         $(SearchDir)\MessagePack.dll;
         $(SearchDir)\Minimatch.dll;
         $(SearchDir)\Newtonsoft.Json.dll;

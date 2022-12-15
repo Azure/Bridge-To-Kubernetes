@@ -266,7 +266,7 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
                 _connection = null;
                 try
                 {
-                    c.DisposeAsync().Wait(100);
+                    c.DisposeAsync().AsTask().Wait(100);
                 }
                 catch (Exception)
                 {

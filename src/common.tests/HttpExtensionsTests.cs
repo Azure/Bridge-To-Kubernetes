@@ -202,7 +202,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
                 var wrapper = response.AsWrapper();
                 Assert.Equal(response.ReasonPhrase, wrapper.ReasonPhrase);
                 Assert.Equal(response.StatusCode, wrapper.StatusCode);
-                Assert.Null(wrapper.Content);
+                Assert.Empty(wrapper.Content);
             }
         }
 
