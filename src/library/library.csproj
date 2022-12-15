@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <RuntimeIdentifiers>win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>Microsoft.BridgeToKubernetes.Library</AssemblyName>
     <RootNamespace>Microsoft.BridgeToKubernetes.Library</RootNamespace>
@@ -41,8 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0.0" />
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -55,7 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\EndpointManager\bin\$(Configuration)\netcoreapp2.1\**" Condition="'$(BUILDING_CLIENT_NUGET)' == 'true'">
+    <Content Include="..\EndpointManager\bin\$(Configuration)\net6.0\**" Condition="'$(BUILDING_CLIENT_NUGET)' == 'true'">
       <Pack>true</Pack>
       <PackagePath>contentFiles\any\any;content</PackagePath>
     </Content>

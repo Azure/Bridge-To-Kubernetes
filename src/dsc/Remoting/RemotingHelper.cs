@@ -19,6 +19,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
     {
         private static CancellationTokenSource _appCancellationTokenSource;
         private static ILog _log;
+        private static IWebHost _host;
 
         public static void StartRemotingServer(
             Func<IWebHostBuilder> webHostBuilderFactory,
@@ -28,12 +29,12 @@ namespace Microsoft.BridgeToKubernetes.Exe.Remoting
         {
             _appCancellationTokenSource = appCancellationTokenSource;
             _log = log;
-            var host = webHostBuilderFactory.Invoke()
+            _host = webHostBuilderFactory.Invoke()
                         .UseKestrel()
                         .UseStartup<Startup>()
                         .UseUrls($"http://localhost:{port}")
                         .Build();
-            host.StartAsync(_appCancellationTokenSource.Token).Forget();
+            _host.StartAsync(_appCancellationTokenSource.Token).Forget();
             log.Verbose($"Remoting started listening on {port}");
         }
 
