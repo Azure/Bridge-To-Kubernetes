@@ -48,7 +48,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         public async Task EnsureClientInvokeWrapperHandlesIOExceptions()
         {
             Expression<Func<Task<HttpOperationResponse<V1PodList>>>> listPodsInNamespaceExpression =
-                                                                            () => _fakeRestClient.ListNamespacedPodWithHttpMessagesAsync(
+                                                                            () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
                                                                                             A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
@@ -74,7 +74,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         public async Task EnsureClientInvokeWrapperHandlesNotFound()
         {
             Expression<Func<Task<HttpOperationResponse<V1PodList>>>> listPodsInNamespaceExpression =
-                                                                            () => _fakeRestClient.ListNamespacedPodWithHttpMessagesAsync(
+                                                                            () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
                                                                                             A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
@@ -92,7 +92,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         public async Task ListPodsInNamespaceTest()
         {
             Expression<Func<Task<HttpOperationResponse<V1PodList>>>> listAllPodsInNamespaceExpression =
-                                                                            () => _fakeRestClient.ListNamespacedPodWithHttpMessagesAsync(
+                                                                            () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
                                                                                             A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
@@ -120,13 +120,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         public async Task ListServicesInNamespace()
         {
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listServiceForAllNamespacesExpression =
-                                                                                () => _fakeRestClient.ListServiceForAllNamespacesWithHttpMessagesAsync(
+                                                                                () => _fakeRestClient.CoreV1.ListServiceForAllNamespacesWithHttpMessagesAsync(
                                                                                                                         A<bool?>._, A<string>._, A<string>._, A<string>._,
                                                                                                                         A<int?>._, A<bool?>._, A<string>._, A<string>._, A<int?>._, A<bool?>._,
                                                                                                                         A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listNamespacedServiceExpression =
-                                                                                () => _fakeRestClient.ListNamespacedServiceWithHttpMessagesAsync(
+                                                                                () => _fakeRestClient.CoreV1.ListNamespacedServiceWithHttpMessagesAsync(
                                                                                                                         A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                                                         A<string>._, A<int?>._, A<string>._, A<string>._, A<int?>._,
                                                                                                                         A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
@@ -154,13 +154,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         public async Task ListServicesInAllNamespaces()
         {
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listServiceForAllNamespacesExpression =
-                                                                                () => _fakeRestClient.ListServiceForAllNamespacesWithHttpMessagesAsync(
+                                                                                () => _fakeRestClient.CoreV1.ListServiceForAllNamespacesWithHttpMessagesAsync(
                                                                                                                         A<bool?>._, A<string>._, A<string>._, A<string>._,
                                                                                                                         A<int?>._, A<bool?>._, A<string>._, A<string>._, A<int?>._, A<bool?>._,
                                                                                                                         A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listNamespacedServiceExpression =
-                                                                                () => _fakeRestClient.ListNamespacedServiceWithHttpMessagesAsync(
+                                                                                () => _fakeRestClient.CoreV1.ListNamespacedServiceWithHttpMessagesAsync(
                                                                                                                         A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                                                         A<string>._, A<int?>._, A<string>._, A<string>._, A<int?>._,
                                                                                                                         A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
