@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 DEFAULT_INSTALL_LOCATION="/app/kubectl/linux"
