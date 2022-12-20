@@ -1,6 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
+        // This configuration is used together with task to attahed debuger when running dotnet test command
+        // More details on how to run it: // For more details: https://stackoverflow.com/questions/56290166/how-to-debug-dotnet-test-in-vs-code
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        },
         {
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
@@ -8,10 +15,10 @@
             "name": "bridge",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "BuildAndPublishWindows", // Replace by BuildAndPublishWindows as needed
+            "preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
             // If you have changed target frameworks, make sure to update the program path.
             // Replace osx-x64 with win-x64 if you are running in windows
-            "program": "${workspaceFolder}/dsc/bin/Debug/netcoreapp3.1/win-x64/dsc.dll",
+            "program": "${workspaceFolder}/dsc/bin/Debug/net6.0/osx-x64/dsc.dll",
             "args": ["connect", "--service", "bikesharingweb", "--local-port", "3000", "--namespace", "bikes"],
             //"args": ["prep-connect", "--service", "stats-api"],// "--local-port", "3001", "--use-kubernetes-service-environment-variables"],
             "env": {

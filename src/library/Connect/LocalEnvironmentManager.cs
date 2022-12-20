@@ -299,7 +299,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             using (var perfLogger = _log.StartPerformanceLogger(Events.LocalEnvironmentManager.AreaName, Events.LocalEnvironmentManager.Operations.GetLocalEnvironment))
             {
                 await this._LoadAdditionalServiceEnvAsync(remoteAgentLocalPort, workloadInfo, localProcessConfig, cancellationToken);
-                var result = this._CreateEnvVariablesForK8s(workloadInfo);
+                var result = this.CreateEnvVariablesForK8s(workloadInfo);
                 perfLogger.SetSucceeded();
                 perfLogger.SetProperty("EnvVarCount", result.Count);
                 return result;
@@ -415,7 +415,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// <summary>
         /// Re-create the Kubernetes service related environment variables.
         /// </summary>
-        private IDictionary<string, string> _CreateEnvVariablesForK8s(WorkloadInfo workloadInfo)
+        public IDictionary<string, string> CreateEnvVariablesForK8s(WorkloadInfo workloadInfo)
         {
             Dictionary<string, string> result = new Dictionary<string, string>(workloadInfo.EnvironmentVariables);
             foreach (var endpoint in workloadInfo.ReachableEndpoints)
@@ -441,9 +441,13 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// <summary>
         /// Add Kubernetes environment variables to existing list of environment variables
         /// </summary>
-        private void _AddKubernetesServiceEnv(IDictionary<string, string> envVariables, string serviceName, string host, string protocol, int port)
+        private void _AddKubernetesServiceEnv(IDictionary<string, string> envVariables, string dnsName, string host, string protocol, int port)
         {
-            serviceName = serviceName.ToUpperInvariant();
+            dnsName = dnsName.ToUpperInvariant();
+            // because we are using dns name instead of service we have to retrieve it by splitting when needed
+            // If this ever cause issues we should consider larger refactor where we add serviceName member varaible to EndpointInfo class.
+            string serviceName = dnsName.Split(".").First();
+
             if (string.IsNullOrEmpty(protocol))
             {
                 protocol = "tcp";
@@ -468,6 +472,12 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             envVariables[$"{serviceName}_SERVICE_PORT"] = port.ToString();
             envVariables[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
             envVariables[$"{serviceName}_SERVICE_HOST"] = host;
+
+            // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable
+            // from dns name to ip:port 
+            if (this._useKubernetesServiceEnvironmentVariables && StringComparer.OrdinalIgnoreCase.Equals(serviceName, Common.Constants.ManagedIdentity.TargetServiceNameOnLocalMachine)) {
+                envVariables[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = "http://" + host + ":" + port + "/metadata/identity/oauth2/token";
+            }
         }
 
         /// <summary>

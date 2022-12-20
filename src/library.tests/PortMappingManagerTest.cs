@@ -10,6 +10,7 @@ using System.Threading;
 using Autofac;
 using FakeItEasy;
 using k8s.Models;
+using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -18,14 +19,17 @@ using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Library.Tests
 {
-    public class WorkloadInformationProviderTests : TestsBase
+    public class PortMappingManagerTest : TestsBase
     {
         private IWorkloadInformationProvider _workloadInformationProvider;
+        private IPortMappingManager _portMappingManager;
 
-        public WorkloadInformationProviderTests()
+        public PortMappingManagerTest()
         {
             var remoteContainerConnectionDetails = new AsyncLazy<RemoteContainerConnectionDetails>(async () => _autoFake.Resolve<RemoteContainerConnectionDetails>());
             _workloadInformationProvider = _autoFake.Resolve<WorkloadInformationProvider>(TypedParameter.From(remoteContainerConnectionDetails));
+            A.CallTo(() => _autoFake.Resolve<IPlatform>().IsOSX).Returns(true);
+            _portMappingManager = _autoFake.Resolve<PortMappingManager>();
         }
 
         [Theory]
@@ -33,25 +37,30 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         [InlineData(5, 20)]
         [InlineData(10, 3)]
         [InlineData(1, 3)]
-        public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses)
+        public async void GetRemoteToFreeLocalPortMappings_HeadlessService(int numServices, int numAddresses)
         {
+            // Set up
             ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
-            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
-            // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
-            Assert.Equal((numServices-1) * (numAddresses), result.Count());
-            foreach (var endpoint in result) {
-                if (endpoint.Ports.Any()) {
-                    Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
-                }
-            }
+            var endpoints = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             
+            // Method to be tested
+            endpoints = _portMappingManager.GetRemoteToFreeLocalPortMappings(endpoints);
+
+            // Verification
+            Assert.Equal(numServices * (numAddresses), endpoints.Count());
+            var assignedPorts = new HashSet<int>();
+            foreach (var endpoint in endpoints) {
+                foreach (var port in endpoint.Ports) {
+                    Assert.NotEqual(port.LocalPort, -1);
+                    Assert.False(assignedPorts.Contains(port.LocalPort));
+                    assignedPorts.Add(port.LocalPort);
+                }
+            }   
         }
 
         private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction)
         {
             var serviceList = new List<V1Service>();
-            // introducing this variable so we can add an endpoint with empty subset to have crash coverage
-            bool addSubset = false;
             for (int i = 0; i < numServices; i++)
             {
                 serviceList.Add(new V1Service()
@@ -68,39 +77,28 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                         Name = namingFunction(i)
                     }
                 });
-                var subsets = new List<V1EndpointSubset>()
+                var endPoint = new V1Endpoints()
+                {
+                    Subsets = new List<V1EndpointSubset>()
                         {
                             new V1EndpointSubset()
                             {
                                 Ports = new List<Corev1EndpointPort> { new Corev1EndpointPort(port: 80, protocol: "TCP") },
                                 Addresses =  new List<V1EndpointAddress>()
                             }
-                        };
-                if (!addSubset) {
-                    subsets = null;
-                }
-                var endPoint = new V1Endpoints()
-                {
-                    Subsets = subsets,
+                        },
                     Metadata = new V1ObjectMeta()
                     {
                         Name = $"{namingFunction(i)}"
                     }
                 };
-                if (addSubset) {
-                    for (int j = 0; j < numAddresses; j++)
+                for (int j = 0; j < numAddresses; j++)
+                {
+                    endPoint.Subsets[0].Addresses.Add(new V1EndpointAddress
                     {
-                        endPoint.Subsets[0].Addresses.Add(new V1EndpointAddress
-                        {
-                            Hostname = addressHostNamingFunction(j)
-                        });
-                    }
+                        Hostname = addressHostNamingFunction(j)
+                    });
                 }
-                else {
-                    // we only want to skip addign subset in one, the rest should have subsets
-                    addSubset = true;
-                }
-
                 A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().GetEndpointInNamespaceAsync(namingFunction(i), A<string>._, A<CancellationToken>._)).Returns(endPoint);
             }
             A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListServicesInNamespaceAsync(default, default, default)).WithAnyArguments().Returns(new V1ServiceList(serviceList));

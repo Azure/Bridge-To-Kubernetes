@@ -1,5 +1,5 @@
 # Build container
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine3.12 AS build-alpine
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine3.16 AS build-alpine
 
 ARG Configuration=Release
 ARG TelemetryType=TELEMETRY_DEVELOPMENT
@@ -17,10 +17,10 @@ COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /output -r linux-musl-x64 devhostAgent.restorationjob.csproj
+RUN dotnet publish -c ${Configuration} -o /output devhostAgent.restorationjob.csproj
 
 # Final container
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine3.12 as final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
 
 # Setup common tools
 COPY /build/setup-alpine-tools.sh .

@@ -1,3 +1,4 @@
+
 # Bridge to Kubernetes
 
 [![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/Mindaro/Bridge-to-Kubernetes?branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build/latest?definitionId=17283&branchName=main)
@@ -18,9 +19,19 @@ Welcome to Bridge-To-Kubernetes! Bridge to Kubernetes extends the Kubernetes per
 - Test end-to-end during development time. Select an existing service in the cluster to route to your development machine where an instance of that service is running locally. Request initiated through the frontend of the application running in Kubernetes will route between services running in the cluster until the service you specified to redirect is called. 
 
 ## Documentation
-- [Overview](https://docs.microsoft.com/en-us/visualstudio/bridge/overview-bridge-to-kubernetes)
-- [Visual Studio](https://docs.microsoft.com/en-us/visualstudio/bridge/bridge-to-kubernetes-vs)
-- [Visual Studio Code](https://docs.microsoft.com/en-us/visualstudio/bridge/bridge-to-kubernetes-vs-codeart)
+- [Overview](https://learn.microsoft.com/visualstudio/bridge/overview-bridge-to-kubernetes)
+- [Visual Studio](https://learn.microsoft.com/visualstudio/bridge/bridge-to-kubernetes-vs)
+- [Visual Studio Code](https://learn.microsoft.com/visualstudio/bridge/bridge-to-kubernetes-vs-code)
+
+## CLI tool installation
+- ```curl -fsSL https://raw.githubusercontent.com/Azure/Bridge-To-Kubernetes/main/scripts/install.sh | bash```
+- Supports Linux, Darwin, Windows - use WSL (installation link [here](https://learn.microsoft.com/en-us/windows/wsl/install)) or Git Bash (installation link [here](https://git-scm.com/))
+
+## How to use the CLI
+- run the following command ``` dsc connect --service <service-name> --local-port <port-number> --namespace <namespace> --use-kubernetes-service-environment-variables ```
+- ```example is dsc connect --service stats-api --local-port 3001 --namespace todo-app```
+- for help  ``` dsc --help```
+- for version ```dsc --version```
 
 ## Microsoft Open Source Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/)
