@@ -177,16 +177,17 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
-  - task: CmdLine@2
-    displayName: Build EndpointManager Launcher using .Net 5
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
     inputs:
-      script: >-
-        echo "Publishing EndpointManager Launcher..."
-
-        "C:\Program Files\dotnet\dotnet.exe" publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
-
-        echo "Done publishing EndpointManager Launcher..."
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c $(BuildConfiguration) -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
   - task: CopyFiles@2
     displayName: Copy EndpointManager Launcher to dsc folder
     enabled: True
