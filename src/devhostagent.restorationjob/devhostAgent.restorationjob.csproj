@@ -3,10 +3,10 @@
   <PropertyGroup>
     <AssemblyName>restorationjob</AssemblyName>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <TieredCompilation>true</TieredCompilation>
-    <RuntimeIdentifiers>linux-x64;linux-musl-x64;win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;linux-arm64;linux-musl-arm64;linux-musl-x64;win-x64</RuntimeIdentifiers>
     <AssemblyVersion>1.0</AssemblyVersion>
     <RootNamespace>Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob</RootNamespace>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="0.4.1">
+    <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

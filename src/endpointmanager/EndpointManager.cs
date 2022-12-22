@@ -171,6 +171,7 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
                         }
                         catch (Exception e)
                         {
+                            _log.Info("exception is:{e.Message}");
                             _log.Exception(e);
                         }
                     }
