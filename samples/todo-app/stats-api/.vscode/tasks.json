@@ -4,14 +4,15 @@
         {
             "label": "bridge-to-kubernetes.resource",
             "type": "bridge-to-kubernetes.resource",
-            "resource": "stats-api",
+            "resource": "<yourservicename>",
             "resourceType": "service",
             "ports": [
                 3001
             ],
-            "targetCluster": "bridgeTesting-01214",
-            "targetNamespace": "todo-app",
-            "useKubernetesServiceEnvironmentVariables": false
+            "targetCluster": "<yourclustername>",
+            "targetNamespace": "<yournamespace>",
+            "useKubernetesServiceEnvironmentVariables": false,
+            "isolateAs": "yourisolatedroute"
         }
     ]
 }
