@@ -19,6 +19,16 @@ variables:
   value: 6.0.x
 - name: BuildParameters.nugetversion
   value: 5.9.x
+- name: BuildConfiguration
+  value: Release
+- name: RunTests
+  value: true
+- name: SignTypeToUse
+  value: real
+- name: TeamName
+  value: Mindaro
+- name: TelemetryType
+  value: TELEMETRY_DEVELOPMENT
 trigger:
   branches:
     include:
