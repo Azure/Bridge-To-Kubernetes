@@ -23,7 +23,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json.Tests
         {
             var settings = (JsonSerializerSettings)JsonHelpers.CreateSerializerSettings();
             Assert.Equal(Formatting.None, settings.Formatting);
-            Assert.IsType<CamelCasePropertyNamesContractResolver>(settings.ContractResolver);
+            Assert.IsType<STJCamelCaseContractResolver>(settings.ContractResolver);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json.Tests
         {
             var settings = (JsonSerializerSettings)JsonHelpers.CreateSerializerSettings(indented: true);
             Assert.Equal(Formatting.Indented, settings.Formatting);
-            Assert.IsType<CamelCasePropertyNamesContractResolver>(settings.ContractResolver);
+            Assert.IsType<STJCamelCaseContractResolver>(settings.ContractResolver);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json.Tests
         {
             var settings = (JsonSerializerSettings)JsonHelpers.CreateSerializerSettings(camelCaseContextResolver: false);
             Assert.Equal(Formatting.None, settings.Formatting);
-            Assert.IsType<DefaultContractResolver>(settings.ContractResolver);
+            Assert.IsType<STJContractResolver>(settings.ContractResolver);
         }
 
         [Fact]
