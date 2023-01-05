@@ -19,6 +19,16 @@ variables:
   value: 6.0.x
 - name: BuildParameters.nugetversion
   value: 5.9.x
+- name: BuildConfiguration
+  value: Release
+- name: RunTests
+  value: true
+- name: SignTypeToUse
+  value: real
+- name: TeamName
+  value: Mindaro
+- name: TelemetryType
+  value: TELEMETRY_DEVELOPMENT
 trigger:
   branches:
     include:
@@ -63,11 +73,7 @@ jobs:
         if ($branchName -eq "refs/heads/main") {
             Write-Host "##vso[task.setvariable variable=SignTypeToUse]real"
             Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
-            Write-Host "Done setting the sign type and telemetry key instance for staging branch"
-        }
-
-        else {
-            Write-Host "Not setting the sign type and telemetry key instance for $branchName branch"
+            Write-Host "Done setting the sign type and telemetry key instance for main branch"
         }
 
 
@@ -177,16 +183,17 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
-  - task: CmdLine@2
-    displayName: Build EndpointManager Launcher using .Net 5
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
     inputs:
-      script: >-
-        echo "Publishing EndpointManager Launcher..."
-
-        "C:\Program Files\dotnet\dotnet.exe" publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
-
-        echo "Done publishing EndpointManager Launcher..."
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c $(BuildConfiguration) -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
   - task: CopyFiles@2
     displayName: Copy EndpointManager Launcher to dsc folder
     enabled: True
@@ -249,7 +256,7 @@ jobs:
   - task: VSBuild@1
     name: ''
     displayName: Sign Files
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
     enabled: True
     inputs:
       solution: src/client.signproj
@@ -415,14 +422,6 @@ jobs:
       script: >-
         $ZipHost = "mindaromaster.blob.core.windows.net"
 
-        if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/staging") {
-            $ZipHost = "mindarostaging.blob.core.windows.net"
-        }
-
-        elseif ($env:BUILD_SOURCEBRANCH -eq "refs/heads/production") {
-            $ZipHost = "bridgetokubernetes.azureedge.net"
-        }
-
         $BlobUrl = "https://$ZipHost/zip/1.0.$env:BUILD_BUILDNUMBER"
 
         $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
@@ -517,7 +516,7 @@ jobs:
     enabled: True
     inputs:
       tags: 'BuildConfiguration: $(BuildConfiguration)'
-- job: Pahse_2
+- job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
   timeoutInMinutes: 120
   cancelTimeoutInMinutes: 1
@@ -544,11 +543,6 @@ jobs:
             Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
             Write-Host "Done setting the sign type and telemetry key instance for staging branch"
         }
-
-        else {
-            Write-Host "Not setting the sign type and telemetry key instance for $branchName branch"
-        }
-
 
         Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
 
@@ -813,14 +807,6 @@ jobs:
       targetType: inline
       script: >
         $ZipHost = "mindaromaster.blob.core.windows.net"
-
-        if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/staging") {
-            $ZipHost = "mindarostaging.blob.core.windows.net"
-        }
-
-        elseif ($env:BUILD_SOURCEBRANCH -eq "refs/heads/production") {
-            $ZipHost = "bridgetokubernetes.azureedge.net"
-        }
 
         $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
 

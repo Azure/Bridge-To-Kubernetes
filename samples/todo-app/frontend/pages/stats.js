@@ -27,7 +27,7 @@ export default class Stats extends React.Component {
 
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
-            return await res.json();
+            return await res.json("");
         }
         else {
             return res.text();

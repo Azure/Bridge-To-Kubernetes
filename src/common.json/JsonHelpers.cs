@@ -21,7 +21,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
     {
         public static Encoding DefaultEncoding { get; } = Encoding.UTF8;
 
-        private static IContractResolver CamelCaseContractResolver { get; } = new CamelCasePropertyNamesContractResolver();
+        private static IContractResolver ContractResolver { get; } = new STJCamelCaseContractResolver();
 
         private static IList<JsonConverter> DefaultConverters { get; } = new List<JsonConverter>
         {
@@ -75,12 +75,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
         /// <returns>Returns 'object' to prevent binding issues when clients reference specific versions of Newtonsoft.Json</returns>
         public static object CreateSerializerSettings(bool indented = false, bool camelCaseContextResolver = true)
         {
+            IContractResolver contractResolver = camelCaseContextResolver ? (IContractResolver)new STJCamelCaseContractResolver() : new STJContractResolver();
             return new JsonSerializerSettings
             {
                 Formatting = indented ? Formatting.Indented : Formatting.None,
                 TypeNameHandling = TypeNameHandling.None, // SDL Requirements dictate that we use this value
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = camelCaseContextResolver ? CamelCaseContractResolver : new DefaultContractResolver(),
+                ContractResolver = contractResolver,
                 Converters = DefaultConverters,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 Error = (object sender, ErrorEventArgs errorArgs) =>
@@ -121,6 +122,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         /// <summary>
         /// This contract resolver is used to ignore particular fields when serializing.
+        /// TODO: Should this derive from a camelcase resolver?  Not sure of use cases for this.
         /// </summary>
         private class PropertyIgnoreSerializerContractResolver : DefaultContractResolver
         {
