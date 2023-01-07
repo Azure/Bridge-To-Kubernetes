@@ -21,19 +21,34 @@ parameters:
     - none
     - test
     - real
+  - name: TelemetryType
+    displayName: Telemetry Type so that correct application insights key is selected
+    default: 'TELEMETRY_DEVELOPMENT'
+    values:
+    - TELEMETRY_DEVELOPMENT
+    - TELEMETRY_STAGING
+    - TELEMETRY_PRODUCTION
+  - name: BuildConfiguration
+    displayName: BuildConfiguration to be used
+    default: 'Release'
+    values:
+    - Release
+    - Debug
+  - name: RunTests
+    displayName: Run unit test cases
+    type: boolean
+    default: true
+    values:
+    - true
+    - false
 variables:
 - name: BuildParameters.dotnetversion
   value: 6.0.x
 - name: BuildParameters.nugetversion
   value: 5.9.x
-- name: BuildConfiguration
-  value: Release
-- name: RunTests
-  value: true
 - name: TeamName
   value: Mindaro
-- name: TelemetryType
-  value: TELEMETRY_DEVELOPMENT
+
 trigger:
   branches:
     include:
@@ -76,7 +91,7 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
             Write-Host "Done setting the sign type and telemetry key instance for main branch"
         }
 
@@ -87,6 +102,7 @@ jobs:
   - task: MicroBuildSigningPlugin@3
     name: ''
     displayName: Install Signing Plugin
+    condition: and(succeeded(), ne(parameters.SignTypeToUse, 'none'))
     enabled: True
     inputs:
       signType: ${{ parameters.SignTypeToUse }}
@@ -131,18 +147,18 @@ jobs:
   - task: VSBuild@1
     name: ''
     displayName: Build client.sln for Loc and Tests
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       solution: src/client.sln
       msbuildArgs: -p:Localize=true -p:ConsumeEndpointManager=false
-      configuration: $(BuildConfiguration)
+      configuration: ${{ parameters.BuildConfiguration }}
   - task: VSTest@2
     displayName: Run Unit Tests
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
-      testAssemblyVer2: '**\bin\$(BuildConfiguration)\*\*Tests.dll'
+      testAssemblyVer2: '**\bin\${{ parameters.BuildConfiguration }}\*\*Tests.dll'
       runSettingsFile: tests/unittests/dotnetcore.runsettings
       runInParallel: true
       codeCoverageEnabled: True
@@ -151,7 +167,7 @@ jobs:
       rerunFailedTests: true
   - task: CopyFiles@2
     displayName: Collect Loc files
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       Contents: >-
@@ -170,7 +186,7 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Loc'
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/Loc
@@ -183,7 +199,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r win-x64 --no-restore --self-contained true --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -194,7 +210,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
-      arguments: -c $(BuildConfiguration) -r win-x64 --no-restore --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -202,12 +218,12 @@ jobs:
     displayName: Copy EndpointManager Launcher to dsc folder
     enabled: True
     inputs:
-      SourceFolder: src/EndpointManagerLauncher/bin/$(BuildConfiguration)/net6.0/win-x64/publish/
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/
       Contents: >-
         **/*
 
         !**/*.pdb
-      TargetFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/EndpointManagerLauncher
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/EndpointManagerLauncher
       OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
@@ -216,7 +232,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r osx-x64 --no-restore --self-contained true --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -227,7 +243,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r linux-x64 --no-restore --self-contained true --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-x64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -238,39 +254,39 @@ jobs:
     inputs:
       targetType: inline
       script: >
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win/kubectl.exe
-
-
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl' -ItemType Directory
-
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
-
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win/kubectl.exe
 
 
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path './src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     name: ''
     displayName: Sign Files
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
-      configuration: '$(BuildConfiguration) '
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish
       Contents: >-
         **/*
 
@@ -310,7 +326,7 @@ jobs:
     displayName: Collect files for .zip (OSX)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish
       Contents: >-
         **/*
 
@@ -354,7 +370,7 @@ jobs:
     displayName: Collect files for .zip (Linux)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish
       Contents: >-
         **/*
 
@@ -465,7 +481,7 @@ jobs:
       packagesToPack: src/dsc/dsc.csproj
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
-      buildProperties: 'NuspecFile=bin\$(BuildConfiguration)\net6.0\win-x64\publish\dsc.nuspec'
+      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Manifest Generator for nuget'
     inputs:
@@ -479,7 +495,7 @@ jobs:
     displayName: Collect Build Symbols - dsc
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0
       Contents: >-
         */publish/dsc.?(pdb|exe|dll|)
 
@@ -492,7 +508,7 @@ jobs:
       OverWrite: true
   - task: PublishSymbols@2
     displayName: Enable Source Server
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       SymbolsFolder: $(Build.ArtifactStagingDirectory)/symbols
@@ -508,7 +524,7 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: symbols'
-    condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/symbols
@@ -516,10 +532,10 @@ jobs:
       TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
   - task: tagBuildOrRelease@0
     displayName: Tag BuildConfiguration
-    condition: and(succeeded(), ne(variables['BuildConfiguration'], 'release'))
+    condition: and(succeeded(), ne(parameters.BuildConfiguration, 'release'))
     enabled: True
     inputs:
-      tags: 'BuildConfiguration: $(BuildConfiguration)'
+      tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
   timeoutInMinutes: 120
@@ -543,7 +559,7 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
             Write-Host "Done setting the sign type and telemetry key instance for staging branch"
         }
 
@@ -588,7 +604,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r win-x64 --self-contained false --no-restore --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --self-contained false --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: CmdLine@2
@@ -603,19 +619,19 @@ jobs:
   - task: CopyFiles@2
     displayName: Copy EndpointManager Launcher to dsc folder
     inputs:
-      SourceFolder: src/EndpointManagerLauncher/bin/$(BuildConfiguration)/net6.0/win-x64/publish/
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/
       Contents: >-
         **/*
 
         !**/*.pdb
-      TargetFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/EndpointManagerLauncher
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/EndpointManagerLauncher
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
     inputs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r osx-x64 --no-restore --self-contained false --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
@@ -624,7 +640,7 @@ jobs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
-      arguments: -c $(BuildConfiguration) -r linux-x64 --no-restore --self-contained false --verbosity detailed
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-x64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: PowerShell@2
@@ -633,35 +649,35 @@ jobs:
     inputs:
       targetType: inline
       script: >
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish/kubectl/win/kubectl.exe
-
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl' -ItemType Directory
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
-
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win/kubectl.exe
 
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     displayName: Sign Files
     inputs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
-      configuration: '$(BuildConfiguration) '
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/win-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish
       Contents: >-
         **/*
 
@@ -700,7 +716,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/osx-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish
       Contents: >-
         **/*
 
@@ -743,7 +759,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
-      SourceFolder: src/dsc/bin/$(BuildConfiguration)/net6.0/linux-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish
       Contents: >-
         **/*
 
