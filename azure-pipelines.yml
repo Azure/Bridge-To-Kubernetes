@@ -24,7 +24,7 @@ variables:
 - name: RunTests
   value: true
 - name: SignTypeToUse
-  value: real
+  value: test
 - name: TeamName
   value: Mindaro
 - name: TelemetryType
@@ -71,7 +71,7 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=SignTypeToUse]real"
+            Write-Host "##vso[task.setvariable variable=SignTypeToUse]test"
             Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
             Write-Host "Done setting the sign type and telemetry key instance for main branch"
         }
@@ -539,7 +539,7 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=SignTypeToUse]real"
+            Write-Host "##vso[task.setvariable variable=SignTypeToUse]test"
             Write-Host "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
             Write-Host "Done setting the sign type and telemetry key instance for staging branch"
         }
