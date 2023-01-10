@@ -49,15 +49,18 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                 return remoteContainerConnectionDetails;
             }
 
-            // Check if restoration pod is present. This is an indication that previous session is still connected or it has not finished restoring yet.
+            // Check if restoration pod is present and in running state. This is an indication that previous session is still connected or it has not finished restoring yet.
             var allPods = (await _kubernetesClient.ListPodsInNamespaceAsync(remoteContainerConnectionDetails.NamespaceName, null, cancellationToken))?.Items;
-            var podsRunningRestorationJob = allPods.Where(p => p.Metadata.Name.StartsWith(remoteContainerConnectionDetails.ServiceName + "-restore") &&
+            if (allPods != null) {
+                var podsRunningRestorationJob = allPods.Where(p => StringComparer.OrdinalIgnoreCase.Equals(p.Status?.Phase, "Running") &&
+                                                        p.Metadata.Name.StartsWith(remoteContainerConnectionDetails.ServiceName + "-restore") &&
                                                         (p.Status?.ContainerStatuses?.Where(cs => cs.Image.Contains(ImageProvider.DevHostRestorationJob.Name)).Any() ?? false));
-            if (podsRunningRestorationJob.Count() > 0)
-            {
-                _log.Warning("Restoration image {0} was found for '{1}' service. This means previous session is not restored yet. Try again once previous session is disconnected and restored.",
-                ImageProvider.DevHostRestorationJob.Name, remoteContainerConnectionDetails.ServiceName);
-                throw new UserVisibleException(_operationContext, Resources.PreviousSessionStillConnected, remoteContainerConnectionDetails.ServiceName);
+                if (podsRunningRestorationJob.Count() > 0)
+                {
+                    _log.Warning("Restoration image {0} was found for '{1}' service. This means previous session is not restored yet. Try again once previous session is disconnected and restored.",
+                    ImageProvider.DevHostRestorationJob.Name, remoteContainerConnectionDetails.ServiceName);
+                    throw new UserVisibleException(_operationContext, Resources.PreviousSessionStillConnected, remoteContainerConnectionDetails.ServiceName);
+                }
             }
 
             // Our target in remoteContainerConnectionDetails can be specified in a variety of ways. The most common one is Service.
