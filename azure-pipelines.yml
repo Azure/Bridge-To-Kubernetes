@@ -524,7 +524,6 @@ jobs:
       TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
   - task: tagBuildOrRelease@0
     displayName: Tag BuildConfiguration
-    condition: and(succeeded(), ne(parameters.BuildConfiguration, 'release'))
     enabled: True
     inputs:
       tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
