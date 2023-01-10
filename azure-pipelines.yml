@@ -33,13 +33,6 @@ parameters:
     values:
     - Release
     - Debug
-  - name: RunTests
-    displayName: Run unit test cases
-    type: boolean
-    default: true
-    values:
-    - true
-    - false
 variables:
 - name: BuildParameters.dotnetversion
   value: 6.0.x
@@ -47,6 +40,8 @@ variables:
   value: 5.9.x
 - name: TeamName
   value: Mindaro
+- name: RunTests
+  value: True
 
 trigger:
   branches:
@@ -145,7 +140,7 @@ jobs:
   - task: VSBuild@1
     name: ''
     displayName: Build client.sln for Loc and Tests
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       solution: src/client.sln
@@ -153,7 +148,7 @@ jobs:
       configuration: ${{ parameters.BuildConfiguration }}
   - task: VSTest@2
     displayName: Run Unit Tests
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       testAssemblyVer2: '**\bin\${{ parameters.BuildConfiguration }}\*\*Tests.dll'
@@ -165,7 +160,7 @@ jobs:
       rerunFailedTests: true
   - task: CopyFiles@2
     displayName: Collect Loc files
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       Contents: >-
@@ -184,7 +179,7 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Loc'
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/Loc
@@ -505,7 +500,7 @@ jobs:
       OverWrite: true
   - task: PublishSymbols@2
     displayName: Enable Source Server
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       SymbolsFolder: $(Build.ArtifactStagingDirectory)/symbols
@@ -521,7 +516,7 @@ jobs:
       OverWrite: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: symbols'
-    condition: and(succeeded(), eq(parameters.RunTests, 'true'))
+    condition: and(succeeded(), eq(variables.RunTests, 'true'))
     enabled: True
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/symbols
