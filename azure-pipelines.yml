@@ -18,6 +18,7 @@ parameters:
     displayName: Signing Type
     default: 'test'
     values:
+    - none
     - test
     - real
   - name: TelemetryType
