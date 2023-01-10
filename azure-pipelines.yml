@@ -599,17 +599,20 @@
           arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --self-contained false --no-restore --verbosity detailed
           zipAfterPublish: false
           modifyOutputPath: false
-      - task: CmdLine@2
-        displayName: Build EndpointManager Launcher using .Net 5
+      - task: DotNetCoreCLI@2
+        displayName: publish EndpointManagerLauncher(Windows)
+        enabled: True
         inputs:
-          script: >-
-            echo "Publishing EndpointManager Launcher..."
-    
-            "C:\Program Files\dotnet\dotnet.exe" publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c {{ parameters.BuildConfiguration }} --no-restore
-    
-            echo "Done publishing EndpointManager Launcher..."
+          command: publish
+          publishWebProjects: false
+          projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+          arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
+          zipAfterPublish: false
+          modifyOutputPath: false
+          selectOrConfig: config
       - task: CopyFiles@2
         displayName: Copy EndpointManager Launcher to dsc folder
+        enabled: True
         inputs:
           SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/
           Contents: >-
@@ -617,6 +620,7 @@
     
             !**/*.pdb
           TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/EndpointManagerLauncher
+          OverWrite: true
       - task: DotNetCoreCLI@2
         displayName: publish DSC (OSX)
         inputs:
