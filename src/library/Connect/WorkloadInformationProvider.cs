@@ -103,6 +103,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         reachableEndpoints.Add(new EndpointInfo()
                         {
                             DnsName = externalEndpoint.Name,
+                            // Here we are not taking into account the ports to ignore, since this code path is handling endpoints user explicitly added for tracking.
                             Ports = externalEndpoint.Ports.Select(p => new PortPair(remotePort: p)).ToArray(), 
                             IsExternalEndpoint = true,
                             IsInWorkloadNamespace = false
@@ -124,21 +125,20 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         public List<int> GetPortsToIgnoreFromAnnotations(V1ServiceList serviceNameSpace) {
             var portsToIgnore = new List<int>();
             foreach(var item in serviceNameSpace.Items) {
-                if (item.Metadata.Annotations != null) {
+                if (item.Metadata != null && item.Metadata.Annotations != null) {
                     if (item.Metadata.Annotations.TryGetValue("bridgetokubernetes/ignore-ports", out var ports)) {
                         var allPorts = ports.Split(",");
                         foreach(var port in allPorts) {
                             try {
                                 portsToIgnore.Add(int.Parse(port));
                             } catch {
-                                throw new Exception("The ports are not in the correct format");
+                                throw new UserVisibleException(this._operationContext, $"bridgetokubernetes/ignore-ports configuration value {port} is invalid. It should be a comma separated list of integer ports");
                             }
-                            
                         }
                     }
                 }
             }
-            _log.Info("Ignoring ports: {0}", portsToIgnore.Count > 0 ? portsToIgnore.ToString() : "none");
+            _log.Info("Per bridgetokubernetes/ignore-ports user config the following ports will be ignored: {0}", portsToIgnore.Count > 0 ? portsToIgnore.ToString() : "none");
             return portsToIgnore;
         }
 
