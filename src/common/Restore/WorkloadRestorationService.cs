@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
@@ -40,10 +41,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
         /// </summary>
         public Task RestorePodPatchAsync(PodPatch podPatch, CancellationToken cancellationToken, Action<ProgressMessage> progressCallback = null, bool noThrow = false)
         {
-            podPatch.ReversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            podPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
             var patchString = JsonConvert.SerializeObject(podPatch.ReversePatch);
             string originalImage = podPatch.ReversePatch.TryGetContainerImageReplacementValue();
 
@@ -122,10 +120,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
         {
             var deployment = deploymentPatch.Deployment;
             var reversePatch = deploymentPatch.ReversePatch;
-            reversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             string originalImage = reversePatch.TryGetContainerImageReplacementValue();
             var patchString = JsonConvert.SerializeObject(reversePatch);
 
@@ -156,10 +151,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
         {
             var statefulSet = statefulSetPatch.StatefulSet;
             var reversePatch = statefulSetPatch.ReversePatch;
-            reversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             string originalImage = reversePatch.TryGetContainerImageReplacementValue();
             var patchString = JsonConvert.SerializeObject(reversePatch);
 
