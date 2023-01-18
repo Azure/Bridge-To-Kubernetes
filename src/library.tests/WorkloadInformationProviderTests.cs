@@ -47,14 +47,37 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             
         }
 
-        private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction)
+        [Theory]
+        [InlineData(1, 100)]
+        [InlineData(5, 20)]
+        [InlineData(10, 3)]
+        [InlineData(1, 3)]
+        public async void GetReachableServicesAsync_PortsToIgnore_HeadlessService(int numServices, int numAddresses)
+        { 
+            List<int> portsToIgnore = new List<int> { 190, 570 };
+
+            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", "190, 570");
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));           
+            // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
+            Assert.Equal((numServices - 1) * (numAddresses), result.Count());
+            foreach (var endpoint in result)
+            {
+                if (endpoint.Ports.Any())
+                {
+                    Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
+                    Assert.Empty(endpoint.Ports.Where(p => portsToIgnore.Contains(p.RemotePort)));
+                }
+            }
+        }
+
+        private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction, string ignorePorts = null)
         {
             var serviceList = new List<V1Service>();
             // introducing this variable so we can add an endpoint with empty subset to have crash coverage
             bool addSubset = false;
             for (int i = 0; i < numServices; i++)
             {
-                serviceList.Add(new V1Service()
+                var service = new V1Service()
                 {
                     Spec = new V1ServiceSpec()
                     {
@@ -65,9 +88,17 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     },
                     Metadata = new V1ObjectMeta()
                     {
-                        Name = namingFunction(i)
+                        Name = namingFunction(i),
                     }
-                });
+                };
+
+                if (!string.IsNullOrEmpty(ignorePorts))
+                {
+                    service.Metadata.Annotations = new Dictionary<string, string>();
+                    service.Metadata.Annotations.Add("bridgetokubernetes/ignore-ports", ignorePorts);
+                }
+
+                serviceList.Add(service);
                 var subsets = new List<V1EndpointSubset>()
                         {
                             new V1EndpointSubset()
@@ -76,7 +107,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                                 Addresses =  new List<V1EndpointAddress>()
                             }
                         };
-                if (!addSubset) {
+                if (!addSubset)
+                {
                     subsets = null;
                 }
                 var endPoint = new V1Endpoints()
@@ -87,7 +119,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                         Name = $"{namingFunction(i)}"
                     }
                 };
-                if (addSubset) {
+                if (addSubset)
+                {
                     for (int j = 0; j < numAddresses; j++)
                     {
                         endPoint.Subsets[0].Addresses.Add(new V1EndpointAddress
@@ -96,7 +129,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                         });
                     }
                 }
-                else {
+                else
+                {
                     // we only want to skip addign subset in one, the rest should have subsets
                     addSubset = true;
                 }

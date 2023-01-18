@@ -133,7 +133,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 if (port.Metadata.Annotations.TryGetValue(ServiceAnnotations, out string ports)) {
                     if (ports.Length > 0) {
                         try {
-                            portsToIgnore.Add(int.Parse(port));
+                            // ports e.g. "460, 543"
+                            var ignorePorts = ports.Split(",").Select(p => int.Parse(p));
+                            portsToIgnore.AddRange(ignorePorts);
                         } 
                         catch {
                             throw new UserVisibleException(this._operationContext, $"bridgetokubernetes/ignore-ports configuration value {port} is invalid. It should be a comma separated list of integer ports");
