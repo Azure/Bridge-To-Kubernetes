@@ -34,6 +34,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         private readonly IResourceNamingService _resourceNamingService;
         private AsyncLazy<RemoteContainerConnectionDetails> _remoteContainerConnectionDetails;
         private readonly IProgress<ProgressUpdate> _progress;
+        private const string ServiceAnnotations = "bridgetokubernetes/ignore-ports";
 
         public delegate IWorkloadInformationProvider Factory(IKubernetesClient kubernetesClient, AsyncLazy<RemoteContainerConnectionDetails> connectionDetails);
 
@@ -121,23 +122,25 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             }
         }
 
-        //
         public List<int> GetPortsToIgnoreFromAnnotations(V1ServiceList serviceNameSpace) {
             var portsToIgnore = new List<int>();
-            foreach(var item in serviceNameSpace.Items) {
-                if (item.Metadata != null && item.Metadata.Annotations != null) {
-                    if (item.Metadata.Annotations.TryGetValue("bridgetokubernetes/ignore-ports", out var ports)) {
-                        var allPorts = ports.Split(",");
-                        foreach(var port in allPorts) {
-                            try {
-                                portsToIgnore.Add(int.Parse(port));
-                            } catch {
-                                throw new UserVisibleException(this._operationContext, $"bridgetokubernetes/ignore-ports configuration value {port} is invalid. It should be a comma separated list of integer ports");
-                            }
+
+            List<V1Service> portsList = serviceNameSpace.Items.Where(item => item.Metadata != null && 
+            item.Metadata.Annotations != null &&
+            item.Metadata.Annotations.ContainsKey(ServiceAnnotations)).ToList();
+
+            portsList.ForEach(port => {
+                if (port.Metadata.Annotations.TryGetValue(ServiceAnnotations, out string ports)) {
+                    if (ports.Length > 0) {
+                        try {
+                            portsToIgnore.Add(int.Parse(port));
+                        } 
+                        catch {
+                            throw new UserVisibleException(this._operationContext, $"bridgetokubernetes/ignore-ports configuration value {port} is invalid. It should be a comma separated list of integer ports");
                         }
                     }
                 }
-            }
+            });
             _log.Info("Per bridgetokubernetes/ignore-ports user config the following ports will be ignored: {0}", portsToIgnore.Count > 0 ? portsToIgnore.ToString() : "none");
             return portsToIgnore;
         }
