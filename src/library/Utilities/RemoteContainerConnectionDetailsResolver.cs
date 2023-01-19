@@ -51,7 +51,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
 
             // Check if restoration pod is present and in running state. This is an indication that previous session is still connected or it has not finished restoring yet.
             var allPods = (await _kubernetesClient.ListPodsInNamespaceAsync(remoteContainerConnectionDetails.NamespaceName, null, cancellationToken))?.Items;
-            if (allPods != null) {
+            if (allPods != null && allPods.Count > 0) {
                 var podsRunningRestorationJob = allPods.Where(p => StringComparer.OrdinalIgnoreCase.Equals(p.Status?.Phase, "Running") &&
                                                         p.Metadata.Name.StartsWith(remoteContainerConnectionDetails.ServiceName + "-restore") &&
                                                         (p.Status?.ContainerStatuses?.Where(cs => cs.Image.Contains(ImageProvider.DevHostRestorationJob.Name)).Any() ?? false));
