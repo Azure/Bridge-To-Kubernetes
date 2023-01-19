@@ -9,7 +9,7 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
     {
         internal static class DevHostAgent
         {
-            public const int Port = 50051;
+            public const int Port = 50052;
         }
 
         internal static class DevHostRestorationJob
