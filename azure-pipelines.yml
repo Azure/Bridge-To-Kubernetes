@@ -97,12 +97,12 @@ jobs:
     name: ''
     displayName: Install Signing Plugin
     enabled: True
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     inputs:
       signType: ${{ parameters.SignTypeToUse }}
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     displayName: 'Install Localization Plugin'
     enabled: True
   - task: UseDotNet@2
@@ -272,7 +272,7 @@ jobs:
     name: ''
     displayName: Sign Files
     enabled: True
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     inputs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
@@ -563,12 +563,12 @@ jobs:
   - task: MicroBuildSigningPlugin@3
     displayName: Install Signing Plugin
     enabled: True
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     inputs:
       signType: ${{ parameters.SignTypeToUse }}
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     displayName: Install Localization Plugin
   - task: UseDotNet@2
     displayName: Use .NET Core SDK 6.0.X
@@ -672,7 +672,7 @@ jobs:
   - task: VSBuild@1
     displayName: Sign Files
     enabled: True
-    condition: eq(parameters.SignTypeToUse, 'real')
+    condition: eq(${{ parameters.SignTypeToUse }}, 'real')
     inputs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
