@@ -126,12 +126,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             var portsToIgnore = new List<int>();
             List<V1Service> portsList = serviceNameSpace.Items.Where(item => item.Metadata?.Annotations?.ContainsKey(ServiceAnnotations) ?? false).ToList();
             portsList.ForEach(port => {
-                if (port.Metadata?.Annotations?.TryGetValue(ServiceAnnotations, out string ports) ?? false) {
+                if (port.Metadata?.Annotations?.TryGetValue(ServiceAnnotat ions, out string ports) ?? false) {
                     if (ports.Length > 0) {
                         try {
                             // ports e.g. "460, 543"
-                            var ignorePorts = ports.Split(",").Select(p => int.Parse(p));
-                            portsToIgnore.AddRange(ignorePorts);
+                            portsToIgnore = ports.Split(",").Select(Int32.Parse)?.ToList();
                         } 
                         catch {
                             throw new UserVisibleException(_operationContext, $"bridgetokubernetes/ignore-ports configuration value {ports} is invalid. It must be a comma separated list of integer ports");
