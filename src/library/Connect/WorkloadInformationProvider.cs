@@ -124,13 +124,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
         public List<int> GetPortsToIgnoreFromAnnotations(V1ServiceList serviceNameSpace) {
             var portsToIgnore = new List<int>();
-
-            List<V1Service> portsList = serviceNameSpace.Items.Where(item => item.Metadata != null && 
-            item.Metadata.Annotations != null &&
-            item.Metadata.Annotations.ContainsKey(ServiceAnnotations)).ToList();
-
+            List<V1Service> portsList = serviceNameSpace.Items.Where(item => item.Metadata?.Annotations?.ContainsKey(ServiceAnnotations) ?? false).ToList();
             portsList.ForEach(port => {
-                if (port.Metadata.Annotations.TryGetValue(ServiceAnnotations, out string ports)) {
+                if (port.Metadata?.Annotations?.TryGetValue(ServiceAnnotations, out string ports) ?? false) {
                     if (ports.Length > 0) {
                         try {
                             // ports e.g. "460, 543"
@@ -138,7 +134,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             portsToIgnore.AddRange(ignorePorts);
                         } 
                         catch {
-                            throw new UserVisibleException(this._operationContext, $"bridgetokubernetes/ignore-ports configuration value {port} is invalid. It should be a comma separated list of integer ports");
+                            throw new UserVisibleException(_operationContext, $"bridgetokubernetes/ignore-ports configuration value {ports} is invalid. It must be a comma separated list of integer ports");
                         }
                     }
                 }
@@ -490,7 +486,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             DnsName = isInWorkloadNamespace ?
                                         $"{address.Hostname}.{endpoint.Metadata.Name}" :
                                         $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !portsToIgnore.Contains(port.Port)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }

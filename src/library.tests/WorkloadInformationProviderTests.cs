@@ -10,6 +10,7 @@ using System.Threading;
 using Autofac;
 using FakeItEasy;
 using k8s.Models;
+using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -48,29 +49,59 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         }
 
         [Theory]
-        [InlineData(1, 100)]
-        [InlineData(5, 20)]
-        [InlineData(10, 3)]
-        [InlineData(1, 3)]
+        [InlineData(5, 1)]
         public async void GetReachableServicesAsync_PortsToIgnore_HeadlessService(int numServices, int numAddresses)
         { 
-            List<int> portsToIgnore = new List<int> { 190, 570 };
-
-            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", "190, 570");
-            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));           
-            // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
-            Assert.Equal((numServices - 1) * (numAddresses), result.Count());
+            // The ports provided to the service
+            List<int> portsOffered = new List<int> {300, 450, 180, 190, 312};
+            // The ports which should be ignored by the service
+            List<int> portsToIgnore = new List<int> {190, 300};
+            // The ports which were allocated by the service, these must not include any of the ignore ports
+            List<int> portsAllocated = new List<int> {450, 180, 312};
+            
+            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", "190, 300", portsOffered);           
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));                       
+            List<int> portsInResult = new List<int>();
             foreach (var endpoint in result)
             {
                 if (endpoint.Ports.Any())
                 {
-                    Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
-                    Assert.Empty(endpoint.Ports.Where(p => portsToIgnore.Contains(p.RemotePort)));
+                    // None of the ports to ignore must be used 
+                    Assert.Empty(endpoint.Ports.Where(p => portsToIgnore.Contains(p.RemotePort)));                    
+                    portsInResult.AddRange(endpoint.Ports.Select( p => p.RemotePort));
                 }
             }
+            Assert.True(portsAllocated.All(p => portsInResult.Contains(p)));
         }
 
-        private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction, string ignorePorts = null)
+        [Theory]
+        [InlineData(5, 1)]
+        public async void GetReachableServicesAsync_NoPortsToIgnore_HeadlessService(int numServices, int numAddresses)
+        { 
+            // The ports provided to the service
+            List<int> portsOffered = new List<int> {300, 450, 180, 190, 312};            
+            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", "", portsOffered);            
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));                       
+            List<int> portsInResult = new List<int>();
+            foreach (var endpoint in result)
+            {
+                if (endpoint.Ports.Any())
+                {
+                    portsInResult.AddRange(endpoint.Ports.Select( p => p.RemotePort));
+                }
+            }
+            Assert.True(portsInResult.All(p => portsOffered.Contains(p)));
+        }
+
+        [Theory]
+        [InlineData(5, 20)]
+        public async void GetReachableServicesAsync_PortsToIgnoreIncorrectFormat_HeadlessService(int numServices, int numAddresses)
+        { 
+            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", "ajhfja, 19o");            
+            await Assert.ThrowsAsync<UserVisibleException>(() => _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken)));                       
+        }
+
+        private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction, string ignorePorts = null, List<int> ports = null)
         {
             var serviceList = new List<V1Service>();
             // introducing this variable so we can add an endpoint with empty subset to have crash coverage
@@ -83,7 +114,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     {
                         Type = "ClusterIP",
                         ClusterIP = "None",
-                        Ports = new List<V1ServicePort> { new V1ServicePort(port: 80, protocol: "TCP") },
+                        Ports = new List<V1ServicePort> { new V1ServicePort(port: ports?.ElementAtOrDefault(i) ?? 80, protocol: "TCP") },
                         Selector = new Dictionary<string, string> { { "app", "myapp" } }
                     },
                     Metadata = new V1ObjectMeta()
@@ -103,7 +134,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                         {
                             new V1EndpointSubset()
                             {
-                                Ports = new List<Corev1EndpointPort> { new Corev1EndpointPort(port: 80, protocol: "TCP") },
+                                Ports = new List<Corev1EndpointPort> { new Corev1EndpointPort(port: ports?.ElementAtOrDefault(i) ?? 80, protocol: "TCP") },
                                 Addresses =  new List<V1EndpointAddress>()
                             }
                         };
