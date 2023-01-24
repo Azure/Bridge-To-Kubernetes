@@ -3,10 +3,10 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.Channel;
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Library.Models
 {
@@ -15,16 +15,16 @@ namespace Microsoft.BridgeToKubernetes.Library.Models
         /// <summary>
         /// Reachable services
         /// </summary>
-        [JsonProperty("reachableEndpoints")]
+        [JsonPropertyName("reachableEndpoints")]
         public IEnumerable<EndpointInfo> ReachableEndpoints { get; set; }
 
         /// <summary>
         /// The port exposed by the local user workload when running locally
         /// </summary>
-        [JsonProperty("reversePortForwardInfo")]
+        [JsonPropertyName("reversePortForwardInfo")]
         public IEnumerable<PortForwardStartInfo> ReversePortForwardInfo { get; set; }
 
-        [JsonProperty("remoteAgentInfo")]
+        [JsonPropertyName("remoteAgentInfo")]
         public RemoteAgentInfo RemoteAgentInfo { get; set; }
     }
 }

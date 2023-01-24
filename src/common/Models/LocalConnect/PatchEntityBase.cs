@@ -4,7 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
 {
@@ -16,7 +16,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
         /// <summary>
         /// The type of patch entity
         /// </summary>
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type => this.GetType().Name;
 
         [JsonIgnore]

@@ -10,8 +10,9 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.RoutingManager.Envoy;
 using Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Xunit;
+using System.Text.Json;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
 {
@@ -37,10 +38,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var lpkPodIp = "1.2.3.4";
             var podTrigger = GetPodTriggerConfig(triggerService, routeOnHeaderValue, lpkPodName, lpkPodIp);
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(triggerService, new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger }), new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -61,10 +62,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger }, ingressTriggers);
 
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -89,10 +90,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger1, podTrigger2 }, ingressTriggers);
 
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger1, podTrigger2 });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -119,20 +120,20 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             // Check for envoy config for HelloUniverse Service
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { helloUniversePodTrigger }, ingressTriggers);
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloUniverseService, routingStateEstablisherInput, new List<PodTriggerConfig> { helloUniversePodTrigger, helloWorldPodTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}_HelloUniverse.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
 
             // Check for envoy config for HelloWorld Service
             routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { helloWorldPodTrigger });
             envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { helloUniversePodTrigger, helloWorldPodTrigger });
-            retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}_HelloWorld.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -156,20 +157,20 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var ingressTriggersForHelloUniverse = GetIngressTriggerConfigs(helloUniverseService, helloUniverseIngress);
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(ingressTriggers: ingressTriggersForHelloUniverse);
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloUniverseService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}_HelloUniverse.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
 
             // Check for envoy config for HelloWorld Service
             routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger });
             envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}GetEnvoyConfig_PodTriggerB_HelloWorld.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -189,10 +190,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger }, loadBalancerTrigger: lbTrigger);
 
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -215,20 +216,20 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var lbTriggersForHelloUniverse = GetLoadBalancerTriggerConfig(HelloType.hellouniverse, helloUniverseService);
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(loadBalancerTrigger: lbTriggersForHelloUniverse);
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloUniverseService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}_HelloUniverse.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
 
             // Check for envoy config for HelloWorld Service
             routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger });
             envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}GetEnvoyConfig_PodTriggerB_HelloWorld.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -250,10 +251,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger }, ingressTriggers, loadBalancerTrigger: lbTrigger);
 
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}{System.Reflection.MethodBase.GetCurrentMethod().Name}.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -277,10 +278,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var ingressTriggersForHelloUniverse = GetIngressTriggerConfigs(helloUniverseService, helloUniverseIngress);
             var routingStateEstablisherInput = new RoutingStateEstablisherInput(ingressTriggers: ingressTriggersForHelloUniverse);
             var envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloUniverseService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            var retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            var retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}GetEnvoyConfig_IngressTriggerA_PodTriggerB_HelloUniverse.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
 
@@ -288,10 +289,10 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
             var lbTrigger = GetLoadBalancerTriggerConfig(HelloType.helloworld, helloWorldService);
             routingStateEstablisherInput = new RoutingStateEstablisherInput(new List<PodTriggerConfig> { podTrigger }, loadBalancerTrigger: lbTrigger);
             envoyConfig = _envoyConfigBuilder.GetEnvoyConfig(helloWorldService, routingStateEstablisherInput, new List<PodTriggerConfig> { podTrigger });
-            retrievedConfig = JsonConvert.SerializeObject(envoyConfig, Formatting.Indented);
+            retrievedConfig = JsonSerializer.Serialize(envoyConfig, new JsonSerializerOptions { WriteIndented = true, });
             using (var r = new StreamReader($"EnvoyConfigs{Path.DirectorySeparatorChar}GetEnvoyConfig_LoadBalancerTriggerA_PodTriggerA.txt"))
             {
-                var expectedConfig = r.ReadToEnd();
+                var expectedConfig = r.ReadToEnd().NormalizeLineBreaks();
                 Assert.Equal(expectedConfig, retrievedConfig);
             }
         }
@@ -453,6 +454,21 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Tests
                     routeOnHeaderValue: routeOnHeaderValue,
                     triggerPodIP: lpkPodIp,
                     correlationId: string.Empty);
+        }
+
+        private string DeserializeIndented(object obj)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true, };
+
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true, });
+        }
+    }
+
+    internal static class StringExtensions
+    {
+        internal static string NormalizeLineBreaks(this string content)
+        {
+            return content.Replace("\r\n", "\n").Replace("\n", System.Environment.NewLine);
         }
     }
 

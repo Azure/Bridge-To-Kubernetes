@@ -3,10 +3,10 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Net.Http;
+using k8s.Autorest;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.Rest;
+using System.Net.Http;
 
 namespace Microsoft.BridgeToKubernetes.Library.Models
 {

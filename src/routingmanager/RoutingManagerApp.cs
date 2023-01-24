@@ -3,14 +3,6 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
@@ -20,7 +12,15 @@ using Microsoft.BridgeToKubernetes.RoutingManager.Logging;
 using Microsoft.BridgeToKubernetes.RoutingManager.Traefik;
 using Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager
 {
@@ -242,7 +242,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                     for (int i = 0; i < routingStateEstablisherInputMap.Count(); i++)
                     {
                         _log.Verbose("Routing state establisher input {0} Key : service named '{1}' in namespace '{2}'", i, new PII(inputKeys[i].Metadata.Name), new PII(inputKeys[i].Metadata.NamespaceProperty));
-                        _log.Verbose("Routing state establisher input {0} Value : '{1}'", i, new PII(JsonConvert.SerializeObject(inputValues[i])));
+                        _log.Verbose("Routing state establisher input {0} Value : '{1}'", i, new PII(JsonSerializer.Serialize(inputValues[i])));
                     }
                     perfLogger.SetSucceeded();
                 }
@@ -417,7 +417,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                     continue;
                 }
 
-                _log.Info(JsonConvert.SerializeObject(routes));
+                _log.Info(JsonSerializer.Serialize(routes));
                 (var httpReadinessProbe, var httpLivenessProbe) = await GetHttpProbesForServiceNamesAsync("ingressRoute", ingressRoute.Metadata.Name, userServices, pods, routes.SelectMany(r => r.Services == null ? new List<string>() : r.Services.Select(s => s.Name)), cancellationToken);
                 foreach (var route in routes)
                 {
@@ -739,7 +739,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
             }
             catch (NullReferenceException e)
             {
-                _log.Error("Null ref in AddLoadBalancerTriggersAsync - message : {0}. Call stack: {1}. Data: {2}", e.Message, e.StackTrace, JsonConvert.SerializeObject(e.Data));
+                _log.Error("Null ref in AddLoadBalancerTriggersAsync - message : {0}. Call stack: {1}. Data: {2}", e.Message, e.StackTrace, JsonSerializer.Serialize(e.Data));
                 throw;
             }
         }

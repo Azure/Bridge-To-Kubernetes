@@ -3,16 +3,9 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
@@ -28,8 +21,14 @@ using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
-using Microsoft.Rest;
-using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using SystemTextJsonPatch;
 using static k8s.Models.V1Patch;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
@@ -726,11 +725,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     try
                     {
-                        var settings = new Newtonsoft.Json.JsonSerializerSettings 
-                        { 
-                            ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver { NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy() }
-                        };
-                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(Newtonsoft.Json.JsonConvert.SerializeObject(patch, settings), PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -1034,8 +1029,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             bool dirty = false;
             var patch = new JsonPatchDocument<V1Deployment>();
             var reversePatch = new JsonPatchDocument<V1Deployment>();
-            patch.ContractResolver = new STJCamelCaseContractResolver();
-            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = deployment.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (deployment.Spec.Replicas != null && deployment.Spec.Replicas.Value != 1)
@@ -1119,8 +1112,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             bool dirty = false;
             var patch = new JsonPatchDocument<V1StatefulSet>();
             var reversePatch = new JsonPatchDocument<V1StatefulSet>();
-            patch.ContractResolver = new STJCamelCaseContractResolver();
-            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = statefulSet.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (statefulSet.Spec.Replicas != null && statefulSet.Spec.Replicas.Value != 1)

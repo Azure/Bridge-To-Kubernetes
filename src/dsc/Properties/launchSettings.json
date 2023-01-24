@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "dsc": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:52947;http://localhost:52948"
+    }
+  }
+}
