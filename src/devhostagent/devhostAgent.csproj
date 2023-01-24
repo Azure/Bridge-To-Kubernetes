@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.8" />
     <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">

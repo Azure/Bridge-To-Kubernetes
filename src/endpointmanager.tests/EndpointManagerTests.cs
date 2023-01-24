@@ -13,11 +13,14 @@ using System.Threading.Tasks;
 using FakeItEasy;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager;
+using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IP;
 using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
+using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
+using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.TestHelpers;
 using Xunit;
@@ -38,10 +41,11 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void AddHostsFileEntry()
         {
-            var request = new EndpointManagerRequest<IEnumerable<HostsFileEntry>>()
+            var request = new EndpointManagerRequest<AddHostsFileEntryArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.AddHostsFileEntry.ToString(),
-                Argument = new[] { new HostsFileEntry() { IP = "1.1.1.1", Names = new[] { "service-a" } } }
+                CorrelationId = "1234",
+                Argument = new AddHostsFileEntryArgument { WorkloadNamespace = "Default", Entries = new List<HostsFileEntry> { new HostsFileEntry() { IP = "1.1.1.1", Names = new[] { "service-a" } } } }
             };
             var fakeSocket = ExecuteApiCall(request);
 
@@ -57,10 +61,10 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void AllocateIP()
         {
-            var request = new EndpointManagerRequest<IDictionary<int, int>[]>()
+            var request = new EndpointManagerRequest<AllocateIPArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.AllocateIP.ToString(),
-                Argument = new[] { new Dictionary<int, int>() { { 80, 8000 } } }
+                Argument = new AllocateIPArgument { Endpoints = new[] { new EndpointInfo { Ports = new[] { new PortPair(80, 8000) } } } }
             };
             var fakeSocket = ExecuteApiCall(request);
 
@@ -75,10 +79,10 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void DisableService()
         {
-            var request = new EndpointManagerRequest<IEnumerable<ServicePortMapping>>()
+            var request = new EndpointManagerRequest<DisableServiceArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.DisableService.ToString(),
-                Argument = new[] { new ServicePortMapping("BranchCache", 80, 77) }
+                Argument = new DisableServiceArgument { ServicePortMappings = new[] { new ServicePortMapping("BranchCache", 80, 77) } }
             };
             var fakeSocket = ExecuteApiCall(request);
 
@@ -95,10 +99,10 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void DisableService_InvalidService()
         {
-            var request = new EndpointManagerRequest<IEnumerable<ServicePortMapping>>()
+            var request = new EndpointManagerRequest<DisableServiceArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.DisableService.ToString(),
-                Argument = new[] { new ServicePortMapping("NotASystemService", 80, 77) }
+                Argument = new DisableServiceArgument { ServicePortMappings = new[] { new ServicePortMapping("NotASystemService", 80, 77) } }
             };
             var fakeSocket = ExecuteApiCall(request);
 
@@ -115,10 +119,10 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void FreeIP()
         {
-            var request = new EndpointManagerRequest<string[]>()
+            var request = new EndpointManagerRequest<FreeIPArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.FreeIP.ToString(),
-                Argument = new[] { "1.1.1.1", "2.2.2.2" }
+                Argument = new FreeIPArgument { IPAddresses = new IPAddress[] { IPAddress.Parse("1.1.1.1"), IPAddress.Parse("2.2.2.2") } }
             };
             var fakeSocket = ExecuteApiCall(request);
 
@@ -133,10 +137,10 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         [Fact]
         public void KillProcess()
         {
-            var request = new EndpointManagerRequest<IEnumerable<ProcessPortMapping>>()
+            var request = new EndpointManagerRequest<KillProcessArgument>()
             {
                 ApiName = Constants.EndpointManager.ApiNames.KillProcess.ToString(),
-                Argument = new[] { new ProcessPortMapping("process1", 80, 77) }
+                Argument = new KillProcessArgument { ProcessPortMappings = new[] { new ProcessPortMapping("process1", 80, 77) } }
             };
             var fakeSocket = ExecuteApiCall(request);
 

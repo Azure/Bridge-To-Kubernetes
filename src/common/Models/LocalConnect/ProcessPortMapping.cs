@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
 {

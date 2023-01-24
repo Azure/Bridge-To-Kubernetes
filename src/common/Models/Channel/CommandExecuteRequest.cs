@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.Channel
 {
@@ -15,31 +15,31 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Channel
         /// <summary>
         /// Command to execute
         /// </summary>
-        [JsonProperty("command")]
+        [JsonPropertyName("command")]
         public string[] Command { get; set; }
 
         /// <summary>
         /// Location to execute the command
         /// </summary>
-        [JsonProperty("workingDirectory")]
+        [JsonPropertyName("workingDirectory")]
         public string WorkingDirectory { get; set; }
 
         /// <summary>
         /// Flag to control whether to run command with a shell
         /// </summary>
-        [JsonProperty("runWithShell")]
+        [JsonPropertyName("runWithShell")]
         public bool RunWithShell { get; set; }
 
         /// <summary>
         /// Flag to indicate command should not remain attached
         /// </summary>
-        [JsonProperty("isDetach")]
+        [JsonPropertyName("isDetach")]
         public bool IsDetach { get; set; }
 
         /// <summary>
         /// Command will detach when this string appears in command output
         /// </summary>
-        [JsonProperty("detachAfter")]
+        [JsonPropertyName("detachAfter")]
         public string DetachAfter { get; set; }
     }
 }

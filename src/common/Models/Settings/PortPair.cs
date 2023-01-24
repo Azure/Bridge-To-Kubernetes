@@ -3,9 +3,9 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
-using Newtonsoft.Json;
+using System;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
 {
@@ -43,19 +43,19 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         /// <summary>
         /// Local port corresponding to the remote port for tunneling
         /// </summary>
-        [JsonProperty("localPort")]
+        [JsonPropertyName("localPort")]
         public int LocalPort { get; set; }
 
         /// <summary>
         /// Remote port corresponding to the local port for tunneling
         /// </summary>
-        [JsonProperty("remotePort")]
+        [JsonPropertyName("remotePort")]
         public int RemotePort { get; set; }
 
         /// <summary>
         /// Procol used when comunicating on this port (usually TCP)
         /// </summary>
-        [JsonProperty("protocol")]
+        [JsonPropertyName("protocol")]
         public string Protocol { get; set; }
 
         /// <summary>

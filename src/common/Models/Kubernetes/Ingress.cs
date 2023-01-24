@@ -4,7 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.Kubernetes
 {
@@ -26,19 +26,19 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Kubernetes
         /// <summary>
         /// Gets or sets the name of the chart.
         /// </summary>
-        [JsonProperty("chartName")]
+        [JsonPropertyName("chartName")]
         public string ChartName { get; }
 
         /// <summary>
         /// Gets or sets the space
         /// </summary>
-        [JsonProperty("spaceName")]
+        [JsonPropertyName("spaceName")]
         public string SpaceName { get; }
 
         /// <summary>
         /// Gets or sets information of public URLs.
         /// </summary>
-        [JsonProperty("publicUrlInfos")]
+        [JsonPropertyName("publicUrlInfos")]
         public IList<PublicUrlInfo> PublicUrlInfos { get; set; }
     }
 }

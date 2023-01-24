@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager;
+using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IP;
@@ -241,30 +242,28 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
                 switch (apiRequest)
                 {
                     case Constants.EndpointManager.ApiNames.AddHostsFileEntry:
-                        var addHostsFileEntryRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<(string workloadNamespace, IEnumerable<HostsFileEntry> entries)>>(request);
-                        result = this.InvokeWithExceptionHandler(() => _hostsFileManager.Add(addHostsFileEntryRequest.Argument.workloadNamespace, addHostsFileEntryRequest.Argument.entries));
+                        var addHostsFileEntryRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<AddHostsFileEntryArgument>>(request);
+                        result = this.InvokeWithExceptionHandler(() => _hostsFileManager.Add(addHostsFileEntryRequest.Argument.WorkloadNamespace, addHostsFileEntryRequest.Argument.Entries));
                         break;
 
                     case Constants.EndpointManager.ApiNames.AllocateIP:
-                        var allocateIpRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<IEnumerable<EndpointInfo>>>(request);
-                        result = this.InvokeWithExceptionHandler<IEnumerable<EndpointInfo>>(() => _ipManager.AllocateIPs(allocateIpRequest.Argument, addRoutingRules: true, _cancellationToken));
+                        var allocateIpRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<AllocateIPArgument>>(request);
+                        result = this.InvokeWithExceptionHandler<IEnumerable<EndpointInfo>>(() => _ipManager.AllocateIPs(allocateIpRequest.Argument.Endpoints, addRoutingRules: true, _cancellationToken));
                         break;
 
                     case Constants.EndpointManager.ApiNames.DisableService:
-                        var disableServiceRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<IEnumerable<ServicePortMapping>>>(request);
-                        var servicePortMappings = disableServiceRequest.Argument;
-                        result = this.InvokeWithExceptionHandler(() => servicePortMappings.ExecuteForEach(mapping => DisableService(mapping)));
+                        var disableServiceRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<DisableServiceArgument>>(request);
+                        result = this.InvokeWithExceptionHandler(() => disableServiceRequest.Argument.ServicePortMappings.ExecuteForEach(mapping => DisableService(mapping)));
                         break;
 
                     case Constants.EndpointManager.ApiNames.FreeIP:
-                        var freeIPRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<IPAddress[]>>(request);
-                        result = this.InvokeWithExceptionHandler(() => _ipManager.FreeIPs(freeIPRequest.Argument, _hostsFileManager, removeRoutingRules: true, _cancellationToken));
+                        var freeIPRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<FreeIPArgument>>(request);
+                        result = this.InvokeWithExceptionHandler(() => _ipManager.FreeIPs(freeIPRequest.Argument.IPAddresses, _hostsFileManager, removeRoutingRules: true, _cancellationToken));
                         break;
 
                     case Constants.EndpointManager.ApiNames.KillProcess:
-                        var killProcessRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<IEnumerable<ProcessPortMapping>>>(request);
-                        var processPortMapping = killProcessRequest.Argument;
-                        result = this.InvokeWithExceptionHandler(() => processPortMapping.ExecuteForEach(mapping => KillProcess(mapping)));
+                        var killProcessRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<KillProcessArgument>>(request);
+                        result = this.InvokeWithExceptionHandler(() => killProcessRequest.Argument.ProcessPortMappings.ExecuteForEach(mapping => KillProcess(mapping)));
                         break;
 
                     case Constants.EndpointManager.ApiNames.Ping:
