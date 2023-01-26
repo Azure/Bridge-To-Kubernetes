@@ -1,3 +1,4 @@
+# This pipeline is meant to run build validation for PRs. This pipeline does not have signing.
 # 'Allow scripts to access the OAuth token' was selected in pipeline.  Add the following YAML to any steps requiring access:
 #       env:
 #           MY_ACCESS_TOKEN: $(System.AccessToken)
