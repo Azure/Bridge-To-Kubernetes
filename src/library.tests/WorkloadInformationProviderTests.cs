@@ -164,7 +164,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                 };
                 if (ignorePorts.GetValueOrDefault(serviceName) != null) {
                     service.Metadata.Annotations = new Dictionary<string, string>();
-                    service.Metadata.Annotations.Add(Constants.AzureDevSpacesService.ServiceAnnotations, ignorePorts.GetValueOrDefault(serviceName));
+                    service.Metadata.Annotations.Add(Constants.DeploymentConfig.ServiceAnnotations, ignorePorts.GetValueOrDefault(serviceName));
                 }               
                 serviceList.Add(service);
                 var subsets = new List<V1EndpointSubset>()
