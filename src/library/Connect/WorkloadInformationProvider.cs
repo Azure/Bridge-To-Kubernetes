@@ -22,6 +22,7 @@ using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
+using static Microsoft.BridgeToKubernetes.Library.Constants;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.Library.Connect
@@ -34,7 +35,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         private readonly IResourceNamingService _resourceNamingService;
         private AsyncLazy<RemoteContainerConnectionDetails> _remoteContainerConnectionDetails;
         private readonly IProgress<ProgressUpdate> _progress;
-        private const string ServiceAnnotations = "bridgetokubernetes/ignore-ports";
 
         public delegate IWorkloadInformationProvider Factory(IKubernetesClient kubernetesClient, AsyncLazy<RemoteContainerConnectionDetails> connectionDetails);
 
@@ -74,7 +74,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             {
                 var reachableEndpoints = new List<EndpointInfo>();
                 var servicesToRoute = new List<V1Service>();
-                var portsToIgnore = new List<int>();
+                var portsToIgnore = new Dictionary<String, IList<int>>();
 
                 if (includeSameNamespaceServices)
                 {
@@ -122,15 +122,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             }
         }
 
-        public List<int> GetPortsToIgnoreFromAnnotations(V1ServiceList serviceNameSpace) {
-            var portsToIgnore = new List<int>();
-            List<V1Service> portsList = serviceNameSpace.Items.Where(item => item.Metadata?.Annotations?.ContainsKey(ServiceAnnotations) ?? false).ToList();
-            portsList.ForEach(port => {
-                if (port.Metadata?.Annotations?.TryGetValue(ServiceAnnotations, out string ports) ?? false) {
+        public Dictionary<String, IList<int>> GetPortsToIgnoreFromAnnotations(V1ServiceList serviceNameSpace) {
+            Dictionary<String, IList<int>> servicePortsToIgnore = new Dictionary<String, IList<int>>();
+            List<V1Service> servicesWithIgnorePorts = serviceNameSpace.Items.Where(item => item.Metadata?.Annotations?.ContainsKey(Constants.AzureDevSpacesService.ServiceAnnotations) ?? false).ToList();
+            servicesWithIgnorePorts.ForEach(service => {
+                if (service.Metadata?.Annotations?.TryGetValue(Constants.AzureDevSpacesService.ServiceAnnotations, out string ports) ?? false) {
                     if (ports.Length > 0) {
                         try {
-                            // ports e.g. "460, 543"
-                            portsToIgnore = ports.Split(",").Select(Int32.Parse)?.ToList();
+                            List<int> ignorePorts = ports.Split(",").Select(p => int.Parse(p)).ToList();
+                            servicePortsToIgnore.Add(service.Metadata.Name, ignorePorts);
                         } 
                         catch {
                             throw new UserVisibleException(_operationContext, $"bridgetokubernetes/ignore-ports configuration value {ports} is invalid. It must be a comma separated list of integer ports");
@@ -138,8 +138,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     }
                 }
             });
-            _log.Info("Per bridgetokubernetes/ignore-ports user config the following ports will be ignored: {0}", portsToIgnore.Count > 0 ? portsToIgnore.ToString() : "none");
-            return portsToIgnore;
+            return servicePortsToIgnore;
         }
 
         /// <summary>
@@ -408,12 +407,14 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             string workloadNamespace,
             IEnumerable<V1Service> services,
             CancellationToken cancellationToken,
-            List<int> portsToIgnore)
+            Dictionary<String, IList<int>> portsToIgnoreForService)
         {
             var servicesToRouteMap = new ConcurrentDictionary<string, V1Service>();
             var headlessServiceEndpointsToRouteMap = new ConcurrentDictionary<string, V1Endpoints>();
 
             Func<string, string, string> getMapKey = (string name, string namespaceName) => $"{name}.{namespaceName}";
+
+            Dictionary<string, IList<int>> portToIgnoreForHeadlessServiceEndpoints = new Dictionary<string, IList<int>>();
 
             foreach (var s in services)
             {
@@ -441,7 +442,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
                     if (!headlessServiceEndpointsToRouteMap.ContainsKey(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty)))
                     {
-                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);
+                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);                        
+                        // Map portsToIgnore from Service.Metadata.Name to Endpoints.Metadata.Name
+                        if (portsToIgnoreForService.ContainsKey(s.Metadata.Name)) {
+                            portToIgnoreForHeadlessServiceEndpoints.Add(endpoint.Metadata.Name, portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name));
+                        } 
                         continue;
                     }
                 }
@@ -457,10 +462,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
             var servicesToRouteEndpointInfos = servicesToRouteMap.Values.Select(s => new EndpointInfo()
             {
+                // portsToIgnore is a directory which contains a separate list of ports to ignore for each service, when picking ports for a service any port which is in the portsToIgnore is not used. 
                 DnsName = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace) ?
                             s.Metadata.Name :
                             $"{s.Metadata.Name}.{s.Metadata.Namespace()}",
-                Ports = s.Spec.Ports?.Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !portsToIgnore.Contains(p.Port)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                Ports = s.Spec.Ports?.Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !(portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name)?.Contains(p.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
                 IsInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace)
             }).ToList();
 
@@ -484,8 +490,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         {
                             DnsName = isInWorkloadNamespace ?
                                         $"{address.Hostname}.{endpoint.Metadata.Name}" :
-                                        $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !portsToIgnore.Contains(port.Port)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                                        $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}", // check the below code
+                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }
