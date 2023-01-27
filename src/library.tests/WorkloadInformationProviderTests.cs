@@ -204,7 +204,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             bool addSubset = false;
             for (int i = 0; i < numServices; i++)
             {
-                var service = new V1Service()
+                serviceList.Add(new V1Service()
                 {
                     Spec = new V1ServiceSpec()
                     {
@@ -215,9 +215,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     },
                     Metadata = new V1ObjectMeta()
                     {
-                        Name = namingFunction(i),
+                        Name = namingFunction(i)
                     }
-                };
+                });
                 var subsets = new List<V1EndpointSubset>()
                         {
                             new V1EndpointSubset()
@@ -253,7 +253,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     // we only want to skip addign subset in one, the rest should have subsets
                     addSubset = true;
                 }
-
                 A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().GetEndpointInNamespaceAsync(namingFunction(i), A<string>._, A<CancellationToken>._)).Returns(endPoint);
             }
             A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListServicesInNamespaceAsync(default, default, default)).WithAnyArguments().Returns(new V1ServiceList(serviceList));
