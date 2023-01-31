@@ -78,9 +78,6 @@ jobs:
             Write-Host "Done setting the sign type and telemetry key instance for main branch"
         }
 
-
-        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
-
         Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
   - task: MicroBuildSigningPlugin@3
     name: ''
@@ -542,8 +539,6 @@ jobs:
             Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
             Write-Host "Done setting the sign type and telemetry key instance for staging branch"
         }
-
-        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
 
         Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
   - task: MicroBuildSigningPlugin@3
