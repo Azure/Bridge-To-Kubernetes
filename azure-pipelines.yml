@@ -14,12 +14,6 @@
 # Variable 'TeamName' was defined in the Variables tab
 # Variable 'TelemetryType' was defined in the Variables tab
 parameters:
-  - name: SignTypeToUse
-    displayName: Signing Type
-    default: 'test'
-    values:
-    - test
-    - real
   - name: TelemetryType
     displayName: Telemetry Type so that correct application insights key is selected
     default: 'TELEMETRY_DEVELOPMENT'
@@ -87,17 +81,15 @@ jobs:
 
         Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
   - task: MicroBuildSigningPlugin@3
     name: ''
     displayName: Install Signing Plugin
     enabled: True
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     inputs:
-      signType: ${{ parameters.SignTypeToUse }}
+      signType: real
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     displayName: 'Install Localization Plugin'
     enabled: True
   - task: UseDotNet@2
@@ -267,10 +259,9 @@ jobs:
     name: ''
     displayName: Sign Files
     enabled: True
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     inputs:
       solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
+      msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
@@ -554,16 +545,14 @@ jobs:
 
         Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
   - task: MicroBuildSigningPlugin@3
     displayName: Install Signing Plugin
     enabled: True
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     inputs:
-      signType: ${{ parameters.SignTypeToUse }}
+      signType: real
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     displayName: Install Localization Plugin
   - task: UseDotNet@2
     displayName: Use .NET Core SDK 6.0.X
@@ -667,10 +656,9 @@ jobs:
   - task: VSBuild@1
     displayName: Sign Files
     enabled: True
-    condition: eq('${{ parameters.SignTypeToUse }}', 'real')
     inputs:
       solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
+      msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
