@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
 {
     /// <summary>
-    /// 
+    /// Argument to tell EndpointManager what IP addresses to allocate
     /// </summary>
     public class AllocateIPArgument : EndpointManagerRequestArgument
     {

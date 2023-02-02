@@ -123,8 +123,11 @@
   </Target>
 
   <ItemGroup>
-    <None Include="&#xD;&#xA;            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;&#xD;&#xA;            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
-	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    <None
+        Include="
+            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
+            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 

@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
 {
     /// <summary>
-    /// HostsFileEntry describes a line in hosts file
+    /// Argument to tell EndpointManager what hosts to add to the HOST file
     /// </summary>
     public class AddHostsFileEntryArgument : EndpointManagerRequestArgument
     {

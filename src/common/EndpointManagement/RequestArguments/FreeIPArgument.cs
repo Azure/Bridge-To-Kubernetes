@@ -8,7 +8,7 @@ using System.Net;
 namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
 {
     /// <summary>
-    /// 
+    /// Argument to tell EndpointManager what IP addresses to free
     /// </summary>
     public class FreeIPArgument : EndpointManagerRequestArgument
     {
