@@ -74,6 +74,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             {
                 var reachableEndpoints = new List<EndpointInfo>();
                 var servicesToRoute = new List<V1Service>();
+                // Dict to hold separate list of ports to ignore for each service.
                 var portsToIgnore = new Dictionary<String, IList<int>>();
 
                 if (includeSameNamespaceServices)
