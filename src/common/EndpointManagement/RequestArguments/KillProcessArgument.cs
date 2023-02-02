@@ -14,7 +14,7 @@ namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
     public class KillProcessArgument : EndpointManagerRequestArgument
     {
         /// <summary>
-        /// 
+        /// Process occupying ports
         /// </summary>
         public IEnumerable<ProcessPortMapping> ProcessPortMappings { get; set; }
     }

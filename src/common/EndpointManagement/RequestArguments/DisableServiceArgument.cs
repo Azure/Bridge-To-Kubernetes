@@ -14,7 +14,7 @@ namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
     public class DisableServiceArgument : EndpointManagerRequestArgument
     {
         /// <summary>
-        /// 
+        /// Service occupying a port
         /// </summary>
         public IEnumerable<ServicePortMapping> ServicePortMappings { get; set; }
     }

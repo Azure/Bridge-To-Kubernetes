@@ -13,7 +13,7 @@ namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
     public class FreeIPArgument : EndpointManagerRequestArgument
     {
         /// <summary>
-        /// 
+        /// Information about the IP addresses to free
         /// </summary>
         public IPAddress[] IPAddresses { get; set; }
     }

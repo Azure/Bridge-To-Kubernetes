@@ -13,9 +13,9 @@ namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
     /// </summary>
     public class AllocateIPArgument : EndpointManagerRequestArgument
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public IEnumerable<EndpointInfo> Endpoints { get; set; }
+    /// <summary>
+    /// Describes service in the cluster, or any endpoint outside of the cluster, which the local process needs to communicate with via the devhostagent
+    /// </summary>
+    public IEnumerable<EndpointInfo> Endpoints { get; set; }
     }
 }

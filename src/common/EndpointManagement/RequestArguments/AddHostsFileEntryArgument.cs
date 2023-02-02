@@ -14,13 +14,13 @@ namespace Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments
     public class AddHostsFileEntryArgument : EndpointManagerRequestArgument
     {
         /// <summary>
-        /// IP address
+        /// The namespace
         /// </summary>
         [JsonPropertyName("workloadNamespace")]
         public string WorkloadNamespace { get; set; }
 
         /// <summary>
-        /// Host names
+        /// Host file entries
         /// </summary>
         [JsonPropertyName("entries")]
         public IEnumerable<HostsFileEntry> Entries { get; set; }
