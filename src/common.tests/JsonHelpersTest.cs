@@ -14,7 +14,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
     {
         private readonly JsonSerializerOptions serializerSettings = new JsonSerializerOptions()
         {
-            MaxDepth = 1,
             ReferenceHandler = null
         };
 

@@ -106,7 +106,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
             }
 
             var serializerSettings = new System.Text.Json.JsonSerializerOptions();
-            serializerSettings.MaxDepth = 2;
             serializerSettings.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
             if (input is Exception ex)
