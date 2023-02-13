@@ -375,6 +375,10 @@
     <value>The specified container '{0}' was not found in pod '{1}'.</value>
     <comment>{0} - container name; {1} - pod name</comment>
   </data>
+  <data name="PreviousSessionStillConnected" xml:space="preserve">
+    <value>Restoration pod is still present for the specified service '{0}'. This means service has a bridge session still running. Please ensure bridge is fully disconnected and try again once the service is restored.</value>
+    <comment>{0} - service name</comment>
+  </data>
   <data name="SpecifiedServiceBackedByManyPodsInDifferentResourcesFormat" xml:space="preserve">
     <value>The specified service '{0}' is backed by {1} pods owned by different {2}. Unable to scale down to a single Pod.</value>
     <comment>{0} - service name; {1} - number of pods; {2} - resource type plural</comment>
