@@ -144,9 +144,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                                 });
                         }
 
-                        if (StringComparer.OrdinalIgnoreCase.Equals(feature, EnableFeature.DisableProbes.ToString()))
+                        if (StringComparer.OrdinalIgnoreCase.Equals(feature, EnableFeature.Probes.ToString()))
                         {
-                            this.IsProbesDisabled = true;
+                            this.IsProbesEnabled = true;
                         }
                     }
                 }
@@ -242,9 +242,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         public bool IsManagedIdentityScenario { get; } = false;
 
         /// <summary>
-        /// <see cref="ILocalProcessConfig.IsProbesDisabled"/>
+        /// <see cref="ILocalProcessConfig.IsProbesEnabled"/>
         /// </summary>
-        public bool IsProbesDisabled { get; } = false;
+        public bool IsProbesEnabled { get; } = false;
 
         /// <summary>
         /// <see cref="ILocalProcessConfig.EvaluateEnvVars"/>

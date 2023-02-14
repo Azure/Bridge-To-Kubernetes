@@ -481,8 +481,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
                     c.Env = newEnv;
 
-                    // If disable probes option is selected, remove any probe in the new pod.
-                    if (localProcessConfig?.IsProbesDisabled == true)
+                    // If probes option is not enabled or not set, remove any probe in the new pod.
+                    if (localProcessConfig?.IsProbesEnabled != true)
                     {
                         c.LivenessProbe = null;
                         c.ReadinessProbe = null;
@@ -1116,7 +1116,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 dirty = true;
             }
 
-            if (localProcessConfig?.IsProbesDisabled == true)
+            // If probes option is not enabled or not set, remove any probe in the new pod.
+            if (localProcessConfig?.IsProbesEnabled != true)
             {
                 if (deployment.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
                 {
@@ -1169,20 +1170,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 reversePatch.Replace(d => d.Spec.Template.Spec.ShareProcessNamespace, true);
                 dirty = true;
             }
-            if (statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
-            {
-                // update statefulset to disable liveness probe
-                patch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, null);
-                reversePatch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
-                dirty = true;
-            }
-            if (statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe != null)
-            {
-                // update statefulset to disable readiness probe
-                patch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, null);
-                reversePatch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
-                dirty = true;
-            }
             if (statefulSet.Spec.Template.Spec.Containers[containerIndex].Command != null)
             {
                 // update statefulset to remove commands
@@ -1229,7 +1216,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 dirty = true;
             }
 
-            if (localProcessConfig?.IsProbesDisabled == true)
+            // If probes option is not enabled or not set, remove any probe in the new pod.
+            if (localProcessConfig?.IsProbesEnabled != true)
             {
                 if (statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
                 {

@@ -8,6 +8,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
     internal enum EnableFeature
     {
         ManagedIdentity,
-        DisableProbes
+        Probes
     }
 }
