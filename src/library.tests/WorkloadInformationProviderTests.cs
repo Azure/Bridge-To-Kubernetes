@@ -60,7 +60,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
             servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
 
-            ConfigureHeadlessServiceWithIgnorePorts(numAddresses, ignorePorts, servicePorts);
+            ConfigureServiceWithIgnorePorts(isHeadLessService: true, numAddresses, ignorePorts, servicePorts);
             // Generate service endpoints
             var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));                       
             
@@ -88,6 +88,45 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
         [Theory]
         [InlineData(1)]
+        public async void GetReachableServicesAsync_PortsToIgnore_Service(int numAddresses)
+        { 
+            // Create two services and specify their ports to ignore and ports to use
+            Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
+            ignorePorts.Add("ServiceA", "190, 300");
+            ignorePorts.Add("ServiceB", "23");
+
+            Dictionary<string, List<int>> servicePorts = new Dictionary<string, List<int>>();
+            servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
+            servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
+
+            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts, servicePorts);
+            // Generate service endpoints
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));                       
+            
+            // Find all ports which were allocated to each service
+            Dictionary<string, List<int>> portsAllocatedToService = new Dictionary<string, List<int>>();
+            foreach (var endpoint in result) 
+            {
+                var ports = portsAllocatedToService.GetOrAdd(endpoint.DnsName, () => new List<int>());
+                ports.AddRange(endpoint.Ports.Select( p => p.RemotePort));
+            }
+            
+            // For each service ensure that none of the ignore ports are in the ports allocated and all other servicePorts are allocated to the service
+            // Check if all services are in the result
+            Assert.True(CompareLists(ignorePorts.Keys.Select( s => $"{s}.").ToList(), portsAllocatedToService.Keys.ToList()));
+            foreach(var serviceName in ignorePorts.Keys) 
+            {
+                // Identify expected ports for a service.
+                var ignorePortsList = ignorePorts.GetValueOrDefault(serviceName)?.Split(",").Select(p => int.Parse(p)).ToList() ?? new List<int>();
+                var expectedPortsForService = servicePorts.GetValueOrDefault(serviceName)?.Where( p => !ignorePortsList.Contains(p)) ?? new List<int>();
+
+                // Check if the allocated ports (from result) are same as the expected ports for the service.
+                Assert.True(CompareLists(expectedPortsForService.ToList(), portsAllocatedToService.GetValueOrDefault($"{serviceName}.")));
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
         public async void GetReachableServicesAsync_NoPortsToIgnore_HeadlessService(int numAddresses) 
         {
             Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
@@ -98,7 +137,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
             servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
 
-            ConfigureHeadlessServiceWithIgnorePorts(numAddresses, ignorePorts, servicePorts);
+            ConfigureServiceWithIgnorePorts(isHeadLessService: true, numAddresses, ignorePorts, servicePorts);
             var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             
             // Find all ports which were allocated to each service
@@ -125,10 +164,56 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
         [Theory]
         [InlineData(1)]
+        public async void GetReachableServicesAsync_NoPortsToIgnore_Service(int numAddresses) 
+        {
+            Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
+            ignorePorts.Add("ServiceA", null);
+            ignorePorts.Add("ServiceB", null);
+
+            Dictionary<string, List<int>> servicePorts = new Dictionary<string, List<int>>();
+            servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
+            servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
+
+            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts, servicePorts);
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
+            
+            // Find all ports which were allocated to each service
+            Dictionary<string, List<int>> portsAllocatedToService = new Dictionary<string, List<int>>();
+            foreach (var endpointInfo in result) 
+            {
+                var ports = portsAllocatedToService.GetOrAdd(endpointInfo.DnsName, () => new List<int>());
+                ports.AddRange(endpointInfo.Ports.Select( p => p.RemotePort));               
+            }  
+            
+            // For each service ensure that none of the ignore ports are in the ports allocated and all other servicePorts are allocated to the service
+            Assert.True(CompareLists(ignorePorts.Keys.Select( s => $"{s}.").ToList(), portsAllocatedToService.Keys.ToList()));
+            
+            foreach(var serviceName in ignorePorts.Keys) 
+            {
+                // Identify expected ports for a service.
+                var ignorePortsList = ignorePorts.GetValueOrDefault(serviceName)?.Split(",").Select(p => int.Parse(p)).ToList() ?? new List<int>();
+                var expectedPortsForService = servicePorts.GetValueOrDefault(serviceName)?.Where( p => !ignorePortsList.Contains(p)) ?? new List<int>();
+
+                // Check if the allocated ports (from result) are same as the expected ports for the service.
+                Assert.True(CompareLists(expectedPortsForService.ToList(), portsAllocatedToService.GetValueOrDefault($"{serviceName}.")));
+            }        
+        }
+
+        [Theory]
+        [InlineData(1)]
         public async void GetReachableServicesAsync_PortsToIgnoreIncorrectFormat_HeadlessService(int numAddresses) {
             Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
             ignorePorts.Add("ServiceA", "19o, abc");
-            ConfigureHeadlessServiceWithIgnorePorts(numAddresses, ignorePorts);
+            ConfigureServiceWithIgnorePorts(isHeadLessService: true, numAddresses, ignorePorts);
+            await Assert.ThrowsAsync<UserVisibleException>(() => _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken)));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public async void GetReachableServicesAsync_PortsToIgnoreIncorrectFormat_Service(int numAddresses) {
+            Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
+            ignorePorts.Add("ServiceA", "19o, abc");
+            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts);
             await Assert.ThrowsAsync<UserVisibleException>(() => _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken)));
         }
 
@@ -142,7 +227,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             return list1.All( item => list2.Contains(item));
         }
 
-        private void ConfigureHeadlessServiceWithIgnorePorts(int numAddresses, Dictionary<string, string> ignorePorts, Dictionary<string, List<int>> servicePorts = null) 
+        private void ConfigureServiceWithIgnorePorts(bool isHeadLessService, int numAddresses, Dictionary<string, string> ignorePorts, Dictionary<string, List<int>> servicePorts = null) 
         {
             var serviceList = new List<V1Service>();
             // ignorePorts.Keys has all services used in the test.
@@ -153,7 +238,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     Spec = new V1ServiceSpec() 
                     {
                         Type = "ClusterIP",
-                        ClusterIP = "None",
+                        ClusterIP = isHeadLessService ? "None" : "10.1.1.1", 
                         Ports = servicePorts?.GetValueOrDefault(serviceName).Select(p => new V1ServicePort(port: p, protocol: "TCP")).ToList() ?? new List<V1ServicePort> { new V1ServicePort(port: 80, protocol: "TCP")}, 
                         Selector = new Dictionary<string, string> { { "app", "myapp" } }
                     },
@@ -191,7 +276,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                             Hostname = $"host-{j}",
                         });
                     }
-
                 A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().GetEndpointInNamespaceAsync(serviceName, A<string>._, A<CancellationToken>._)).Returns(endPoint);
             }
             A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListServicesInNamespaceAsync(default, default, default)).WithAnyArguments().Returns(new V1ServiceList(serviceList));
