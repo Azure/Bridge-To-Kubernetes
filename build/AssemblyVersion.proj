@@ -3,6 +3,9 @@ Configures the version based on the build number. Assumes $AssemblyVersion has a
 depends on each project.
 -->
 <Project>
+	<PropertyGroup>
+		<DisableUsernameInAssemblyVersion></DisableUsernameInAssemblyVersion>
+	</PropertyGroup>
     <PropertyGroup Condition=" '$(Version)' == '' ">
         <BUILD_BUILDNUMBER Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$(MINDARO_BUILD_NUMBER)</BUILD_BUILDNUMBER>
         <BUILD_BUILDNUMBER Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$([System.DateTime]::Now.ToString(`yyyyMMdd`))</BUILD_BUILDNUMBER>

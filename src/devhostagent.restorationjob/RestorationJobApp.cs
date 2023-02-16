@@ -245,10 +245,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                deploymentPatch.ReversePatch.ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                };
+                deploymentPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
 
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(deploymentPatch.ReversePatch.TryGetContainerImageReplacementValue()))
@@ -294,10 +291,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                statefulSetPatch.ReversePatch.ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                };
+                statefulSetPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
 
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(statefulSetPatch.ReversePatch.TryGetContainerImageReplacementValue()))
@@ -326,10 +320,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// </summary>
         private async Task<Uri> _GetAgentEndpointAsync(PodPatch podPatch, CancellationToken cancellationToken)
         {
-            podPatch.ReversePatch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            podPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
 
             string ns = podPatch.Pod.Namespace();
             string name = podPatch.Pod.Name();

@@ -7,6 +7,7 @@ using k8s.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Xunit;
 using Newtonsoft.Json.Serialization;
+using Microsoft.BridgeToKubernetes.Common.Json;
 
 namespace Microsoft.BridgeToKubernetes.Common.Tests.Extensions
 {
@@ -17,10 +18,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Extensions
         {
             const string image = "foobar";
             var patch = new JsonPatchDocument<V1Deployment>();
-            patch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            patch.ContractResolver = new STJCamelCaseContractResolver();
             patch.Replace(d => d.Spec.Template.Spec.Containers[0].Image, image);
             Assert.Equal(image, patch.TryGetContainerImageReplacementValue());
 
@@ -33,10 +31,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Extensions
         {
             const string image = "foobar";
             var patch = new JsonPatchDocument<V1Pod>();
-            patch.ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            patch.ContractResolver = new STJCamelCaseContractResolver();
             patch.Replace(p => p.Spec.Containers[10].Image, image);
             Assert.Equal(image, patch.TryGetContainerImageReplacementValue());
 
