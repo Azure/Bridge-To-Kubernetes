@@ -74,10 +74,12 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
+            echo "telemetry variable set to:$(TelemetryType)"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         } else {
-            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
+            echo "telemetry variable set to:$(TelemetryType)"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
@@ -539,10 +541,12 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
+            echo "telemetry variable set to:$(TelemetryType)"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         } else {
-            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
+            echo "telemetry variable set to:$(TelemetryType)"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
