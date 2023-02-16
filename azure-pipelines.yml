@@ -74,8 +74,8 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
-            Write-Host "Done setting the sign type and telemetry key instance for main branch"
+            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         }
 
         Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
@@ -536,8 +536,8 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
-            Write-Host "Done setting the sign type and telemetry key instance for staging branch"
+            Write-Host "##vso[task.setvariable variable=TelemetryType] ${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         }
 
         Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
