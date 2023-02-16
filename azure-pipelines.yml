@@ -543,7 +543,6 @@ jobs:
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         } else {
             Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
-            Write-Host "$env:TelemetryType"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
