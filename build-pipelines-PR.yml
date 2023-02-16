@@ -1,3 +1,4 @@
+# This pipeline is meant to run build validation for PRs. This pipeline does not have signing.
 # 'Allow scripts to access the OAuth token' was selected in pipeline.  Add the following YAML to any steps requiring access:
 #       env:
 #           MY_ACCESS_TOKEN: $(System.AccessToken)
@@ -37,6 +38,11 @@ variables:
 - name: RunTests
   value: True
 
+trigger:
+  branches:
+    include:
+    - refs/heads/main
+  batch: True
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
   repositories:
@@ -78,17 +84,10 @@ jobs:
             Write-Host "Done setting the sign type and telemetry key instance for main branch"
         }
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
-  - task: MicroBuildSigningPlugin@3
-    name: ''
-    displayName: Install Signing Plugin
-    enabled: True
-    inputs:
-      signType: real
-      zipSources: false
-  - task: MicroBuildLocalizationPlugin@3
-    displayName: 'Install Localization Plugin'
-    enabled: True
+
+        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
+
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
   - task: UseDotNet@2
     displayName: Use .NET Core SDK 6.0.x
     enabled: True
@@ -252,14 +251,7 @@ jobs:
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  - task: VSBuild@1
-    name: ''
-    displayName: Sign Files
-    enabled: True
-    inputs:
-      solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=real
-      configuration: '${{ parameters.BuildConfiguration }} '
+
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -459,7 +451,7 @@ jobs:
       packagesToPack: src/dsc/dsc.csproj
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
-      buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
+      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Manifest Generator for nuget'
     inputs:
@@ -540,13 +532,9 @@ jobs:
             Write-Host "Done setting the sign type and telemetry key instance for staging branch"
         }
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
-  - task: MicroBuildSigningPlugin@3
-    displayName: Install Signing Plugin
-    enabled: True
-    inputs:
-      signType: real
-      zipSources: false
+        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
+
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
   - task: MicroBuildLocalizationPlugin@3
     displayName: Install Localization Plugin
   - task: UseDotNet@2
@@ -648,13 +636,6 @@ jobs:
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  - task: VSBuild@1
-    displayName: Sign Files
-    enabled: True
-    inputs:
-      solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=real
-      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
