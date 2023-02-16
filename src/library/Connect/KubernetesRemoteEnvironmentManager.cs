@@ -493,6 +493,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     c.LivenessProbe = null;
                     c.ReadinessProbe = null;
+                    c.StartupProbe = null;
                 }
             }
 
