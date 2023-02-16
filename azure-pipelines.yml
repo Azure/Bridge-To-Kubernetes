@@ -74,16 +74,14 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
-            echo "telemetry variable set to:$(TelemetryType)"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         } else {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
-            echo "telemetry variable set to:$(TelemetryType)"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled;]true"
   - task: MicroBuildSigningPlugin@3
     name: ''
     displayName: Install Signing Plugin
@@ -541,16 +539,14 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
-            echo "telemetry variable set to:$(TelemetryType)"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
         } else {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]${{ parameters.TelemetryType }}"
-            echo "telemetry variable set to:$(TelemetryType)"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
             Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]true"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled;]true"
   - task: MicroBuildSigningPlugin@3
     displayName: Install Signing Plugin
     enabled: True
