@@ -189,7 +189,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public Task<HttpOperationResponse<V1DeploymentList>> WatchV1DeploymentAsync(string namespaceName, string deploymentName, int timeoutSeconds, CancellationToken cancellationToken)
         {
-            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={deploymentName}", timeoutSeconds: timeoutSeconds, cancellationToken: cancellationToken), nameof(WatchV1DeploymentAsync), cancellationToken);
+            return ClientInvokeWrapperAsync(async () => await RestClient.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync(namespaceName, fieldSelector: $"metadata.name={deploymentName}", timeoutSeconds: timeoutSeconds, watch: true, cancellationToken: cancellationToken), nameof(WatchV1DeploymentAsync), cancellationToken);
         }
 
         /// <summary>
