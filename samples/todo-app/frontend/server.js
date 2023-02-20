@@ -23,8 +23,8 @@ app.prepare().then(() => {
             res.send(data);
         });
     });
-
-    var bus = serviceBus.bus({ url: "amqp://"+process.env.STATS_QUEUE_SERVICE_HOST+":"+process.env.STATS_QUEUE_SERVICE_PORT_TCP });
+    
+    var bus = serviceBus.bus({ url: `amqp://${process.env.STATS_QUEUE_SERVICE_HOST}:${process.env.STATS_QUEUE_SERVICE_PORT}` });
     bus.use(bus.logger());
     bus.on("error", err => {
         console.error(err.message)
