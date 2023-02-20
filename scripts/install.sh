@@ -110,7 +110,7 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '3.1'* ]]; then
+    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'* ]]; then
         install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
@@ -127,10 +127,12 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                $PACKAGER tap isen-ng/dotnet-sdk-versions
-                install_with_sudo dotnet-sdk3-1-400 --cask
+                $PACKAGER tap isen-ng/dotnet-sdk-versionsisen-ng/dotnet-sdk-versions
+                install_with_sudo dotnet-sdk6-0-400 --cask
+            elif [[ $OSTYPE == "linux"* ]]; then
+                install_with_sudo aspnetcore-runtime-6.0
             else 
-                install_with_sudo aspnetcore-runtime-3.1
+                install_with_sudo dotnet-6.0-runtime
             fi
             ;;
         jq)
