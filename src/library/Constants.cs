@@ -12,6 +12,11 @@ namespace Microsoft.BridgeToKubernetes.Library
             public const string UserClusterNamespaceName = "azds";
         }
 
+        internal static class DeploymentConfig 
+        {
+            public const string ServiceAnnotations = "bridgetokubernetes/ignore-ports";
+        }
+
         internal static class AzureContainerServiceResource
         {
             public const string AKSCluster = "AKS cluster";

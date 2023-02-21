@@ -788,6 +788,15 @@ namespace Microsoft.BridgeToKubernetes.Library {
                 return ResourceManager.GetString("SpecifiedServiceBackedByMultipleRemoteAgents", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Restoration pod is still present for the specified service '{0}'. This means service has a bridge session still running. Please ensure bridge is fully disconnected and try again once the service is restored.
+        /// </summary>
+        internal static string PreviousSessionStillConnected {
+            get {
+                return ResourceManager.GetString("PreviousSessionStillConnected", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The specified service &apos;{0}&apos; could not be found in namespace &apos;{1}&apos;..
