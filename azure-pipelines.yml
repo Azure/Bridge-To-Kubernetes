@@ -14,12 +14,6 @@
 # Variable 'TeamName' was defined in the Variables tab
 # Variable 'TelemetryType' was defined in the Variables tab
 parameters:
-  - name: SignTypeToUse
-    displayName: Signing Type
-    default: 'test'
-    values:
-    - test
-    - real
   - name: TelemetryType
     displayName: Telemetry Type so that correct application insights key is selected
     default: 'TELEMETRY_DEVELOPMENT'
@@ -43,11 +37,6 @@ variables:
 - name: RunTests
   value: True
 
-trigger:
-  branches:
-    include:
-    - refs/heads/main
-  batch: True
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
   repositories:
@@ -85,20 +74,20 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
-            Write-Host "Done setting the sign type and telemetry key instance for main branch"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
+        } else {
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
-
-        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
-
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled;]true"
   - task: MicroBuildSigningPlugin@3
     name: ''
     displayName: Install Signing Plugin
     enabled: True
     inputs:
-      signType: ${{ parameters.SignTypeToUse }}
+      signType: real
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
     displayName: 'Install Localization Plugin'
@@ -272,7 +261,7 @@ jobs:
     enabled: True
     inputs:
       solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
+      msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
@@ -550,18 +539,19 @@ jobs:
         $branchName = $env:BUILD_SOURCEBRANCH
 
         if ($branchName -eq "refs/heads/main") {
-            Write-Host "##vso[task.setvariable variable=TelemetryType]"{{ parameters.TelemetryType }}
-            Write-Host "Done setting the sign type and telemetry key instance for staging branch"
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
+        } else {
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
         }
 
-        Write-Host "Disabling NuGet package signing because it doesn't work, and we don't publish public NuGet packages"
-
-        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled]false"
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled;]true"
   - task: MicroBuildSigningPlugin@3
     displayName: Install Signing Plugin
     enabled: True
     inputs:
-      signType: ${{ parameters.SignTypeToUse }}
+      signType: real
       zipSources: false
   - task: MicroBuildLocalizationPlugin@3
     displayName: Install Localization Plugin
@@ -669,7 +659,7 @@ jobs:
     enabled: True
     inputs:
       solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=${{ parameters.SignTypeToUse }}
+      msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
