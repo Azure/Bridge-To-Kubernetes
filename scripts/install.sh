@@ -127,7 +127,7 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                $PACKAGER tap isen-ng/dotnet-sdk-versionsisen-ng/dotnet-sdk-versions
+                $PACKAGER tap isen-ng/dotnet-sdk-versions
                 install_with_sudo dotnet-sdk6-0-400 --cask
             elif [[ $OSTYPE == "linux"* ]]; then
                 install_with_sudo dotnet-sdk-6.0
