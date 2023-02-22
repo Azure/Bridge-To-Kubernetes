@@ -127,7 +127,7 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                if [[ uname -m =~ "arm64" ]]; then
+                if [[ $(uname -m) == "arm64" ]]; then
                     install_dotnet_x64_for_arm
                 else 
                     $PACKAGER tap isen-ng/dotnet-sdk-versions
