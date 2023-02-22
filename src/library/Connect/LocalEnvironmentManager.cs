@@ -421,67 +421,69 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// </summary>
         public IDictionary<string, string> CreateEnvVariablesForK8s(WorkloadInfo workloadInfo)
         {
-            Dictionary<string, string> result = new Dictionary<string, string>(workloadInfo.EnvironmentVariables);
+            var result = new Dictionary<string, string>(workloadInfo.EnvironmentVariables);
+
             foreach (var endpoint in workloadInfo.ReachableEndpoints)
             {
-                if (StringComparer.OrdinalIgnoreCase.Equals(endpoint.DnsName, DAPR))
+                if (string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase))
                 {
                     // Override the DAPR env variables with the real local ports (that might be different if we neeeded to re-allocate them)
                     result["DAPR_HTTP_PORT"] = endpoint.Ports[0].LocalPort.ToString(); // TODO (lolodi): this is a hack that relies on the HTTP port to always be the first and GRPC port the second.
                     result["DAPR_GRPC_PORT"] = endpoint.Ports[1].LocalPort.ToString(); // We should probably name the port pairs (maybe with the env variable that we want to set with them).
-                }                                                                      // Once we do that, we can actually stop assigning the DAPR dns name ot this endpoint and just leave it empty, consistently with how the Remote agent works
+                                                                                       // Once we do that, we can actually stop assigning the DAPR dns name ot this endpoint and just leave it empty, consistently with how the Remote agent works
+                }
+
+                // because we are using dns name instead of service we have to retrieve it by splitting when needed
+                // If this ever cause issues we should consider larger refactor where we add serviceName member variable to EndpointInfo class.
+                var serviceName = endpoint.DnsName
+                    .ToUpperInvariant()
+                    .Split(".")
+                    .First()
+                    .Replace("-", "_")
+                    .Replace(".", "_");
+
+                var host = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                    ? endpoint.LocalIP.ToString()
+                    : endpoint.DnsName;
+
+                if (string.Equals(serviceName, "KUBERNETES", StringComparison.OrdinalIgnoreCase))
+                    host = _kubernetesClient.HostName;
+
+                var unnamedPort = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                    ? endpoint.Ports[0].LocalPort.ToString()
+                    : endpoint.Ports[0].RemotePort.ToString();
+
+                // Service Host
+                result[$"{serviceName}_SERVICE_HOST"] = host;
+
+                // Service Port: allocate the first port in the service to the backwards-compatible environment variable in keeping with Kubernetes source code
+                result[$"{serviceName}_SERVICE_PORT"] = unnamedPort;
+                result[$"{serviceName}_PORT"] = $"{endpoint.Ports[0].Protocol}://{host}:{unnamedPort}";
+
+                // All named ports (only the first may be unnamed according to Kubernetes source code)
                 foreach (var portPair in endpoint.Ports)
                 {
-                    this._AddKubernetesServiceEnv(result,
-                                                  endpoint.DnsName,
-                                                  (this._useKubernetesServiceEnvironmentVariables || StringComparer.OrdinalIgnoreCase.Equals(endpoint.DnsName, DAPR)) ? endpoint.LocalIP.ToString() : endpoint.DnsName,
-                                                  portPair.Protocol,
-                                                  (this._useKubernetesServiceEnvironmentVariables || StringComparer.OrdinalIgnoreCase.Equals(endpoint.DnsName, DAPR)) ? portPair.LocalPort : portPair.RemotePort);
+                    var port = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                        ? portPair.LocalPort
+                        : portPair.RemotePort;
+
+                    var protocolUpper = portPair.Protocol.ToUpperInvariant();
+
+                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"] = portPair.Protocol;
+                    result[$"{serviceName}_PORT_{port}_{protocolUpper}"] = $"{portPair.Protocol}://{host}:{port}";
+                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"] = port.ToString();
+                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
+
+                    if (!string.IsNullOrWhiteSpace(portPair.Name))
+                        result[$"{serviceName}_SERVICE_PORT_{portPair.Name.ToUpperInvariant()}"] = port.ToString();
+
+                    // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable from dns name to ip:port
+                    if (_useKubernetesServiceEnvironmentVariables && string.Equals(serviceName, ManagedIdentity.TargetServiceNameOnLocalMachine, StringComparison.OrdinalIgnoreCase))
+                        result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = $"http://{host}:{port}/metadata/identity/oauth2/token";
                 }
             }
+
             return result;
-        }
-
-        /// <summary>
-        /// Add Kubernetes environment variables to existing list of environment variables
-        /// </summary>
-        private void _AddKubernetesServiceEnv(IDictionary<string, string> envVariables, string dnsName, string host, string protocol, int port)
-        {
-            dnsName = dnsName.ToUpperInvariant();
-            // because we are using dns name instead of service we have to retrieve it by splitting when needed
-            // If this ever cause issues we should consider larger refactor where we add serviceName member varaible to EndpointInfo class.
-            string serviceName = dnsName.Split(".").First();
-
-            if (string.IsNullOrEmpty(protocol))
-            {
-                protocol = "tcp";
-            }
-            var protocolUpper = protocol.ToUpperInvariant();
-
-            if (serviceName == "KUBERNETES")
-            {
-                // reset KUBERNETES_SERVICE_HOST to cluster name.
-                host = this._kubernetesClient.HostName;
-            }
-
-            // Linux environment variable name doesn't allow '-' nor '.'. Need to be replaced by '_'.
-            serviceName = serviceName.Replace("-", "_");
-            serviceName = serviceName.Replace(".", "_");
-
-            envVariables[$"{serviceName}_PORT"] = $"{protocol}://{host}:{port}";
-            envVariables[$"{serviceName}_SERVICE_PORT_{protocolUpper}"] = port.ToString();
-            envVariables[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"] = protocol;
-            envVariables[$"{serviceName}_PORT_{port}_{protocolUpper}"] = $"{protocol}://{host}:{port}";
-            envVariables[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"] = port.ToString();
-            envVariables[$"{serviceName}_SERVICE_PORT"] = port.ToString();
-            envVariables[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
-            envVariables[$"{serviceName}_SERVICE_HOST"] = host;
-
-            // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable
-            // from dns name to ip:port 
-            if (this._useKubernetesServiceEnvironmentVariables && StringComparer.OrdinalIgnoreCase.Equals(serviceName, Common.Constants.ManagedIdentity.TargetServiceNameOnLocalMachine)) {
-                envVariables[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = "http://" + host + ":" + port + "/metadata/identity/oauth2/token";
-            }
         }
 
         /// <summary>

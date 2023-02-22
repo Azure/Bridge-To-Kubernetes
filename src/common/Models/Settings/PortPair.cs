@@ -20,12 +20,14 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         /// <param name="localPort"></param>
         /// <param name="remotePort"></param>
         /// <param name="protocol"></param>
+        /// <param name="name"></param>
         [JsonConstructor]
-        public PortPair(int localPort, int remotePort, string protocol = KubernetesConstants.Protocols.Tcp)
+        public PortPair(int localPort, int remotePort, string protocol = KubernetesConstants.Protocols.Tcp, string name = null)
         {
-            this.LocalPort = localPort;
-            this.RemotePort = remotePort;
-            this.Protocol = protocol;
+            LocalPort = localPort;
+            RemotePort = remotePort;
+            Protocol = protocol;
+            Name = name;
         }
 
         /// <summary>
@@ -33,11 +35,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         /// </summary>
         /// <param name="remotePort"></param>
         /// <param name="protocol"></param>
-        public PortPair(int remotePort, string protocol = KubernetesConstants.Protocols.Tcp)
+        /// <param name="name"></param>
+        public PortPair(int remotePort, string protocol = KubernetesConstants.Protocols.Tcp, string name = null)
         {
-            this.LocalPort = Constants.IP.PortPlaceHolder;
-            this.RemotePort = remotePort;
-            this.Protocol = protocol;
+            LocalPort = Constants.IP.PortPlaceHolder;
+            RemotePort = remotePort;
+            Protocol = protocol;
+            Name = name;
         }
 
         /// <summary>
@@ -53,10 +57,20 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         public int RemotePort { get; set; }
 
         /// <summary>
-        /// Procol used when comunicating on this port (usually TCP)
+        /// Protocol used when communicating on this port (usually TCP)
         /// </summary>
         [JsonProperty("protocol")]
         public string Protocol { get; set; }
+
+        /// <summary>
+        /// Name metadata corresponding to named ports in service resource in Kubernetes
+        /// </summary>
+        /// <remarks>
+        /// Service resources with multiple ports must be given names so that they are unambiguous.
+        /// https://kubernetes.io/docs/concepts/services-networking/service/#multi-port-services
+        /// </remarks>
+        [JsonProperty("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// Create a clone of this object
@@ -64,7 +78,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         /// <returns></returns>
         public object Clone()
         {
-            return new PortPair(LocalPort, RemotePort, Protocol);
+            return new PortPair(LocalPort, RemotePort, Protocol, Name);
         }
     }
 }
