@@ -127,8 +127,12 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                $PACKAGER tap isen-ng/dotnet-sdk-versions
-                install_with_sudo dotnet-sdk6-0-400 --cask
+                if [[ uname -m =~ "arm64" ]]; then
+                    install_dotnet_x64_for_arm
+                else 
+                    $PACKAGER tap isen-ng/dotnet-sdk-versions
+                    install_with_sudo dotnet-sdk6-0-400 --cask
+                fi 
             elif [[ $OSTYPE == "linux"* ]]; then
                 install_with_sudo dotnet-sdk-6.0
             else 
@@ -143,6 +147,13 @@ install_tool() {
             exit 1
             ;;
     esac
+}
+
+install_dotnet_x64_for_arm() {
+    log INFO "downloading and installing dotnet x64 binaries in arm machines"
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
+    sudo mv ~/.dotnet/* /usr/local/share/dotnet/x64
+    export PATH="/usr/local/share/dotnet/x64/*":$PATH
 }
 
 install_with_sudo() {
