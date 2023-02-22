@@ -127,7 +127,7 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                arch = $(uname -m)
+                arch=$(uname -m)
                 if [[ "$arch" == 'arm64' ]]; then
                     install_dotnet_x64_for_arm
                 else 
