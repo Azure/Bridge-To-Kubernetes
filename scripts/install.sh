@@ -110,7 +110,7 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    log INFO "dotnetruntimes are -->"dotnetruntimes
+    log INFO "dotnetruntimes are -->"${dotnetruntimes}
     if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'*  || ! `grep -q "6.0" ${dotnetruntimes}` ]]; then
         install_tool dotnet
     else 
@@ -133,7 +133,7 @@ install_tool() {
             elif [[ $OSTYPE == "linux"* ]]; then
                 install_with_sudo aspnetcore-runtime-6.0
             else 
-                install_with_sudo dotnet-6.0-runtime
+                install_with_sudo dotnet-6.0-aspnetruntime
             fi
             ;;
         jq)
