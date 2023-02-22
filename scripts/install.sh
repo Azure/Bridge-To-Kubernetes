@@ -133,7 +133,7 @@ install_tool() {
             elif [[ $OSTYPE == "linux"* ]]; then
                 install_with_sudo aspnetcore-runtime-6.0
             else 
-                install_with_sudo dotnet-6.0-aspnetruntime
+                install_with_sudo dotnet-6.0-aspnetruntime -y
             fi
             ;;
         jq)
@@ -149,8 +149,10 @@ install_tool() {
 install_with_sudo() {
     if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install $1 -y
-    else
+    elif [[ $OSTYPE == "darwin"* ]]; then
         $PACKAGER install $2 $1
+    else 
+        $PACKAGER install $1 $2
     fi
 }
 
