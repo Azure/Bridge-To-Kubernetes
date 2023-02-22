@@ -153,7 +153,7 @@ install_tool() {
 install_dotnet_x64_for_arm() {
     log INFO "downloading and installing dotnet x64 binaries in arm machines"
     curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
-    if [ ! -d /usr/local/share/dotnet || ! -d /usr/local/share/dotnet/x64 ]; then
+    if [[ ! -d /usr/local/share/dotnet ]] || [[ ! -d /usr/local/share/dotnet/x64 ]]; then
         sudo mkdir -p /usr/local/share/dotnet/x64
     fi
     sudo mv ~/.dotnet/* /usr/local/share/dotnet/x64/
