@@ -33,9 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devhostAgent.restorationjob
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "routingmanager.tests", "routingmanager.tests\routingmanager.tests.csproj", "{49DF73FE-1E7D-4AF6-87B5-194BF4A35ADB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "endpointmanagerlauncher", "endpointmanagerlauncher\endpointmanagerlauncher.csproj", "{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "endpointmanagerlauncher", "EndpointManagerLauncher\endpointmanagerlauncher.csproj", "{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "localagent", "LocalAgent\localagent.csproj", "{C3F0EE30-9187-43D8-B2C7-86CD61635561}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "localagent", "LocalAgent\LocalAgent.csproj", "{C3F0EE30-9187-43D8-B2C7-86CD61635561}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dsc.tests", "dsc.tests\dsc.tests.csproj", "{C3753974-9857-4AF1-B06B-DD53F963108B}"
 EndProject

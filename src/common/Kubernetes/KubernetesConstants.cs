@@ -70,7 +70,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 
         public static class Protocols
         {
-            public const string Tcp = "TCP";
+            public const string Tcp = "tcp";
         }
     }
 }
