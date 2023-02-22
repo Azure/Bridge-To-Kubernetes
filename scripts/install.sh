@@ -154,7 +154,7 @@ install_dotnet_x64_for_arm() {
     log INFO "downloading and installing dotnet x64 binaries in arm machines"
     curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
     sudo mkdir -p /usr/local/share/dotnet/x64
-    sudo mv ~/.dotnet/* /usr/local/share/dotnet/x64
+    sudo mv ~/.dotnet/* /usr/local/share/dotnet/x64/
     export PATH="/usr/local/share/dotnet/x64/*":$PATH
 }
 
