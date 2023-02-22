@@ -156,7 +156,7 @@ install_dotnet_x64_for_arm() {
     if [[ ! -d /usr/local/share/dotnet ]] || [[ ! -d /usr/local/share/dotnet/x64 ]]; then
         sudo mkdir -p /usr/local/share/dotnet/x64
     fi
-    sudo cp -r $HOME/.dotnet/ /usr/local/share/dotnet/x64/
+    sudo cp -r "$HOME/.dotnet/" /usr/local/share/dotnet/x64/
     export PATH="/usr/local/share/dotnet/x64/*":$PATH
 }
 
