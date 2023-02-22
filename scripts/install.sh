@@ -110,7 +110,8 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'* ]]; then
+    log INFO "dotnetruntimes are -->"dotnetruntimes
+    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'*  || ! "${dotnetruntimes}" | grep "6.0" ]]; then
         install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
