@@ -108,18 +108,22 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
             var serializerSettings = new System.Text.Json.JsonSerializerOptions();
             serializerSettings.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
+            var debugOutput = "";
             if (input is Exception ex)
             {
                 input = RemoveUnwantedExceptionProperties(input, serializerSettings, ex);
+                debugOutput += $"Exception beging serialized: {ex} | ";
             }
 
             try
             {
                 return JsonHelpers.SerializeObject(input, serializerSettings);
             }
-            catch (JsonException)
+            catch (JsonException jsex)
             {
-                return "Serialization Error";
+                debugOutput += $"JsonException: {jsex} |";
+
+                return $"Serialization Error: Debug output: {debugOutput}";
             }
         }
 
