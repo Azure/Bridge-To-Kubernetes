@@ -22,6 +22,7 @@ using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.Channel;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
+using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Common.PortForward;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
@@ -447,16 +448,23 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     : endpoint.DnsName;
 
                 if (string.Equals(serviceName, "KUBERNETES", StringComparison.OrdinalIgnoreCase))
+                {
+                    // reset KUBERNETES_SECRET_HOST to cluster name
                     host = _kubernetesClient.HostName;
-
-                var unnamedPort = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
-                    ? endpoint.Ports[0].LocalPort.ToString()
-                    : endpoint.Ports[0].RemotePort.ToString();
+                }
 
                 // Service Host
                 result[$"{serviceName}_SERVICE_HOST"] = host;
 
-                // Service Port: allocate the first port in the service to the backwards-compatible environment variable in keeping with Kubernetes source code
+                // Service Port
+                // tl;dr: allocate the first port in the service to the backwards-compatible environment variable in keeping with Kubernetes source code.
+                // These environment variables are distinct per service definition as they do not contain metadata that distinguish them apart from other port mapping variables.
+                // Kubernetes currently appears to bind the first port in the service definition to these ports, as such, we are initializing them in the outer loop here so
+                // they cannot be overwritten by the final iteration of the inner loop below which would end up setting them to the final port in the collection
+                var unnamedPort = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                    ? endpoint.Ports[0].LocalPort.ToString()
+                    : endpoint.Ports[0].RemotePort.ToString();
+
                 result[$"{serviceName}_SERVICE_PORT"] = unnamedPort;
                 result[$"{serviceName}_PORT"] = $"{endpoint.Ports[0].Protocol}://{host}:{unnamedPort}";
 
@@ -467,7 +475,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         ? portPair.LocalPort
                         : portPair.RemotePort;
 
-                    var protocolUpper = portPair.Protocol.ToUpperInvariant();
+                    var protocolUpper = string.IsNullOrWhiteSpace(portPair.Protocol)
+                        ? KubernetesConstants.Protocols.Tcp.ToUpperInvariant()
+                        : portPair.Protocol.ToUpperInvariant();
 
                     result[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"] = portPair.Protocol;
                     result[$"{serviceName}_PORT_{port}_{protocolUpper}"] = $"{portPair.Protocol}://{host}:{port}";
@@ -475,11 +485,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
 
                     if (!string.IsNullOrWhiteSpace(portPair.Name))
+                    {
                         result[$"{serviceName}_SERVICE_PORT_{portPair.Name.ToUpperInvariant()}"] = port.ToString();
+                    }
 
                     // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable from dns name to ip:port
                     if (_useKubernetesServiceEnvironmentVariables && string.Equals(serviceName, ManagedIdentity.TargetServiceNameOnLocalMachine, StringComparison.OrdinalIgnoreCase))
+                    {
                         result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = $"http://{host}:{port}/metadata/identity/oauth2/token";
+                    }
                 }
             }
 
