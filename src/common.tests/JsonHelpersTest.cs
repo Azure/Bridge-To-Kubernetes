@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using k8s;
 using Microsoft.BridgeToKubernetes.Common.Json;
 using System;
 using System.Text.Json;
@@ -106,10 +107,25 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
             Assert.Equal(expected, deserialized.ToString());
         }
 
+        [Fact]
+        public void SerializeWatchEventType()
+        {
+            var json = "{  \"type\": \"ADDED\",  \"object\": {\"kind\": \"Pod\", \"apiVersion\": \"v1\", \"metadata\": {\"resourceVersion\": \"10596\"}}}";
+            var deserialized = JsonHelpers.DeserializeObject<WatchEvent>(json);
+            
+            Assert.Equal(WatchEventType.Added, deserialized.Type);
+        }
+
         private class Person
         {
             public string Name { get; set; }
             public Person BestFriend { get; set; }
+        }
+
+        private class WatchEvent
+        {
+            public WatchEventType Type { get; set; }
+            public KubernetesObject Object { get; set; }
         }
     }
 }
