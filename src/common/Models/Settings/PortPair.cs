@@ -69,7 +69,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Settings
         /// Service resources with multiple ports must be given names so that they are unambiguous.
         /// https://kubernetes.io/docs/concepts/services-networking/service/#multi-port-services
         /// </remarks>
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
         /// <summary>
