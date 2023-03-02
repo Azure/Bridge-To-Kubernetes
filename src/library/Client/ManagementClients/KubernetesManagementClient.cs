@@ -98,6 +98,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
                         {
                             // If we are able to list pods using the the KubernetesClient everything is cool
                             var po = await _kubernetesClient.ListPodsInNamespaceAsync(targetNamespace);
+                            perfLogger.SetSucceeded();
                             return;
                         }
                         catch (k8s.Exceptions.KubeConfigException ex)
