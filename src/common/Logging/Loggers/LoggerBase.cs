@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using k8s.Autorest;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
@@ -12,8 +13,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Rest;
-using Microsoft.Rest.Azure;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
@@ -285,11 +284,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
         {
             try
             {
-                if (ex is CloudException cloudException)
-                {
-                    cloudException.Request?.Headers.ScrambleHeaders();
-                }
-                else if (ex is IRequestResponse requestResponseException)
+                if (ex is IRequestResponse requestResponseException)
                 {
                     if (requestResponseException.Request != null)
                     {

@@ -16,13 +16,11 @@ WORKDIR /src/localagent
 COPY /src/nuget.config .
 COPY /src/nuget.config /src/library/
 COPY /src/localagent/localagent.csproj .
-COPY /src/common.json/common.json.csproj /src/common.json/
 COPY /src/common/common.csproj /src/common/
 COPY /src/library/library.csproj /src/library/
 COPY /deployment/settings/services/imagetag.setting /deployment/settings/services/imagetag.setting
 RUN dotnet restore
 COPY /src/localagent/ /src/localagent/
-COPY /src/common.json/ /src/common.json/
 COPY /src/common/ /src/common/
 copy /src/library/ /src/library/
 COPY /build/ /build/

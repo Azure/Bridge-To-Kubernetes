@@ -11,8 +11,9 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
 {
@@ -63,7 +64,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                 // Now we will start adding clusters to this envoy configuration
                 ConfigureClusters(triggerService, routingStateEstablisherInput.PodTriggers, envoyConfig, servicePort);
             }
-            _log.Info("Envoy Config is: {0}", JsonConvert.SerializeObject(envoyConfig));
+            _log.Info("Envoy Config is: {0}", JsonSerializer.Serialize(envoyConfig));
             return envoyConfig;
         }
 

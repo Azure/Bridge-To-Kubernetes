@@ -11,7 +11,6 @@ COPY ["nuget.config", "."]
 COPY ["LocalAgent/localagent.csproj", "LocalAgent/"]
 COPY ["library/library.csproj", "library/"]
 COPY ["common/common.csproj", "common/"]
-COPY ["common.json/common.json.csproj", "common.json/"]
 RUN dotnet restore "LocalAgent/localagent.csproj"
 COPY . .
 WORKDIR "/src/LocalAgent"

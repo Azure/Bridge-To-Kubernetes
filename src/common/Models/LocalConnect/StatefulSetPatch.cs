@@ -4,9 +4,9 @@
 // --------------------------------------------------------------------------------------------
 
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using SystemTextJsonPatch;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
 {
@@ -29,13 +29,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
         /// <summary>
         /// The statefulSet that was patched
         /// </summary>
-        [JsonProperty("statefulSet")]
+        [JsonPropertyName("statefulSet")]
         public V1StatefulSet StatefulSet { get; private set; }
 
         /// <summary>
         /// The operations to perform to reverse the patch
         /// </summary>
-        [JsonProperty("reversePatch")]
+        [JsonPropertyName("reversePatch")]
         public JsonPatchDocument<V1StatefulSet> ReversePatch { get; private set; }
     }
 }

@@ -7,11 +7,9 @@ ARG MindaroBuildNumber=0.0
 
 WORKDIR /src/devhostagent.restorationjob
 COPY /src/devhostagent.restorationjob/devhostAgent.restorationjob.csproj .
-COPY /src/common.json/common.json.csproj /src/common.json/
 COPY /src/common/common.csproj /src/common/
 RUN dotnet restore
 COPY /src/devhostagent.restorationjob/ .
-COPY /src/common.json/ /src/common.json/
 COPY /src/common/ /src/common/
 COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}

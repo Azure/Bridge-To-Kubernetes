@@ -6,7 +6,7 @@
 using System;
 using System.Net.Http;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.Rest;
+using k8s.Autorest;
 
 namespace Microsoft.BridgeToKubernetes.Common.Exceptions
 {

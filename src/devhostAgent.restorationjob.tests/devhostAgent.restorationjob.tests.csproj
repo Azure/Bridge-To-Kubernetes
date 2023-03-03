@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\common.json\common.json.csproj" />
 	<ProjectReference Include="..\devhostagent.restorationjob\devhostAgent.restorationjob.csproj" />
     <ProjectReference Include="..\testhelpers\testhelpers.csproj" />
   </ItemGroup>

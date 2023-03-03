@@ -3,14 +3,6 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Commands;
@@ -30,7 +22,14 @@ using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.Extensions.CommandLineUtils;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
@@ -196,7 +195,7 @@ Additional Arguments
                     try
                     {
                         var jsonElevationRequests = elevationRequestsOption.Value();
-                        var elevationRequestsData = JsonHelpers.DeserializeObject<IEnumerable<ElevationRequestData>>(jsonElevationRequests);
+                        var elevationRequestsData = JsonHelpers.DeserializeObjectCaseInsensitive<IEnumerable<ElevationRequestData>>(jsonElevationRequests);
                         this._elevationRequests = elevationRequestsData.Select(erd => erd.ConvertToElevationRequest()).ToList();
                     }
                     catch (Exception)
@@ -427,7 +426,7 @@ Additional Arguments
                 var envVars = await connectManagementClient.GetLocalEnvironment(_localPorts, cancellationToken);
                 if (!string.IsNullOrEmpty(_envJsonPath))
                 {
-                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonConvert.SerializeObject(envVars, Formatting.Indented));
+                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
                 }
                 this.ReportProgress(EventLevel.LogAlways, $"##################### {Resources.Progress_EnvironmentStarted} #############################################################");
                 if (string.IsNullOrEmpty(_updateScript))
@@ -524,7 +523,7 @@ Additional Arguments
                 // This is the env file that should be used
                 if (!string.IsNullOrEmpty(_envJsonPath))
                 {
-                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonConvert.SerializeObject(envVars, Formatting.Indented));
+                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
                 }
 
                 while (!cancellationToken.IsCancellationRequested)
