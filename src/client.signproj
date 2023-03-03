@@ -56,7 +56,8 @@
         $(SearchDir)\prometheus.netcore.dll;
         $(SearchDir)\prometheus.netstandard.dll;
         $(SearchDir)\system.io.abstractions.dll;
-        $(SearchDir)\YamlDotNet.dll">
+        $(SearchDir)\YamlDotNet.dll;
+        $(SearchDir)\systemtextjsonpatch.dll">
       <Authenticode>3PartySHA2</Authenticode>
     </FilesToSign>
   </ItemGroup>
