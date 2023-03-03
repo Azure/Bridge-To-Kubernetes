@@ -51,6 +51,8 @@
         $(SearchDir)\MessagePack.Annotations.dll;
         $(SearchDir)\MessagePack.dll;
         $(SearchDir)\Minimatch.dll;
+        $(SearchDir)\Newtonsoft.Json.dll;
+        $(SearchDir)\Newtonsoft.Json.Bson.dll;
         $(SearchDir)\prometheus.netcore.dll;
         $(SearchDir)\prometheus.netstandard.dll;
         $(SearchDir)\system.io.abstractions.dll;
