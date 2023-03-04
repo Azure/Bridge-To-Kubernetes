@@ -21,7 +21,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                 return input.Equals(inputPattern, StringComparison.CurrentCultureIgnoreCase);
             }
 
-            string regexPattern = string.Concat("^", Regex.Escape(inputPattern).Replace("\\*", ".*"), "$");
+            string regexPattern = string.Concat("^", Regex.Escape(inputPattern).Replace("\\*", ".*?"), "$");
 
             return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase);
         }
