@@ -401,6 +401,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                 {
                     try 
                     {
+                        _log.Warning("Initial CreateNamespacedServiceAsync failed, deleting namespace");
                         await RestClient.CoreV1.DeleteNamespacedServiceAsync(service.Metadata.Name, namespaceName);
                     }
                     catch (JsonException ex)
