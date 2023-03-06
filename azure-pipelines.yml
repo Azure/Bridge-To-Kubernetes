@@ -264,6 +264,7 @@ jobs:
       msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
   - task: CodeSign@1
+    displayName: Validate Signatures
     inputs:
       Path: 'src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish'
   - task: CopyFiles@2
@@ -664,6 +665,10 @@ jobs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
+  - task: CodeSign@1
+    displayName: Validate Signatures
+    inputs:
+      Path: 'src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
