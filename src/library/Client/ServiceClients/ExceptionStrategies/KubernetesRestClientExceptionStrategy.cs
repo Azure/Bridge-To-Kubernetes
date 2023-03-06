@@ -68,26 +68,6 @@ namespace Microsoft.BridgeToKubernetes.Library.ServiceClients
                 }
                 throw;
             }
-            catch (Rest.ValidationException e)
-            {
-                var args = new FailureConfig.RecognizedExceptionArgs(e, _log);
-                failureConfig.RecognizedExceptionCallback?.Invoke(args);
-
-                _log.Warning(failureConfig.FailureFormat, failureConfig.FailureMessageArgs);
-                string validationMessage = e.Message;
-                if (!string.IsNullOrEmpty(failureConfig.ValidationFailureFormat))
-                {
-                    validationMessage = $"{failureConfig.ValidationFailureFormat} - {e.Message}";
-                }
-                var newEx = new ValidationException(_operationContext, e, validationMessage, failureConfig.ValidationFailureArgs);
-                _log.ExceptionAsWarning(newEx);
-
-                if (args.Handled)
-                {
-                    return default(T);
-                }
-                throw newEx;
-            }
             catch (InvalidOperationException e)
             {
                 var args = new FailureConfig.RecognizedExceptionArgs(e, _log);

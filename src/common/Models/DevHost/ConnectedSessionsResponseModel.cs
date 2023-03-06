@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.DevHost
 {
@@ -15,7 +15,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.DevHost
         /// <summary>
         /// The number of connected clients
         /// </summary>
-        [JsonProperty("numConnectedSessions")]
+        [JsonPropertyName("numConnectedSessions")]
         public int NumConnectedSessions { get; set; }
     }
 }

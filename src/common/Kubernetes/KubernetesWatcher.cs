@@ -13,24 +13,19 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Exceptions;
 using k8s.Models;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.Rest;
-using Microsoft.Rest.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
 {
     /// <summary>
     /// Represents a client for watching Kubernetes objects.
-    /// The official .NET client library is unable to properly implement
-    /// watching of objects due to how AutoRest currently generates code
-    /// according to the Swagger for the Kubernetes REST API. This class
-    /// uses the Microsoft.Rest client runtime infrastructure but without
-    /// relying on any generated code.
     /// </summary>
-    internal class KubernetesWatcher : ServiceClient<KubernetesWatcher>, IKubernetesWatcher
+    internal class KubernetesWatcher : IKubernetesWatcher
     {
         private const int WatchIntervalMilliseconds = 60000;
         private readonly Uri _baseUri;
@@ -38,6 +33,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
         private readonly bool _skipTlsVerify;
         private readonly ServiceClientCredentials _credentials;
         private readonly ILog _log;
+        private readonly HttpClient _httpClient;
 
         private bool _isDisposed = false;
 
@@ -71,11 +67,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
             this._caCerts = config.SslCaCerts;
             this._skipTlsVerify = config.SkipTlsVerify;
 
+            var httpClientHandler = new HttpClientHandler();
+
             if (_baseUri.Scheme == "https")
             {
                 if (config.SkipTlsVerify)
                 {
-                    HttpClientHandler.ServerCertificateCustomValidationCallback =
+                    httpClientHandler.ServerCertificateCustomValidationCallback =
                         (sender, certificate, chain, sslPolicyErrors) => true;
                 }
                 else
@@ -84,7 +82,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
                     {
                         throw new KubeConfigException("A CA must be set when SkipTlsVerify === false");
                     }
-                    HttpClientHandler.ServerCertificateCustomValidationCallback =
+                    httpClientHandler.ServerCertificateCustomValidationCallback =
                         (sender, certificate, chain, sslPolicyErrors) =>
                         {
                             return CertificateValidationCallBack(sender, _caCerts, certificate, chain,
@@ -112,11 +110,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
             var clientCert = ClientCertUtil.GetClientCert(config);
             if (clientCert != null) 
             {
-                HttpClientHandler.ClientCertificates.Add(clientCert);
+                httpClientHandler.ClientCertificates.Add(clientCert);
             }
+
+            _httpClient = new HttpClient(httpClientHandler);
         }
 
-        public new void Dispose()
+        public void Dispose()
         {
             if (this._isDisposed)
             {
@@ -129,7 +129,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
             cts.Cancel();
             cts.Dispose();
             this._isDisposed = true;
-            base.Dispose();
         }
 
         /// <summary>
@@ -235,7 +234,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
                 {
                     await this._credentials.ProcessHttpRequestAsync(request, cancellationToken);
                 }
-                var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return response;
             }
@@ -275,7 +274,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
                     while (!cancellationToken.IsCancellationRequested &&
                         (line = await reader.ReadLineAsync()) != null)
                     {
-                        var ev = SafeJsonConvert.DeserializeObject<WatchEvent>(line);
+                        var ev = JsonHelpers.DeserializeObject<WatchEvent>(line);
                         if (ev.Object.Kind == "Status")
                         {
                             break;

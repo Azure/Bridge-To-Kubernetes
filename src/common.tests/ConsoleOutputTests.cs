@@ -3,15 +3,15 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
 using FakeItEasy;
 using Microsoft.BridgeToKubernetes.Common.Commands;
 using Microsoft.BridgeToKubernetes.Common.IO.Output;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Common.Tests
@@ -57,8 +57,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             const string ExpectedTestItemJson = @"[
               {
                 ""name1"": ""name1"",
-                ""name2Override"": ""Name2"",
-                ""name3JsonOverride"": ""name3""
+                ""Name2Override"": ""Name2"",
+                ""Name3JsonOverride"": ""name3""
               }
             ]";
             A.CallTo(() => fakeConsole.WriteLine(ExpectedHeaderRow)).MustHaveHappened();
@@ -87,8 +87,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             const string ExpectedTestItemJson = @"[
               {
                 ""name1"": null,
-                ""name2Override"": null,
-                ""name3JsonOverride"": ""name3""
+                ""Name2Override"": null,
+                ""Name3JsonOverride"": ""name3""
               }
             ]";
             A.CallTo(() => fakeConsole.WriteLine(ExpectedHeaderRow)).MustHaveHappened();
@@ -102,11 +102,11 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             [DisplayName("Name1Override")]
             public string Name1 { get; set; }
 
-            [JsonProperty("Name2Override")]
+            [JsonPropertyName("Name2Override")]
             public string Name2 { get; set; }
 
             [DisplayName("Name3TableOverride")]
-            [JsonProperty("Name3JsonOverride")]
+            [JsonPropertyName("Name3JsonOverride")]
             public string Name3 { get; set; }
         }
 

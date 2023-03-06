@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Autofac.Core;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager;
+using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Json;
@@ -69,21 +70,21 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 
         public Task AddHostsFileEntryAsync(string workloadNamespace, IEnumerable<HostsFileEntry> hostsFileEntries, CancellationToken cancellationToken)
         {
-            var request = CreateRequest(EndpointManager.ApiNames.AddHostsFileEntry, (workloadNamespace, hostsFileEntries));
-            return this.InvokeEndpointManagerAsync<EndpointManagerRequest<(string, IEnumerable<HostsFileEntry>)>, EndpointManagerResult>(request, cancellationToken);
+            var request = CreateRequest(EndpointManager.ApiNames.AddHostsFileEntry, new AddHostsFileEntryArgument { WorkloadNamespace = workloadNamespace, Entries = hostsFileEntries });
+            return this.InvokeEndpointManagerAsync<EndpointManagerRequest<AddHostsFileEntryArgument>, EndpointManagerResult>(request, cancellationToken);
         }
 
         public async Task<IEnumerable<EndpointInfo>> AllocateIPAsync(IEnumerable<EndpointInfo> endpoints, CancellationToken cancellationToken)
         {
-            var request = CreateRequest(EndpointManager.ApiNames.AllocateIP, endpoints);
-            var response = await this.InvokeEndpointManagerAsync<EndpointManagerRequest<IEnumerable<EndpointInfo>>, EndpointManagerResult<IEnumerable<EndpointInfo>>>(request, cancellationToken);
+            var request = CreateRequest(EndpointManager.ApiNames.AllocateIP, new AllocateIPArgument { Endpoints = endpoints });
+            var response = await this.InvokeEndpointManagerAsync<EndpointManagerRequest<AllocateIPArgument>, EndpointManagerResult<IEnumerable<EndpointInfo>>>(request, cancellationToken);
             return response?.Value;
         }
 
         public Task FreeIPAsync(IPAddress[] ipsToCollect, CancellationToken cancellationToken)
         {
-            var request = CreateRequest(EndpointManager.ApiNames.FreeIP, ipsToCollect);
-            return this.InvokeEndpointManagerAsync<EndpointManagerRequest<IPAddress[]>, EndpointManagerResult>(request, cancellationToken);
+            var request = CreateRequest(EndpointManager.ApiNames.FreeIP, new FreeIPArgument { IPAddresses = ipsToCollect });
+            return this.InvokeEndpointManagerAsync<EndpointManagerRequest<FreeIPArgument>, EndpointManagerResult>(request, cancellationToken);
         }
 
         public async Task FreePortsAsync(IEnumerable<IElevationRequest> elevationRequests, CancellationToken cancellationToken)
@@ -96,8 +97,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 
             if (processPortMappings.Any())
             {
-                var request = CreateRequest(EndpointManager.ApiNames.KillProcess, processPortMappings);
-                await this.InvokeEndpointManagerAsync<EndpointManagerRequest<IEnumerable<ProcessPortMapping>>, EndpointManagerResult>(request, cancellationToken);
+                var request = CreateRequest(EndpointManager.ApiNames.KillProcess, new KillProcessArgument { ProcessPortMappings = processPortMappings });
+                await this.InvokeEndpointManagerAsync<EndpointManagerRequest<KillProcessArgument>, EndpointManagerResult>(request, cancellationToken);
             }
 
             IEnumerable<ServicePortMapping> servicePortMappings = elevationRequests.Where(request => request.RequestType == ElevationRequestType.FreePort)
@@ -108,8 +109,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 
             if (servicePortMappings.Any())
             {
-                var request = CreateRequest(EndpointManager.ApiNames.DisableService, servicePortMappings);
-                await this.InvokeEndpointManagerAsync<EndpointManagerRequest<IEnumerable<ServicePortMapping>>, EndpointManagerResult>(request, cancellationToken);
+                var request = CreateRequest(EndpointManager.ApiNames.DisableService, new DisableServiceArgument { ServicePortMappings = servicePortMappings });
+                await this.InvokeEndpointManagerAsync<EndpointManagerRequest<DisableServiceArgument>, EndpointManagerResult>(request, cancellationToken);
             }
         }
 
@@ -228,8 +229,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                 CorrelationId = _operationContext.CorrelationId
             };
 
-        private EndpointManagerRequest<T> CreateRequest<T>(EndpointManager.ApiNames apiName, T argument)
-            => new EndpointManagerRequest<T>()
+         private EndpointManagerRequest<T> CreateRequest<T>(EndpointManager.ApiNames apiName, T argument) where T : EndpointManagerRequestArgument
+             => new EndpointManagerRequest<T>()
             {
                 ApiName = apiName.ToString(),
                 CorrelationId = _operationContext.CorrelationId,
