@@ -263,10 +263,6 @@ jobs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
-  - task: CodeSign@1
-    displayName: Validate Signatures
-    inputs:
-      Path: 'src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -476,6 +472,10 @@ jobs:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
       ArtifactName: nuget
+  - task: CodeSign@1
+    displayName: Validate Signatures
+    inputs:
+      Path: '$(Build.ArtifactStagingDirectory)/nuget'
   - task: CopyFiles@2
     displayName: Collect Build Symbols - dsc
     enabled: True
@@ -665,10 +665,6 @@ jobs:
       solution: src/client.signproj
       msbuildArgs: /t:SignFiles /p:SignType=real
       configuration: '${{ parameters.BuildConfiguration }} '
-  - task: CodeSign@1
-    displayName: Validate Signatures
-    inputs:
-      Path: 'src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
@@ -708,6 +704,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/win
+  - task: CodeSign@1
+    displayName: Validate Signatures
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/win'
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
