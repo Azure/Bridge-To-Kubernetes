@@ -5,7 +5,7 @@
 
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
 {
@@ -27,13 +27,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.LocalConnect
         /// <summary>
         /// The pod that was deployed
         /// </summary>
-        [JsonProperty("pod")]
+        [JsonPropertyName("pod")]
         public V1Pod Pod { get; private set; }
 
         /// <summary>
         /// The user pod that was replaced, if any
         /// </summary>
-        [JsonProperty("userpodtorestore")]
+        [JsonPropertyName("userPodToRestore")]
         public V1Pod UserPodToRestore { get; set; }
     }
 }

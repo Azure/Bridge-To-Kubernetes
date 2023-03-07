@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.IO;
@@ -22,7 +21,7 @@ using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Logging;
-using Newtonsoft.Json.Serialization;
+using SystemTextJsonPatch;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 using static Microsoft.BridgeToKubernetes.Common.DevHostAgent.DevHostConstants;
 using static Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Logging.Events.RestorationJob.Properties;
@@ -245,8 +244,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                deploymentPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(deploymentPatch.ReversePatch.TryGetContainerImageReplacementValue()))
                 {
@@ -291,8 +288,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                statefulSetPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(statefulSetPatch.ReversePatch.TryGetContainerImageReplacementValue()))
                 {
@@ -320,8 +315,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// </summary>
         private async Task<Uri> _GetAgentEndpointAsync(PodPatch podPatch, CancellationToken cancellationToken)
         {
-            podPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
             string ns = podPatch.Pod.Namespace();
             string name = podPatch.Pod.Name();
             try

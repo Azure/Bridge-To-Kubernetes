@@ -3,15 +3,8 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
@@ -21,8 +14,15 @@ using Microsoft.BridgeToKubernetes.RoutingManager.Envoy;
 using Microsoft.BridgeToKubernetes.RoutingManager.Logging;
 using Microsoft.BridgeToKubernetes.RoutingManager.Traefik;
 using Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig;
-using Microsoft.Rest;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager
@@ -678,7 +678,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
             // Copy the original selectors from our annotation
             if (clonedService.Metadata.Annotations != null && clonedService.Metadata.Annotations.ContainsKey(Routing.OriginalServiceSelectorAnnotation))
             {
-                clonedService.Spec.Selector = JsonConvert.DeserializeObject<Dictionary<string, string>>(clonedService.Metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
+                clonedService.Spec.Selector = JsonSerializer.Deserialize<Dictionary<string, string>>(clonedService.Metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
             }
 
             return clonedService;
@@ -895,7 +895,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                     // Add the trigger service's selectors to an annotation (if not exists already) so that we can refer to it in subsequent runs
                     if (!input.Key.Metadata.Annotations.ContainsKey(Routing.OriginalServiceSelectorAnnotation))
                     {
-                        input.Key.Metadata.Annotations.Add(Routing.OriginalServiceSelectorAnnotation, JsonConvert.SerializeObject(input.Key.Spec.Selector));
+                        input.Key.Metadata.Annotations.Add(Routing.OriginalServiceSelectorAnnotation, JsonSerializer.Serialize(input.Key.Spec.Selector));
                     }
 
                     input.Key.Spec.Selector =

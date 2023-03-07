@@ -6,7 +6,7 @@
 using System.Collections.Generic;
 using k8s;
 using k8s.Models;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager.Traefik
 {
@@ -39,7 +39,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Traefik
         public int? Weight { get; set; }
         public string Strategy { get; set; }
 
-        [JsonProperty("healthCheck(Optional)")]
+        [JsonPropertyName("healthCheck(Optional)")]
         public HealthCheckOptional HealthCheckOptional { get; set; }
     }
 
@@ -63,7 +63,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Traefik
         public Virtualhost Virtualhost { get; set; }
         public string Strategy { get; set; }
 
-        [JsonProperty("healthCheck(Optional)")]
+        [JsonPropertyName("healthCheck(Optional)")]
         public HealthCheckOptional HealthCheckOptional { get; set; }
         public List<Route> Routes { get; set; }
     }

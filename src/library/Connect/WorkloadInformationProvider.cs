@@ -106,7 +106,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         {
                             DnsName = externalEndpoint.Name,
                             // Here we are not taking into account the ports to ignore, since this code path is handling endpoints user explicitly added for tracking.
-                            Ports = externalEndpoint.Ports.Select(p => new PortPair(remotePort: p)).ToArray(), 
+                            Ports = externalEndpoint.Ports.Select(p => new PortPair(remotePort: p)).ToArray(),
                             IsExternalEndpoint = true,
                             IsInWorkloadNamespace = false
                         });
@@ -132,7 +132,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         try {
                             List<int> ignorePorts = ports.Split(",").Select(p => int.Parse(p)).ToList();
                             servicePortsToIgnore.Add(service.Metadata.Name, ignorePorts);
-                        } 
+                        }
                         catch {
                             throw new UserVisibleException(_operationContext, $"bridgetokubernetes/ignore-ports configuration value {ports} is invalid. It must be a comma separated list of integer ports");
                         }
@@ -344,7 +344,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         if (configMap?.Data != null)
                         {
                             envNames.AddRange(configMap.Data.Keys);
-                            foreach (var env in configMap.Data) 
+                            foreach (var env in configMap.Data)
                             {
                                 specValues.TryAdd(env.Key, new string(env.Value));
                             }
@@ -443,11 +443,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
                     if (!headlessServiceEndpointsToRouteMap.ContainsKey(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty)))
                     {
-                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);                        
+                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);
                         // Map portsToIgnore from Service.Metadata.Name to Endpoints.Metadata.Name
                         if (portsToIgnoreForService.ContainsKey(s.Metadata.Name)) {
                             portToIgnoreForHeadlessServiceEndpoints.Add(endpoint.Metadata.Name, portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name));
-                        } 
+                        }
                         continue;
                     }
                 }
@@ -462,12 +462,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             }
 
             var servicesToRouteEndpointInfos = servicesToRouteMap.Values.Select(s => new EndpointInfo()
-            { 
+            {
                 DnsName = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace) ?
                             s.Metadata.Name :
                             $"{s.Metadata.Name}.{s.Metadata.Namespace()}",
-                            // portsToIgnore is a directory which contains a separate list of ports to ignore for each service, when picking ports for a service any port which is in the portsToIgnore is not used.
-                Ports = s.Spec.Ports?.Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !(portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name)?.Contains(p.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                // portsToIgnore is a directory which contains a separate list of ports to ignore for each service, when picking ports for a service any port which is in the portsToIgnore is not used.
+                Ports = s.Spec.Ports?
+                    .Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !(portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name)?.Contains(p.Port) ?? false))
+                    .Select(p => new PortPair(remotePort: p.Port, name: p.Name))
+                    .ToArray() ?? new PortPair[] { },
                 IsInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace)
             }).ToList();
 
@@ -492,7 +495,10 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             DnsName = isInWorkloadNamespace ?
                                         $"{address.Hostname}.{endpoint.Metadata.Name}" :
                                         $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                            Ports = subset.Ports?
+                                .Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false))
+                                .Select(p => new PortPair(remotePort: p.Port, p.Name))
+                                .ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }
