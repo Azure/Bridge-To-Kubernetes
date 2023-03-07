@@ -255,14 +255,14 @@ jobs:
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-  #  name: ''
-  #  displayName: Sign Files
-  #  enabled: True
-  #  inputs:
-  #    solution: src/client.signproj
-  #    msbuildArgs: /t:SignFiles /p:SignType=real
-  #    configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    name: ''
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -473,7 +473,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
       ArtifactName: nuget
   - task: CodeSign@1
-    displayName: Validate Signatures
+    displayName: Validate Signatures nuget
     inputs:
       Path: '$(Build.ArtifactStagingDirectory)/nuget'
   - task: CopyFiles@2
@@ -524,6 +524,7 @@ jobs:
   - task: SdtReport@2
     inputs:
       GdnExportAllTools: true
+      GdnExportHtmlFile: true
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
@@ -673,13 +674,13 @@ jobs:
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-  #  displayName: Sign Files
-  #  enabled: True
-  #  inputs:
-  #    solution: src/client.signproj
-  #    msbuildArgs: /t:SignFiles /p:SignType=real
-  #    configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
@@ -766,6 +767,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
+  - task: CodeSign@1
+    displayName: Validate Signatures OSX
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/osx'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -809,6 +814,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/linux
+  - task: CodeSign@1
+    displayName: Validate Signatures linux
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/linux'
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
     inputs:
@@ -901,6 +910,7 @@ jobs:
   - task: SdtReport@2
     inputs:
       GdnExportAllTools: true
+      GdnExportHtmlFile: true
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
