@@ -520,6 +520,16 @@ jobs:
     enabled: True
     inputs:
       tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
   - task: PostAnalysis@2
     inputs:
       GdnBreakAllTools: true
@@ -887,6 +897,16 @@ jobs:
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
   - task: PostAnalysis@2
     inputs:
       GdnBreakAllTools: true
