@@ -255,14 +255,14 @@ jobs:
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  - task: VSBuild@1
-    name: ''
-    displayName: Sign Files
-    enabled: True
-    inputs:
-      solution: src/client.signproj
-      msbuildArgs: /t:SignFiles /p:SignType=real
-      configuration: '${{ parameters.BuildConfiguration }} '
+  #- task: VSBuild@1
+  #  name: ''
+  #  displayName: Sign Files
+  #  enabled: True
+  #  inputs:
+  #    solution: src/client.signproj
+  #    msbuildArgs: /t:SignFiles /p:SignType=real
+  #    configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -520,6 +520,11 @@ jobs:
     enabled: True
     inputs:
       tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
+
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
   timeoutInMinutes: 120
@@ -882,4 +887,8 @@ jobs:
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
 ...
