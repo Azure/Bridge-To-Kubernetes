@@ -255,14 +255,14 @@ jobs:
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-  #  name: ''
-  #  displayName: Sign Files
-  #  enabled: True
-  #  inputs:
-  #    solution: src/client.signproj
-  #    msbuildArgs: /t:SignFiles /p:SignType=real
-  #    configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    name: ''
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -674,13 +674,13 @@ jobs:
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-    #displayName: Sign Files
-    #enabled: True
-    #inputs:
-    #  solution: src/client.signproj
-    #  msbuildArgs: /t:SignFiles /p:SignType=real
-    #  configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
