@@ -33,13 +33,13 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         [InlineData(1, 100)]
         [InlineData(5, 20)]
         [InlineData(10, 3)]
-        [InlineData(1, 3)]
+        [InlineData(2, 3)]
         public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses)
         {
             ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
             var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
-            Assert.Equal((numServices-1) * (numAddresses), result.Count());
+            Assert.Equal(numAddresses == 0 ? numServices : (numServices-1) * (numAddresses), result.Count());
             foreach (var endpoint in result) {
                 if (endpoint.Ports.Any()) {
                     Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
@@ -328,7 +328,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     {
                         endPoint.Subsets[0].Addresses.Add(new V1EndpointAddress
                         {
-                            Hostname = addressHostNamingFunction(j)
+                            // Allow empty hostname for better coverage
+                            Hostname = j%2 == 0 ? addressHostNamingFunction(j) : ""
                         });
                     }
                 }
