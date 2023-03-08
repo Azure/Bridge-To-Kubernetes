@@ -69,7 +69,6 @@ jobs:
       restoreArguments: -r win-x64
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
-      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x
@@ -85,7 +84,6 @@ jobs:
       selectOrConfig: config
       feedRestore: fc5819b5-ed1c-4a51-9766-a55ddb558d72
       nugetConfigPath: src/nuget.config
-      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
       verbosityRestore: Normal
       searchPatternPush: $(Build.ArtifactStagingDirectory)/*.nupkg
   - task: VSBuild@1
