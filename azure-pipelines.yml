@@ -255,14 +255,14 @@ jobs:
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-  #  name: ''
-  #  displayName: Sign Files
-  #  enabled: True
-  #  inputs:
-  #    solution: src/client.signproj
-  #    msbuildArgs: /t:SignFiles /p:SignType=real
-  #    configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    name: ''
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     enabled: True
@@ -522,20 +522,20 @@ jobs:
     inputs:
       tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
 
-  #- task: SdtReport@2
-  #  inputs:
-  #    GdnExportAllTools: true
-  #    GdnExportHtmlFile: true
-  #- task: PublishSecurityAnalysisLogs@3
-  #  inputs:
-  #    ArtifactName: 'CodeAnalysisLogs'
-  #    ArtifactType: 'Container'
-  #    AllTools: true
-  #    ToolLogsNotFoundAction: 'Standard'
-  #- task: PostAnalysis@2
-  #  inputs:
-  #    GdnBreakAllTools: true
-  #    GdnBreakFast: true
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
 
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
@@ -675,13 +675,13 @@ jobs:
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
-  #- task: VSBuild@1
-  #  displayName: Sign Files
-  #  enabled: True
-  #  inputs:
-  #    solution: src/client.signproj
-  #    msbuildArgs: /t:SignFiles /p:SignType=real
-  #    configuration: '${{ parameters.BuildConfiguration }} '
+  - task: VSBuild@1
+    displayName: Sign Files
+    enabled: True
+    inputs:
+      solution: src/client.signproj
+      msbuildArgs: /t:SignFiles /p:SignType=real
+      configuration: '${{ parameters.BuildConfiguration }} '
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
@@ -725,7 +725,6 @@ jobs:
     displayName: Validate Signatures
     inputs:
       Path: '$(Agent.TempDirectory)/zip/win'
-      continueOnError: false
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
@@ -773,7 +772,6 @@ jobs:
     displayName: Validate Signatures OSX
     inputs:
       Path: '$(Agent.TempDirectory)/zip/osx'
-      continueOnError: false
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -911,18 +909,18 @@ jobs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
 
-  #- task: SdtReport@2
-  #  inputs:
-  #    GdnExportAllTools: true
-  #    GdnExportHtmlFile: true
-  #- task: PublishSecurityAnalysisLogs@3
-  #  inputs:
-  #    ArtifactName: 'CodeAnalysisLogs'
-  #    ArtifactType: 'Container'
-  #    AllTools: true
-  #    ToolLogsNotFoundAction: 'Standard'
-  #- task: PostAnalysis@2
-  #  inputs:
-  #    GdnBreakAllTools: true
-  #    GdnBreakFast: true
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
 ...
