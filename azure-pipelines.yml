@@ -523,8 +523,9 @@ jobs:
 
   - task: SdtReport@2
     inputs:
-      GdnExportAllTools: true
+      GdnExportAllTools: false
       GdnExportHtmlFile: true
+      GdnExportGdnToolCodesignValidationSeverity: Warning
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
@@ -909,8 +910,9 @@ jobs:
 
   - task: SdtReport@2
     inputs:
-      GdnExportAllTools: true
+      GdnExportAllTools: false
       GdnExportHtmlFile: true
+      GdnExportGdnToolCodesignValidationSeverity: Warning
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
