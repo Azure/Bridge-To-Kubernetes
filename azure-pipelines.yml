@@ -523,9 +523,8 @@ jobs:
 
   - task: SdtReport@2
     inputs:
-      GdnExportAllTools: false
+      GdnExportAllTools: true
       GdnExportHtmlFile: true
-      GdnExportGdnToolCodesignValidationSeverity: Warning
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
@@ -910,9 +909,8 @@ jobs:
 
   - task: SdtReport@2
     inputs:
-      GdnExportAllTools: false
+      GdnExportAllTools: true
       GdnExportHtmlFile: true
-      GdnExportGdnToolCodesignValidationSeverity: Warning
   - task: PublishSecurityAnalysisLogs@3
     inputs:
       ArtifactName: 'CodeAnalysisLogs'
@@ -921,8 +919,6 @@ jobs:
       ToolLogsNotFoundAction: 'Standard'
   - task: PostAnalysis@2
     inputs:
-      GdnBreakAllTools: false
-      GdnBreakGdnToolCodesignValidation: true
-      GdnBreakGdnToolCodesignValidationSeverity: Error
+      GdnBreakAllTools: true
       GdnBreakFast: true
 ...
