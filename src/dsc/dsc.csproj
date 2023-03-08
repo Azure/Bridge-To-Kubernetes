@@ -54,9 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -123,10 +120,7 @@
   </Target>
 
   <ItemGroup>
-    <None
-        Include="
-            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
-            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+    <None Include="&#xD;&#xA;            $(MSBuildThisFileDirectory)..\..\NOTICE.txt;&#xD;&#xA;            $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
