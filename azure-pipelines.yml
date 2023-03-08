@@ -476,7 +476,6 @@ jobs:
     displayName: Validate Signatures nuget
     inputs:
       Path: '$(Build.ArtifactStagingDirectory)/nuget'
-      continueOnError: false
   - task: CopyFiles@2
     displayName: Collect Build Symbols - dsc
     enabled: True
