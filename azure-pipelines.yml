@@ -819,7 +819,6 @@ jobs:
     displayName: Validate Signatures linux
     inputs:
       Path: '$(Agent.TempDirectory)/zip/linux'
-      continueOnError: false
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
     inputs:
