@@ -37,6 +37,8 @@ variables:
 - name: RunTests
   value: True
 
+# A pipeline with no CI trigger since this is a signed build needs to be triggered manually.
+trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
   repositories:
