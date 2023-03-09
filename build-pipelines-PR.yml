@@ -40,7 +40,7 @@ resources:
     ref: refs/heads/main
 jobs:
 - job: Phase_1
-  displayName: Run PR build
+  displayName: Run PR build for self contained
   timeoutInMinutes: 120
   cancelTimeoutInMinutes: 1
   pool:
@@ -152,6 +152,74 @@ jobs:
       modifyOutputPath: false
       selectOrConfig: config
   - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack CLI NuGet (Windows)'
+    inputs:
+      command: pack
+      feedsToUse: config
+      packagesToPack: src/dsc/dsc.csproj
+      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
+      nobuild: true
+      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
+
+- job: Phase_2
+  displayName: Run PR build for non self contained
+  timeoutInMinutes: 120
+  cancelTimeoutInMinutes: 1
+  pool:
+    name: 'VSEngSS-MicroBuild2022-1ES'
+    demands:
+    - msbuild
+    - visualstudio
+    - DotNetFramework
+  steps:
+  - checkout: self
+    clean: true
+    fetchTags: false
+    persistCredentials: True
+  - task: UseDotNet@2
+    displayName: Use .NET Core SDK 6.0.x
+    enabled: True
+    inputs:
+      version: $(BuildParameters.dotnetversion)
+      installationPath: $(Agent.TempDirectory)/dotnet
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager (Windows) (to download runtime pack)
+    enabled: True
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-x64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+  - task: NuGetToolInstaller@1
+    name: ''
+    displayName: Use NuGet 5.9.x
+    enabled: True
+    inputs:
+      versionSpec: $(BuildParameters.nugetversion)
+  - task: NuGetCommand@2
+    name: ''
+    displayName: NuGet restore client.sln
+    enabled: True
+    inputs:
+      solution: src/client.sln
+      selectOrConfig: config
+      feedRestore: fc5819b5-ed1c-4a51-9766-a55ddb558d72
+      nugetConfigPath: src/nuget.config
+      verbosityRestore: Normal
+      searchPatternPush: $(Build.ArtifactStagingDirectory)/*.nupkg
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher(Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
     displayName: publish DSC for non self contained (Windows)
     inputs:
       command: publish
@@ -178,13 +246,4 @@ jobs:
       arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet pack CLI NuGet (Windows)'
-    inputs:
-      command: pack
-      feedsToUse: config
-      packagesToPack: src/dsc/dsc.csproj
-      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
-      nobuild: true
-      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
 ...
