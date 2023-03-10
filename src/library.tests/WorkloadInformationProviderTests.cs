@@ -36,19 +36,19 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         [InlineData(2, 3, false)]
         public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses, bool isInWorkloadNamespace)
         {
-            var expected = ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", isInWorkloadNamespace);
-            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: isInWorkloadNamespace ? "testNamespace" : "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
+            List<string> expectedDnsList = ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", isInWorkloadNamespace);
+            var resultRechableEndpoints = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: isInWorkloadNamespace ? "testNamespace" : "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
-            Assert.Equal((numServices-1) * (numAddresses), result.Count());
-            foreach (var endpoint in result) {
+            Assert.Equal((numServices-1) * (numAddresses), resultRechableEndpoints.Count());
+            foreach (var endpoint in resultRechableEndpoints) {
                 if (endpoint.Ports.Any()) {
                     Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
                     bool found = false;
-                    foreach (var dns in expected) {
+                    foreach (var dns in expectedDnsList) {
                         if (string.Equals(endpoint.DnsName, dns))
                         {
                             found = true;
-                            expected.Remove(dns);
+                            expectedDnsList.Remove(dns);
                             break;
                         }
                     }
