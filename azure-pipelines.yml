@@ -472,6 +472,10 @@ jobs:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/nuget'
       ArtifactName: nuget
+  - task: CodeSign@1
+    displayName: Validate Signatures nuget
+    inputs:
+      Path: '$(Build.ArtifactStagingDirectory)/nuget'
   - task: CopyFiles@2
     displayName: Collect Build Symbols - dsc
     enabled: True
@@ -516,6 +520,22 @@ jobs:
     enabled: True
     inputs:
       tags: 'BuildConfiguration: ${{ parameters.BuildConfiguration }}'
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
+
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
   timeoutInMinutes: 120
@@ -700,6 +720,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/win
+  - task: CodeSign@1
+    displayName: Validate Signatures
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/win'
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
@@ -743,6 +767,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
+  - task: CodeSign@1
+    displayName: Validate Signatures OSX
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/osx'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -786,6 +814,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/linux
+  - task: CodeSign@1
+    displayName: Validate Signatures linux
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/linux'
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
     inputs:
@@ -874,4 +906,19 @@ jobs:
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
 ...
