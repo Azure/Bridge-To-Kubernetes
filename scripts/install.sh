@@ -110,7 +110,7 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '3.1'* ]]; then
+    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'* ]]; then
         install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
@@ -127,10 +127,17 @@ install_tool() {
             ;;
         dotnet)
             if [[ $OSTYPE == "darwin"* ]]; then
-                $PACKAGER tap isen-ng/dotnet-sdk-versions
-                install_with_sudo dotnet-sdk3-1-400 --cask
+                arch=$(uname -m)
+                if [[ "$arch" == 'arm64' ]]; then
+                    install_dotnet_x64_for_arm
+                else 
+                    $PACKAGER tap isen-ng/dotnet-sdk-versions
+                    install_with_sudo dotnet-sdk6-0-400 --cask
+                fi 
+            elif [[ $OSTYPE == "linux"* ]]; then
+                install_with_sudo dotnet-sdk-6.0
             else 
-                install_with_sudo aspnetcore-runtime-3.1
+                install_with_sudo dotnet-6.0-sdk -y
             fi
             ;;
         jq)
@@ -143,11 +150,23 @@ install_tool() {
     esac
 }
 
+install_dotnet_x64_for_arm() {
+    log INFO "downloading and installing dotnet x64 binaries in arm machines"
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
+    if [[ ! -d /usr/local/share/dotnet ]] || [[ ! -d /usr/local/share/dotnet/x64 ]]; then
+        sudo mkdir -p /usr/local/share/dotnet/x64
+    fi
+    sudo cp -r "$HOME/.dotnet/" /usr/local/share/dotnet/x64/
+    export PATH="/usr/local/share/dotnet/x64/*":$PATH
+}
+
 install_with_sudo() {
     if [[ $OSTYPE == "linux"* ]]; then
         sudo $PACKAGER install $1 -y
-    else
+    elif [[ $OSTYPE == "darwin"* ]]; then
         $PACKAGER install $2 $1
+    else 
+        $PACKAGER install $1 $2
     fi
 }
 

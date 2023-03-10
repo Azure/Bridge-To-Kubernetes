@@ -480,21 +480,33 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 var isInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(endpoint.Metadata.Namespace(), workloadNamespace);
                 foreach (var subset in endpoint.Subsets)
                 {
-                    // For headless service, we only add entries that specify hostname,
-                    // if hostname its not specify there is no dsn to reach the replicate.
-                    var addresses = subset.Addresses?.Where(a => !string.IsNullOrWhiteSpace(a?.Hostname));
-                    if (addresses == null || !addresses.Any())
+                    if (subset.Addresses == null)
                     {
                         continue;
                     }
-
-                    foreach (var address in addresses)
+                    
+                    foreach (var address in  subset.Addresses)
                     {
+                        if (address == null) {
+                            continue;
+                        }
+                        string dns = "";
+                        // If hostname is empty for the address, then dns used is that of the endpoint
+                        if (!string.IsNullOrWhiteSpace(address.Hostname))
+                        {
+                            dns = isInWorkloadNamespace ?
+                                    $"{address.Hostname}.{endpoint.Metadata.Name}" :
+                                    $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}";
+                        }
+                        else
+                        {
+                            dns = isInWorkloadNamespace ? 
+                                    endpoint.Metadata.Name : 
+                                    $"{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}";
+                        }
                         servicesToRouteEndpointInfos.Add(new EndpointInfo()
                         {
-                            DnsName = isInWorkloadNamespace ?
-                                        $"{address.Hostname}.{endpoint.Metadata.Name}" :
-                                        $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
+                            DnsName = dns,
                             Ports = subset.Ports?
                                 .Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false))
                                 .Select(p => new PortPair(remotePort: p.Port, p.Name))

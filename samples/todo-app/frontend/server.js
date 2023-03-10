@@ -1,7 +1,7 @@
 const next = require('next');
 const express = require('express')
 const bodyParser = require("body-parser");
-const serviceBus = require('servicebus');
+const serviceBus = require('@servicebus/rabbitbus');
 const http = require('http');
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -23,8 +23,8 @@ app.prepare().then(() => {
             res.send(data);
         });
     });
-
-    var bus = serviceBus.bus({ url: process.env.STATS_QUEUE_URI });
+    
+    var bus = serviceBus.bus({ url: `amqp://${process.env.STATS_QUEUE_SERVICE_HOST}:${process.env.STATS_QUEUE_SERVICE_PORT}` });
     bus.use(bus.logger());
     bus.on("error", err => {
         console.error(err.message)
@@ -81,6 +81,7 @@ app.prepare().then(() => {
     server.get("/api/stats", function (req, res) {
         var options = {
             host: process.env.STATS_API_SERVICE_HOST,
+            port: process.env.STATS_API_SERVICE_PORT,
             path: '/stats',
             method: 'GET'
         };
