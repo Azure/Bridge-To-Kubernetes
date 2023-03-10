@@ -40,7 +40,7 @@ resources:
     ref: refs/heads/main
 jobs:
 - job: Phase_1
-  displayName: Run PR build for self contained
+  displayName: Run self-contained build (binaries V1, where the binaries are all bundled together)
   timeoutInMinutes: 120
   cancelTimeoutInMinutes: 1
   pool:
@@ -93,7 +93,7 @@ jobs:
     enabled: True
     inputs:
       solution: src/client.sln
-      msbuildArgs: -p:ConsumeEndpointManager=false
+      msbuildArgs: -p:Localize=true -p:ConsumeEndpointManager=false
       configuration: ${{ parameters.BuildConfiguration }}
   - task: VSTest@2
     displayName: Run Unit Tests
@@ -162,7 +162,7 @@ jobs:
       buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
 
 - job: Phase_2
-  displayName: Run PR build for non self contained
+  displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
   timeoutInMinutes: 120
   cancelTimeoutInMinutes: 1
   pool:
