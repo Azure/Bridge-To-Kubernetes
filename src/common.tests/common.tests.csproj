@@ -30,4 +30,16 @@
     <ProjectReference Include="..\common\common.csproj" />
     <ProjectReference Include="..\testhelpers\testhelpers.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestData\ca.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\kubeconfig.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestData\token.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
