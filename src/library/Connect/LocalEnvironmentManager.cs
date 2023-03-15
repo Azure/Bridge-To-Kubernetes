@@ -30,7 +30,7 @@ using Microsoft.BridgeToKubernetes.Library.EndpointManagement;
 using Microsoft.BridgeToKubernetes.Library.LocalAgentManagement;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
-using Minimatch;
+using Microsoft.BridgeToKubernetes.Library.Utilities;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.Library.Connect
@@ -654,9 +654,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                                                                              .FirstOrDefault();
             if (containerVolume == null)
             {
-                // use mini-match to match volumeName
-                Minimatcher minimatcher = new Minimatcher(volumeToken.Name);
-                containerVolume = workloadInfo.VolumeMounts.Where(v => minimatcher.IsMatch(v.Name)).FirstOrDefault();
+                containerVolume = workloadInfo.VolumeMounts.Where(v => PatternMatchingUtillities.IsMatch(volumeToken.Name, v.Name)).FirstOrDefault();
             }
             if (containerVolume == null)
             {
