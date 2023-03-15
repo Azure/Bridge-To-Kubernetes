@@ -86,7 +86,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 // Load patch state
                 var patchState = this._ParsePatchState();
 
-                _log.Error("Waiting to restore previous state on {0} {1}/{2}...", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
+                _log.Info("Waiting to restore previous state on {0} {1}/{2}...", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
                 // Extra wait at the beginning to allow things to initialize
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
@@ -105,7 +105,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     // Sleep
                     await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
 
-                    _log.Error("Pinging...");
+                    _log.Verbose("Pinging...");
                     using (var perfLogger = _log.StartPerformanceLogger(
                         Events.RestorationJob.AreaName,
                         Events.RestorationJob.Operations.AgentPing,
@@ -120,7 +120,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         Uri agentEndpoint = await this._GetAgentEndpointAsync((dynamic)patchState, cancellationToken);
                         if (agentEndpoint == null)
                         {
-                            _log.Error("Couldn't get agent endpoint");
+                            _log.Verbose("Couldn't get agent endpoint");
                             numFailedPings++;
                             continue;
                         }
@@ -129,27 +129,27 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         var result = await this._PingAgentAsync(agentEndpoint, cancellationToken);
                         if (result == null)
                         {
-                            _log.Error("Failed to ping agent");
+                            _log.Verbose("Failed to ping agent");
                             numFailedPings++;
                             continue;
                         }
                         else if (result.NumConnectedSessions > 0)
                         {
-                            _log.Error($"Agent has {result.NumConnectedSessions} connected sessions");
+                            _log.Verbose($"Agent has {result.NumConnectedSessions} connected sessions");
                             lastPingWithSessions = DateTimeOffset.Now;
                             perfLogger.SetProperty(HasConnectedClients, true);
                         }
                         else
                         {
                             perfLogger.SetProperty(HasConnectedClients, false);
-                            _log.Info("inside else");
+
                             var disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
                             if ((disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout) || (lastPingWithSessions == null && count > 2))
                             {
                                 // Restore workload
-                                _log.Error($"Agent has no connected sessions for {(disconnectedTimeSpan != null ? disconnectedTimeSpan.Value : "N/A")}. Restoring...");
+                                _log.Info($"Agent has no connected sessions for {(disconnectedTimeSpan != null ? disconnectedTimeSpan.Value : "N/A")}. Restoring...");
                                 await this._RestoreAsync((dynamic)patchState, cancellationToken);
-                                _log.Error("Restored {0} {1}/{2}.", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
+                                _log.Info("Restored {0} {1}/{2}.", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
                                 perfLogger.SetProperty(RestorePerformed, true);
                                 restoredWorkload = true;
                             }
@@ -178,7 +178,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
             }
             catch (Exception e)
             {
-                _log.Error("Exception Occurred", e.StackTrace);
                 _log.WithoutTelemetry.Error($"Encountered exception: {e.Message}");
                 _log.WithoutConsole.Exception(e);
                 return ExitCode.Fail;
