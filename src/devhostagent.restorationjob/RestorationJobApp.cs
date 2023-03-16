@@ -90,12 +90,11 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 // Extra wait at the beginning to allow things to initialize
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
-                int count = 0;
                 DateTimeOffset? lastPingWithSessions = null;
+                DateTimeOffset? timeUntilLastPingIsNull = null;
                 bool restoredWorkload = false;
                 while (!cancellationToken.IsCancellationRequested && !restoredWorkload)
                 {
-                    count++;
                     if (numFailedPings >= _restorationJobEnvironmentVariables.NumFailedPingsBeforeExit)
                     {
                         _log.Error($"Failed to ping agent {numFailedPings} times. Exiting...");
@@ -142,17 +141,22 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         else
                         {
                             perfLogger.SetProperty(HasConnectedClients, false);
-
-                            var disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
-                            if ((disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout) || (lastPingWithSessions == null && count > 2))
+                            TimeSpan? disconnectedTimeSpan = null;
+                            if (lastPingWithSessions == null)
                             {
-                                if (disconnectedTimeSpan != null)
-                                {
-                                    _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
-                                } else
-                                {
-                                    _log.Info($"Agent has no connected sessions. Restoring...");
-                                }
+                                // first loop timeUntilLastPingIsNull will be set to current time and then next while loop it will preserve that time.
+                                // if lastPingWithSessions is being null for last 60 seconds or more then restoration will happen.
+                                timeUntilLastPingIsNull = timeUntilLastPingIsNull == null ? DateTimeOffset.Now : timeUntilLastPingIsNull;
+                                disconnectedTimeSpan = DateTimeOffset.Now - timeUntilLastPingIsNull;
+                            } else
+                            {
+                                disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            }
+
+                            
+                            if ((disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout))
+                            {
+                                _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
                                 await this._RestoreAsync((dynamic)patchState, cancellationToken);
                                 _log.Info("Restored {0} {1}/{2}.", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
                                 perfLogger.SetProperty(RestorePerformed, true);
