@@ -63,7 +63,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+
     <PackageReference Include="SystemTextJsonPatch" Version="1.0.0" />
   </ItemGroup>
 

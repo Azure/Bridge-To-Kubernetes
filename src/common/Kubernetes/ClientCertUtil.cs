@@ -19,7 +19,9 @@ using k8s;
 using k8s.Exceptions;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 {
@@ -55,67 +57,55 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// <returns>Generated Pfx Path</returns>
         public static X509Certificate2 GeneratePfx(KubernetesClientConfiguration config)
         {
-            byte[] keyData = null;
-            byte[] certData = null;
+            string keyData = null;
+            string certData = null;
+
             if (!string.IsNullOrWhiteSpace(config.ClientCertificateKeyData))
             {
-                keyData = Convert.FromBase64String(config.ClientCertificateKeyData);
+                keyData = Encoding.UTF8.GetString(Convert.FromBase64String(config.ClientCertificateKeyData));
             }
+
             if (!string.IsNullOrWhiteSpace(config.ClientKeyFilePath))
             {
-                keyData = File.ReadAllBytes(config.ClientKeyFilePath);
+                keyData = File.ReadAllText(config.ClientKeyFilePath);
             }
+
             if (keyData == null)
             {
                 throw new KubeConfigException("keyData is empty");
             }
+
             if (!string.IsNullOrWhiteSpace(config.ClientCertificateData))
             {
-                certData = Convert.FromBase64String(config.ClientCertificateData);
+                certData = Encoding.UTF8.GetString(Convert.FromBase64String(config.ClientCertificateData));
             }
+
             if (!string.IsNullOrWhiteSpace(config.ClientCertificateFilePath))
             {
-                certData = File.ReadAllBytes(config.ClientCertificateFilePath);
+                certData = File.ReadAllText(config.ClientCertificateFilePath);
             }
+
             if (certData == null)
             {
                 throw new KubeConfigException("certData is empty");
             }
-            var cert = new Org.BouncyCastle.X509.X509CertificateParser().ReadCertificate(new MemoryStream(certData));
-            // key usage is a bit string, zero-th bit is 'digitalSignature'
-            // See https://www.alvestrand.no/objectid/2.5.29.15.html for more details.
-            if (cert != null && cert.GetKeyUsage() != null && !cert.GetKeyUsage()[0])
+
+            var cert = X509Certificate2.CreateFromPem(certData, keyData);
+
+            // see https://github.com/kubernetes-client/csharp/issues/737
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                throw new Exception(
-                    "Client certificates must be marked for digital signing. " +
-                    "See https://github.com/kubernetes-client/csharp/issues/319");
-            }
-            object obj;
-            using (var reader = new StreamReader(new MemoryStream(keyData)))
-            {
-                obj = new Org.BouncyCastle.OpenSsl.PemReader(reader).ReadObject();
-                var key = obj as Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair;
-                if (key != null)
-                {
-                    var cipherKey = key;
-                    obj = cipherKey.Private;
-                }
-            }
-            var keyParams = (Org.BouncyCastle.Crypto.AsymmetricKeyParameter)obj;
-            var store = new Org.BouncyCastle.Pkcs.Pkcs12StoreBuilder().Build();
-            store.SetKeyEntry("K8SKEY", new Org.BouncyCastle.Pkcs.AsymmetricKeyEntry(keyParams), new[] { new Org.BouncyCastle.Pkcs.X509CertificateEntry(cert) });
-            using (var pkcs = new MemoryStream())
-            {
-                store.Save(pkcs, new char[0], new Org.BouncyCastle.Security.SecureRandom());
                 if (config.ClientCertificateKeyStoreFlags.HasValue)
                 {
-                    return new X509Certificate2(pkcs.ToArray(), "", config.ClientCertificateKeyStoreFlags.Value);
+                    cert = new X509Certificate2(cert.Export(X509ContentType.Pkcs12), "", config.ClientCertificateKeyStoreFlags.Value);
                 }
                 else
                 {
-                    return new X509Certificate2(pkcs.ToArray());
+                    cert = new X509Certificate2(cert.Export(X509ContentType.Pkcs12));
                 }
             }
+
+            return cert;
         }
     }
 }
