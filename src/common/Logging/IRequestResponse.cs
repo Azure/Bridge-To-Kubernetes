@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using Microsoft.Rest;
+using k8s.Autorest;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {

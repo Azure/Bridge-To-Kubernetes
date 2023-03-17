@@ -63,7 +63,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Extensions
         public void ValidateDateTimeFormatForDefaultDateTimeString()
         {
             var dateTimeString = default(DateTime).ToUniversalTime().ToString("s") + "Z";
-            Assert.Equal("-", DateTimeExtensions.FormatDateTimeUtcAsAgoString(DateTime.Parse((dateTimeString))));
+            Assert.Equal("-", DateTimeExtensions.FormatDateTimeUtcAsAgoString(DateTime.Parse(dateTimeString).ToUniversalTime()));
         }
     }
 }

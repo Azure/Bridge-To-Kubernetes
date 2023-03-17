@@ -8,10 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using FakeItEasy;
+using k8s.Autorest;
 using Microsoft.BridgeToKubernetes.Common.IO.Output;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.TestHelpers;
-using Microsoft.Rest;
 using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Exe.Tests

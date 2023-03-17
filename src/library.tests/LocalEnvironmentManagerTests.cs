@@ -3,10 +3,11 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Autofac;
+using FluentAssertions;
+using Microsoft.BridgeToKubernetes.Common.Models;
+using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.TestHelpers;
@@ -17,61 +18,172 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 {
     public class LocalEnvironmentManagerTests : TestsBase
     {
-        private ILocalEnvironmentManager _localEnvironmentManager;
+        private readonly ILocalEnvironmentManager _localEnvironmentManager;
 
-        public LocalEnvironmentManagerTests()
+        public LocalEnvironmentManagerTests() =>
+            _localEnvironmentManager =
+                _autoFake.Resolve<LocalEnvironmentManager>(new NamedParameter(
+                    "useKubernetesServiceEnvironmentVariables",
+                    true));
+
+        public static IEnumerable<object[]> TestData()
         {
-            var remoteContainerConnectionDetails = new AsyncLazy<RemoteContainerConnectionDetails>(async () => _autoFake.Resolve<RemoteContainerConnectionDetails>());
-            _localEnvironmentManager = _autoFake.Resolve<LocalEnvironmentManager>(new NamedParameter("useKubernetesServiceEnvironmentVariables", true));
+            // single basic endpoint
+            yield return new object[]
+            {
+                new[] {
+                    new EndpointInfo
+                    {
+                        DnsName = "foo",
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[] { new PortPair(5050, 80) }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["FOO_SERVICE_HOST"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT"] = "5050",
+                    ["FOO_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports
+                    ["FOO_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["FOO_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["FOO_PORT_5050_TCP_PORT"] = "5050",
+                    ["FOO_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                }
+            };
+
+            // single endpoint with multiple named ports
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = "foo",
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[]
+                        {
+                            new PortPair(5050, 80, "tcp", "http"),
+                            new PortPair(5051, 443, "tcp", "tls")
+                        }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["FOO_SERVICE_HOST"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT"] = "5050",
+                    ["FOO_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports for first port pair
+                    ["FOO_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["FOO_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["FOO_PORT_5050_TCP_PORT"] = "5050",
+                    ["FOO_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT_HTTP"] = "5050",
+                    // named ports for second port pair
+                    ["FOO_PORT_5051_TCP_PROTO"] = "tcp",
+                    ["FOO_PORT_5051_TCP"] = "tcp://127.0.0.1:5051",
+                    ["FOO_PORT_5051_TCP_PORT"] = "5051",
+                    ["FOO_PORT_5051_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT_TLS"] = "5051",
+                }
+            };
+
+            // multiple endpoints with simple and named ports
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = "foo",
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[]
+                        {
+                            new PortPair(5050, 80, "tcp", "http"),
+                            new PortPair(5051, 443, "tcp", "tls")
+                        }
+                    },
+                    new EndpointInfo
+                    {
+                        DnsName = "bar",
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.2"),
+                        Ports = new[] { new PortPair(5050, 80) }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // first endpoints backwards-compatible ports
+                    ["FOO_SERVICE_HOST"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT"] = "5050",
+                    ["FOO_PORT"] = "tcp://127.0.0.1:5050",
+                    // first endpoints named ports for first port pair
+                    ["FOO_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["FOO_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["FOO_PORT_5050_TCP_PORT"] = "5050",
+                    ["FOO_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT_HTTP"] = "5050",
+                    // first endpoints named ports for second port pair
+                    ["FOO_PORT_5051_TCP_PROTO"] = "tcp",
+                    ["FOO_PORT_5051_TCP"] = "tcp://127.0.0.1:5051",
+                    ["FOO_PORT_5051_TCP_PORT"] = "5051",
+                    ["FOO_PORT_5051_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_SERVICE_PORT_TLS"] = "5051",
+                    // second endpoints backwards-compatible ports
+                    ["BAR_SERVICE_HOST"] = "127.0.0.2",
+                    ["BAR_SERVICE_PORT"] = "5050",
+                    ["BAR_PORT"] = "tcp://127.0.0.2:5050",
+                    // second endpoints named ports for first port pair
+                    ["BAR_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["BAR_PORT_5050_TCP"] = "tcp://127.0.0.2:5050",
+                    ["BAR_PORT_5050_TCP_PORT"] = "5050",
+                    ["BAR_PORT_5050_TCP_ADDR"] = "127.0.0.2",
+                }
+            };
+
+            // managed identity
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = ManagedIdentity.TargetServiceNameOnLocalMachine,
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[] { new PortPair(5050, 80, "tcp") }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_SERVICE_HOST"] = "127.0.0.1",
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_SERVICE_PORT"] = "5050",
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_PORT_5050_TCP_PORT"] = "5050",
+                    ["MANAGEDIDENTITYFORBRIDGETOKUBERNETES_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                    // specific use case for managed identity
+                    [ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = "http://127.0.0.1:5050/metadata/identity/oauth2/token",
+                }
+            };
         }
 
-        [Fact]
-        public async void GetLocalEnvironment_GoodPath()
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void CreateEnvVariablesForK8s_Returns_ExactlyTheExpectedResults(IEnumerable<EndpointInfo> endpoints, Dictionary<string, string> expected)
         {
-            // Prepare test
-            WorkloadInfo workloadInfo = new WorkloadInfo();
-            Common.Models.EndpointInfo endpointInfo1 = new Common.Models.EndpointInfo();
-            endpointInfo1.DnsName = Common.Constants.ManagedIdentity.TargetServiceNameOnLocalMachine;
-            endpointInfo1.LocalIP = System.Net.IPAddress.Parse("127.0.0.1");
-            endpointInfo1.Ports = new Common.Models.Settings.PortPair[] {new Common.Models.Settings.PortPair(5050, 80)};
-            Common.Models.EndpointInfo endpointInfo2 = new Common.Models.EndpointInfo();
-            endpointInfo2.DnsName = "foo";
-            endpointInfo2.LocalIP = System.Net.IPAddress.Parse("127.0.0.2");
-            endpointInfo2.Ports = new Common.Models.Settings.PortPair[] { new Common.Models.Settings.PortPair(5049, 80)};
-            Common.Models.EndpointInfo endpointInfo3 = new Common.Models.EndpointInfo();
-            endpointInfo3.DnsName = "kubernetes.default";
-            endpointInfo3.LocalIP = System.Net.IPAddress.Parse("127.0.0.3");
-            endpointInfo3.Ports = new Common.Models.Settings.PortPair[] { new Common.Models.Settings.PortPair(5048, 80)};
+            var workloadInfo = new WorkloadInfo
+            {
+                ReachableEndpoints = new List<EndpointInfo>(endpoints),
+                EnvironmentVariables = new Dictionary<string, string>()
+            };
 
-            workloadInfo.ReachableEndpoints = new List<Common.Models.EndpointInfo>{endpointInfo1, endpointInfo2, endpointInfo3};
-            workloadInfo.EnvironmentVariables = new Dictionary<string, string>();
+            var result = _localEnvironmentManager.CreateEnvVariablesForK8s(workloadInfo);
 
-            // Execute
-            IDictionary<string, string> result = _localEnvironmentManager.CreateEnvVariablesForK8s(workloadInfo);
-            
-            // Validate
-            // We should add 8 entries per each service
-            // Since one of the services is managed identity for bridge to kubernetes we should also add/update msi_enpoint variable
-            Assert.Equal(8*3 + 1, result.Count());
-            ValidateService("foo", result, "tcp", "5049", "127.0.0.2");
-            ValidateService(Common.Constants.ManagedIdentity.TargetServiceNameOnLocalMachine, result, "tcp", "5050", "127.0.0.1");
-            ValidateService("kubernetes", result, "tcp", "5048", "");
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable], "http://127.0.0.1:5050/metadata/identity/oauth2/token"));
-            
+            result.Should().Equal(expected);
         }
-
-        public void ValidateService(string serviceName, IDictionary<string, string> result, string protocol, string port, string host) {
-            var protocolUpper = protocol.ToUpperInvariant();
-            serviceName = serviceName.ToUpperInvariant();
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_PORT"], $"{protocol}://{host}:{port}"));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_SERVICE_PORT_{protocolUpper}"], port.ToString()));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"], protocol));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_PORT_{port}_{protocolUpper}"], $"{protocol}://{host}:{port}"));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"], port.ToString()));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_SERVICE_PORT"], port.ToString()));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"], host));
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(result[$"{serviceName}_SERVICE_HOST"], host));
-        }
-
     }
 }

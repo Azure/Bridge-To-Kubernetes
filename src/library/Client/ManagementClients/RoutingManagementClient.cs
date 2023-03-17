@@ -3,14 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Json;
@@ -20,8 +13,15 @@ using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
-using Microsoft.Rest;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
@@ -161,7 +161,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                     var responseBody = await responseMessage.Content.ReadAsStringAsync();
                     deserializedRoutingStatus = JsonHelpers.DeserializeObject<RoutingStatus>(responseBody);
                 }
-                catch (JsonSerializationException ex)
+                catch (JsonException ex)
                 {
                     _log.Exception(ex);
                     throw new InvalidOperationException($"Failed to deserialize routing status: '{ex.Message}'.");

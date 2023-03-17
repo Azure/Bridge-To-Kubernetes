@@ -40,7 +40,6 @@
         $(SearchDir)\Autofac.dll;
         $(SearchDir)\Autofac.Extensions.DependencyInjection.dll;
         $(SearchDir)\AutoMapper.dll;
-        $(SearchDir)\BouncyCastle.Crypto.dll;
         $(SearchDir)\Fractions.dll;
         $(SearchDir)\IdentityModel.dll;
         $(SearchDir)\IdentityModel.OidcClient.dll;
@@ -50,13 +49,13 @@
         $(SearchDir)\kubectl.exe;
         $(SearchDir)\MessagePack.Annotations.dll;
         $(SearchDir)\MessagePack.dll;
-        $(SearchDir)\Minimatch.dll;
         $(SearchDir)\Newtonsoft.Json.dll;
         $(SearchDir)\Newtonsoft.Json.Bson.dll;
         $(SearchDir)\prometheus.netcore.dll;
         $(SearchDir)\prometheus.netstandard.dll;
         $(SearchDir)\system.io.abstractions.dll;
-        $(SearchDir)\YamlDotNet.dll">
+        $(SearchDir)\YamlDotNet.dll;
+        $(SearchDir)\systemtextjsonpatch.dll">
       <Authenticode>3PartySHA2</Authenticode>
     </FilesToSign>
   </ItemGroup>

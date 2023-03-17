@@ -3,7 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Models.Channel
 {
@@ -15,55 +15,55 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Channel
         /// <summary>
         /// Ujnique identifier for this request
         /// </summary>
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
         /// <summary>
         /// List of processes to kill to ensure a clean state
         /// </summary>
-        [JsonProperty("processesToKill")]
+        [JsonPropertyName("processesToKill")]
         public string[] ProcessesToKill { get; set; }
 
         /// <summary>
         /// Service startup command
         /// </summary>
-        [JsonProperty("serviceStartupCommand")]
+        [JsonPropertyName("serviceStartupCommand")]
         public string[] ServiceStartupCommand { get; set; }
 
         /// <summary>
         /// Service startup command arguments
         /// </summary>
-        [JsonProperty("serviceStartupArguments")]
+        [JsonPropertyName("serviceStartupArguments")]
         public string[] ServiceStartupArguments { get; set; }
 
         /// <summary>
         /// List of commands to execute
         /// </summary>
-        [JsonProperty("commands")]
+        [JsonPropertyName("commands")]
         public CommandExecuteRequest[] Commands { get; set; }
 
         /// <summary>
         /// Indicates whether startup command should be run
         /// </summary>
-        [JsonProperty("runStartupCommand")]
+        [JsonPropertyName("runStartupCommand")]
         public bool RunStartupCommand { get; set; }
 
         /// <summary>
         /// Indicates whether this is an iterative run versus standalone
         /// </summary>
-        [JsonProperty("runIterate")]
+        [JsonPropertyName("runIterate")]
         public bool RunIterate { get; set; }
 
         /// <summary>
         /// Indicates whether or not to accept input
         /// </summary>
-        [JsonProperty("isInteractive")]
+        [JsonPropertyName("isInteractive")]
         public bool IsInteractive { get; set; }
 
         /// <summary>
         /// Indicates whether to live synchronize files rather than a full in-place refresh
         /// </summary>
-        [JsonProperty("syncOnly")]
+        [JsonPropertyName("syncOnly")]
         public bool SyncOnly { get; set; }
     }
 }

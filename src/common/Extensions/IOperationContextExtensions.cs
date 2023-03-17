@@ -3,22 +3,14 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Net.Http;
+using k8s.Autorest;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.Rest;
-using Microsoft.Rest.Azure;
+using System.Net.Http;
 
 namespace Microsoft.BridgeToKubernetes.Common.Extensions
 {
     internal static class IOperationContextExtensions
     {
-        public static void SetRequestIds(this IOperationContext context, CloudException ex)
-        {
-            context.RequestId = ex?.RequestId;
-            context.ClientRequestId = ex?.Request?.GetClientRequestId();
-            context.CorrelationId = ex?.Response?.GetCorrelationRequestId();
-        }
-
         public static void SetRequestIds(this IOperationContext context, HttpRequestMessage request, HttpResponseMessage response)
         {
             context.RequestId = response?.GetRequestId();

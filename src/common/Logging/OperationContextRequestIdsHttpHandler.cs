@@ -8,7 +8,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.BridgeToKubernetes.Common.Extensions;
-using Microsoft.Rest.Azure;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
@@ -32,11 +31,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
                 response = await base.SendAsync(request, cancellationToken);
                 _context?.SetRequestIds(request, response);
                 return response;
-            }
-            catch (CloudException e)
-            {
-                _context?.SetRequestIds(e);
-                throw;
             }
             catch (Exception)
             {

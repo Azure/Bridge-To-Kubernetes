@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
@@ -36,7 +36,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
         /// <summary>
         /// The unscrambled value that may contain personally-identifiable information
         /// </summary>
-        [JsonProperty]
+        [JsonPropertyName("Value")]
         public string Value
         {
             get { return _value; }

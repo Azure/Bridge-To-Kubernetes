@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.BridgeToKubernetes.Common.IO.Output;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Exe.Output.Models
 {
@@ -23,11 +23,11 @@ namespace Microsoft.BridgeToKubernetes.Exe.Output.Models
         public string RequestType { get; }
 
         [TableOutputFormatIgnore]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public IEnumerable<PortInformationData> TargetPortInformation { get; }
 
         [TableOutputFormatIgnore]
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string TargetType { get; }
 
         [JsonConstructor]
