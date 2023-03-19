@@ -9,13 +9,13 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.PortForward;
 using Microsoft.BridgeToKubernetes.Common.Restore;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.Logging;
@@ -41,6 +41,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
     {
         private readonly IKubernetesClient _kubernetesClient;
         private readonly ILog _log;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly IOperationContext _operationContext;
         private readonly IEnvironmentVariables _environmentVariables;
         private readonly IImageProvider _imageProvider;
@@ -67,6 +68,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             IKubernetesClient kubernetesClient,
             AsyncLazy<RemoteContainerConnectionDetails> connectionDetails,
             ILog log,
+            IJsonSerializer jsonSerializer,
             IOperationContext operationContext,
             IEnvironmentVariables environmentVariables,
             IImageProvider imageProvider,
@@ -79,6 +81,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             this._kubernetesClient = kubernetesClient;
             this._remoteContainerConnectionDetails = connectionDetails;
             this._log = log;
+            this._jsonSerializer = jsonSerializer;
             this._operationContext = operationContext;
             this._environmentVariables = environmentVariables;
             this._imageProvider = imageProvider;
@@ -723,13 +726,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 V1Pod result = null;
                 if (patch != null)
                 {
+                    var serializedPatch = "";
                     try
                     {
-                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        serializedPatch = this._jsonSerializer.SerializeObject(patch);
+                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        var serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(patch.Serialize());
+                        serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(serializedPatch);
                             
                         _log.Error($"Patch deployment {namespaceName}/{remoteContainerConnectionDetails.DeploymentName} failed. Patch is {serializedPatch}, {ex.Message}");
                         throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.Deployment.ToString(), namespaceName, deploymentName, serializedPatch, ex.Message);
@@ -819,14 +824,18 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 V1Pod result = null;
                 if (patch != null)
                 {
+                    var serializedPatch = "";
                     try
                     {
-                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(patch, PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        serializedPatch = this._jsonSerializer.SerializeObject(patch);
+                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {patch.Serialize()}, {ex.Message}");
-                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, patch.Serialize(), ex.Message);
+                        serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(serializedPatch);
+
+                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {serializedPatch}, {ex.Message}");
+                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, serializedPatch, ex.Message);
                     }
                     var statefulSetPatch = new StatefulSetPatch(remoteContainerConnectionDetails.StatefulSet, reversePatch);
                     try

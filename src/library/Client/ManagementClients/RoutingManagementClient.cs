@@ -6,10 +6,10 @@
 using k8s.Autorest;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -32,6 +32,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
     internal class RoutingManagementClient : ManagementClientBase, IRoutingManagementClient
     {
         private readonly string _namespaceName;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly IKubernetesClient _kubernetesClient;
         private readonly IEnvironmentVariables _environmentVariables;
         private readonly ManagementClientExceptionStrategy _managementClientExceptionStrategy;
@@ -48,6 +49,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
             string namespaceName,
             string userAgent,
             string correlationId,
+            IJsonSerializer jsonSerializer,
             IKubernetesClient kubernetesClient,
             ILog log,
             IOperationContext operationContext,
@@ -55,6 +57,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
             ManagementClientExceptionStrategy managementClientExceptionStrategy,
             Lazy<IImageProvider> imageProvider) : base(log, operationContext)
         {
+            this._jsonSerializer = jsonSerializer;
             this._namespaceName = namespaceName;
             this._kubernetesClient = kubernetesClient;
             this._environmentVariables = environmentVariables;
@@ -159,7 +162,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                 try
                 {
                     var responseBody = await responseMessage.Content.ReadAsStringAsync();
-                    deserializedRoutingStatus = JsonHelpers.DeserializeObject<RoutingStatus>(responseBody);
+                    deserializedRoutingStatus = _jsonSerializer.DeserializeObject<RoutingStatus>(responseBody);
                 }
                 catch (JsonException ex)
                 {

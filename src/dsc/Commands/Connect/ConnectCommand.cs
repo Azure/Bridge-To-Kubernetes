@@ -10,10 +10,10 @@ using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IO.Input;
 using Microsoft.BridgeToKubernetes.Common.IO.Output;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Exe.Output.Models;
 using Microsoft.BridgeToKubernetes.Exe.Remoting;
@@ -36,6 +36,8 @@ namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
 {
     internal class ConnectCommand : TargetConnectCommandBase, ITopLevelCommand
     {
+        private readonly IJsonSerializer _jsonSerializer;
+
         private readonly Lazy<IPlatform> _platform;
         private readonly Lazy<IFileSystem> _fileSystem;
         private readonly Lazy<IConsoleLauncher> _consoleLauncher;
@@ -61,6 +63,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
         public override string Name => CommandConstants.Connect;
 
         public ConnectCommand(
+            IJsonSerializer jsonSerializer,
             CommandLineArgumentsManager commandLineArgumentsManager,
             IManagementClientFactory clientFactory,
             ILog log,
@@ -85,6 +88,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Commands.Connect
                   cliCommandOptionFactory,
                   sdkErrorHandling)
         {
+            _jsonSerializer = jsonSerializer;
             _platform = platform;
             _fileSystem = fileSystem;
             _consoleLauncher = consoleLauncher;
@@ -195,7 +199,7 @@ Additional Arguments
                     try
                     {
                         var jsonElevationRequests = elevationRequestsOption.Value();
-                        var elevationRequestsData = JsonHelpers.DeserializeObjectCaseInsensitive<IEnumerable<ElevationRequestData>>(jsonElevationRequests);
+                        var elevationRequestsData = _jsonSerializer.DeserializeObjectCaseInsensitive<IEnumerable<ElevationRequestData>>(jsonElevationRequests);
                         this._elevationRequests = elevationRequestsData.Select(erd => erd.ConvertToElevationRequest()).ToList();
                     }
                     catch (Exception)
@@ -426,7 +430,7 @@ Additional Arguments
                 var envVars = await connectManagementClient.GetLocalEnvironment(_localPorts, cancellationToken);
                 if (!string.IsNullOrEmpty(_envJsonPath))
                 {
-                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
+                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, _jsonSerializer.SerializeObjectIndented(envVars));
                 }
                 this.ReportProgress(EventLevel.LogAlways, $"##################### {Resources.Progress_EnvironmentStarted} #############################################################");
                 if (string.IsNullOrEmpty(_updateScript))
@@ -523,7 +527,7 @@ Additional Arguments
                 // This is the env file that should be used
                 if (!string.IsNullOrEmpty(_envJsonPath))
                 {
-                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
+                    _fileSystem.Value.WriteAllTextToFile(_envJsonPath, _jsonSerializer.SerializeObjectIndented(envVars));
                 }
 
                 while (!cancellationToken.IsCancellationRequested)

@@ -20,10 +20,10 @@ using Microsoft.BridgeToKubernetes.Common.EndpointManager;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
@@ -33,6 +33,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 {
     internal class EndpointManagementClient : ManagementClientBase, IEndpointManagementClient
     {
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly Func<ISocket> _socketFactory;
         private readonly IProgress<ProgressUpdate> _progress;
         private readonly IFileSystem _fileSystem;
@@ -48,6 +49,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             string userAgent,
             string correlationId,
             IOperationContext operationContext,
+            IJsonSerializer jsonSerializer,
             Func<ISocket> socketFactory,
             IProgress<ProgressUpdate> progress,
             IFileSystem fileSystem,
@@ -62,6 +64,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             _platform = platform;
             _assemblyMetadataProvider = assemblyMetadataProvider;
             _environmentVariables = environmentVariables;
+            _jsonSerializer = jsonSerializer;
             _socketFilePath = _fileSystem.Path.Combine(fileSystem.GetPersistedFilesDirectory(DirectoryName.PersistedFiles), EndpointManager.ProcessName, EndpointManager.SocketName);
             _socketFactory = socketFactory;
             operationContext.UserAgent = userAgent;
@@ -267,14 +270,14 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     }
 
                     // Send api invocation request
-                    var serializedRequest = JsonHelpers.SerializeObject(request);
+                    var serializedRequest = _jsonSerializer.SerializeObject(request);
                     _log.Info($"Sending request: '{serializedRequest}'");
                     await socket.SendWithEndMarkerAsync(serializedRequest);
 
                     // Wait for response
                     result = await socket.ReadUntilEndMarkerAsync();
                     _log.Info($"Received response: '{result}'");
-                    deserializedResult = JsonHelpers.DeserializeObject<ResponseType>(result);
+                    deserializedResult = _jsonSerializer.DeserializeObject<ResponseType>(result);
                 }
             }
             catch (Exception ex) when (ex is SocketException socketException && (socketException.SocketErrorCode == SocketError.ConnectionRefused

@@ -16,11 +16,11 @@ using Microsoft.BridgeToKubernetes.Common.EndpointManager;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IP;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Models.Settings;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.TestHelpers;
 using Xunit;
@@ -29,11 +29,16 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
 {
     public class EndpointManagerTests : TestsBase
     {
+        private readonly JsonSerializer _jsonSerializer;
         private readonly EndpointManager _endpointManager;
 
         public EndpointManagerTests()
         {
+            _jsonSerializer = new JsonSerializer();
+            
             A.CallTo(() => _autoFake.Resolve<IPlatform>().IsWindows).Returns(true);
+
+            _autoFake.Provide<IJsonSerializer>(_jsonSerializer);
 
             _endpointManager = _autoFake.Resolve<EndpointManager>();
         }
@@ -190,11 +195,11 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager.Tests
         /// <returns>A fake ISocket that will be used to transmit the API call, and can be used for .MustHaveHappened* assertions</returns>
         private ISocket ExecuteApiCall<T>(T request) where T : EndpointManagerRequest
         {
-            var requestBytes = Encoding.UTF8.GetBytes(JsonHelpers.SerializeObject(request));
+            var requestBytes = Encoding.UTF8.GetBytes(_jsonSerializer.SerializeObject(request));
 
             var fakeSocket = _autoFake.Resolve<ISocket>();
             A.CallTo(() => fakeSocket.ReadUntilEndMarkerAsync())
-                .ReturnsLazily(() => Task.FromResult(JsonHelpers.SerializeObject(request))).Once();
+                .ReturnsLazily(() => Task.FromResult(_jsonSerializer.SerializeObject(request))).Once();
             A.CallTo(() => _autoFake.Resolve<ISocket>().AcceptAsync())
                 .Returns(fakeSocket).Once()
                 .Then

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Logging;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -159,8 +160,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                             {
                                 foreach (var t in entry.Tokens)
                                 {
-                                    // TODO: t.Serialize() returns "Serialization Error" when port is specified. Need to fix this at some point, but it doesn't affect the user experience at all.
-                                    log.Verbose("Loaded env var '{0}' of type {1}: {2} => {3}", new PII(t.Name), t.GetType().Name, new PII(t.Serialize()), new PII(t.Evaluate()));
+                                    log.Verbose("Loaded env var '{0}' of type {1}: {2} => {3}", new PII(t.Name), t.GetType().Name, new PII(JsonSerializer.SerializeForLoggingPurpose(t)), new PII(t.Evaluate()));
                                 }
                                 _envVarEntries.Add(entry);
                                 _serviceTokens.AddRange(entry.Tokens.OfType<IServiceToken>().Distinct().Except(_serviceTokens));
@@ -191,7 +191,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
             {
                 if (_issues != null && _issues.Any())
                 {
-                    log.Warning("{0} config parse issues encountered with file '{1}': {2}", Product.Name, new PII(filePath), new PII(_issues.Serialize()));
+                    log.Warning("{0} config parse issues encountered with file '{1}': {2}", Product.Name, new PII(filePath), new PII(JsonSerializer.SerializeForLoggingPurpose(_issues)));
                 }
             }
         }

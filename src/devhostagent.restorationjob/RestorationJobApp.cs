@@ -13,12 +13,12 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models.DevHost;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Logging;
 using SystemTextJsonPatch;
@@ -39,6 +39,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         private static readonly string AgentPingEndpointFormat = $"http://{{0}}:{DevHostConstants.DevHostAgent.Port}/api/connectedsessions";
 
         private readonly ILog _log;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly IWorkloadRestorationService _workloadRestorationService;
         private readonly IRemoteRestoreJobCleaner _remoteRestoreJobCleaner;
         private readonly IKubernetesClient _kubernetesClient;
@@ -51,6 +52,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// </summary>
         public RestorationJobApp(
             ILog log,
+            IJsonSerializer jsonSerializer,
             IWorkloadRestorationService workloadRestorationService,
             IRemoteRestoreJobCleaner remoteRestoreJobCleaner,
             IKubernetesClient kubernetesClient,
@@ -59,6 +61,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
             HttpClient httpClient)
         {
             _log = log;
+            _jsonSerializer = jsonSerializer;
             _workloadRestorationService = workloadRestorationService;
             _remoteRestoreJobCleaner = remoteRestoreJobCleaner;
             _kubernetesClient = kubernetesClient;
@@ -191,7 +194,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 {
                     response.EnsureSuccessStatusCode();
                     string rawContent = await response.Content.ReadAsStringAsync();
-                    var content = JsonHelpers.DeserializeObject<ConnectedSessionsResponseModel>(rawContent);
+                    var content = _jsonSerializer.DeserializeObject<ConnectedSessionsResponseModel>(rawContent);
                     return content;
                 }
             }
@@ -209,13 +212,13 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         private PatchEntityBase _ParsePatchState()
         {
             string patchStateJson = _fileSystem.ReadAllTextFromFile(DevHostRestorationJob.PatchStateFullPath);
-            string type = JsonHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
+            string type = JsonPropertyHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
             return type switch
             {
-                nameof(DeploymentPatch) => JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson),
-                nameof(PodPatch) => JsonHelpers.DeserializeObject<PodPatch>(patchStateJson),
-                nameof(PodDeployment) => JsonHelpers.DeserializeObject<PodDeployment>(patchStateJson),
-                nameof(StatefulSetPatch) => JsonHelpers.DeserializeObject<StatefulSetPatch>(patchStateJson),
+                nameof(DeploymentPatch) => _jsonSerializer.DeserializeObject<DeploymentPatch>(patchStateJson),
+                nameof(PodPatch) => _jsonSerializer.DeserializeObject<PodPatch>(patchStateJson),
+                nameof(PodDeployment) => _jsonSerializer.DeserializeObject<PodDeployment>(patchStateJson),
+                nameof(StatefulSetPatch) => _jsonSerializer.DeserializeObject<StatefulSetPatch>(patchStateJson),
                 _ => throw new InvalidOperationException($"Unknown restoration patch type: '{type}'"),
             };
         }

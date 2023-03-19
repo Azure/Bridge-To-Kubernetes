@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IO.Output;
 using Microsoft.BridgeToKubernetes.Common.IP;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
@@ -25,6 +25,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         private readonly LocalAgentConfig _config;
         private readonly IIPManager _ipManager;
         private readonly ILog _log;
+        private readonly IJsonSerializer _jsonSerializer;
         private IProgress<ProgressUpdate> _progress;
         private readonly IConsoleOutput _out;
         private readonly IConnectManagementClient _connectManagementClient;
@@ -33,11 +34,13 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             IManagementClientFactory managementClientFactory,
             IIPManager ipManager,
             ILog log,
+            IJsonSerializer jsonSerializer,
             IConsoleOutput consoleOutput,
             IFileSystem fileSystem)
         {
             _ipManager = ipManager;
             _log = log;
+            _jsonSerializer = jsonSerializer;
             _out = consoleOutput;
             _progress = new SerializedProgress<ProgressUpdate>((progressUpdate) =>
             {
@@ -49,8 +52,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
 
             try
             {
-                _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
-                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\Users\lolodi\localAgentConfig.json"));
+                _config = _jsonSerializer.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
             }
             catch (Exception ex)
             {

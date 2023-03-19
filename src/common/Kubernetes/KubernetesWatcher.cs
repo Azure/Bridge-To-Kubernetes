@@ -16,9 +16,9 @@ using k8s;
 using k8s.Autorest;
 using k8s.Exceptions;
 using k8s.Models;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
 {
@@ -33,6 +33,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
         private readonly bool _skipTlsVerify;
         private readonly ServiceClientCredentials _credentials;
         private readonly ILog _log;
+        private readonly IJsonSerializer _jsonSerializer;
+
         private readonly HttpClient _httpClient;
 
         private bool _isDisposed = false;
@@ -42,9 +44,10 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
 
         public delegate IKubernetesWatcher InClusterFactory(bool useInClusterConfig = true);
 
-        public KubernetesWatcher(ILog log, KubernetesClientConfiguration config = null, bool useInClusterConfig = false)
+        public KubernetesWatcher(ILog log, IJsonSerializer jsonSerializer, KubernetesClientConfiguration config = null, bool useInClusterConfig = false)
         {
             this._log = log ?? throw new ArgumentNullException(nameof(log));
+            this._jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
             if (config == null && useInClusterConfig)
             {
                 config = KubernetesClientConfiguration.InClusterConfig();
@@ -274,7 +277,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
                     while (!cancellationToken.IsCancellationRequested &&
                         (line = await reader.ReadLineAsync()) != null)
                     {
-                        var ev = JsonHelpers.DeserializeObject<WatchEvent>(line);
+                        var ev = _jsonSerializer.DeserializeObject<WatchEvent>(line);
                         if (ev.Object.Kind == "Status")
                         {
                             break;

@@ -4,7 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
 {
@@ -16,15 +16,18 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
 
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentVariables _environmentVariables;
+        private readonly IJsonSerializer _jsonSerializer;
         private readonly IPlatform _platform;
 
         public VSCodeStorageReader(
             IFileSystem fileSystem,
             IEnvironmentVariables environmentVariables,
+            IJsonSerializer jsonSerializer,
             IPlatform platform)
         {
             this._fileSystem = fileSystem;
             this._environmentVariables = environmentVariables;
+            this._jsonSerializer = jsonSerializer;
             this._platform = platform;
         }
 
@@ -57,7 +60,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
                 }
 
                 var serializedStorage = this._fileSystem.ReadAllTextFromFile(vsCodeStoragePath);
-                dynamic deserializedStorage = JsonHelpers.DeserializeObject(serializedStorage);
+                dynamic deserializedStorage = this._jsonSerializer.DeserializeObject<object>(serializedStorage);
                 return deserializedStorage[name].Value;
             }
             catch { }

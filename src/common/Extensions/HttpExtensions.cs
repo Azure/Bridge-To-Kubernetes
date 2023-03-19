@@ -5,9 +5,8 @@
 
 using k8s.Autorest;
 using Microsoft.BridgeToKubernetes.Common;
-using Microsoft.BridgeToKubernetes.Common.Json;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
@@ -67,7 +66,7 @@ namespace System.Net.Http
 
             if (!response.StatusCode.IsIn(codes))
             {
-                throw new HttpRequestException($"Response code '{(int)response.StatusCode}' is not in the expected list: {JsonHelpers.SerializeObject(codes.Cast<int>())}");
+                throw new HttpRequestException($"Response code '{(int)response.StatusCode}' is not in the expected list: {JsonSerializer.SerializeForLoggingPurpose(codes.Cast<int>())}");
             }
         }
 

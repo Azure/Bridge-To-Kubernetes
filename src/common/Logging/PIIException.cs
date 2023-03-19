@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -64,20 +65,20 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
         private static string _SafeStringFormat(string format, params object[] args)
         {
-            if (args == null || !args.Any())
-            {
-                return format;
-            }
+          if (args == null || !args.Any())
+          {
+            return format;
+          }
 
-            try
-            {
-                var serializedArgs = args.Select(arg => arg.Serialize()).ToArray();
-                return string.Format(CultureInfo.InvariantCulture, format, serializedArgs);
-            }
-            catch (FormatException)
-            {
-                return $"{format} -- {args.Aggregate((x, y) => $"{x ?? "null"} -- {y ?? "null"}")}";
-            }
+          try
+          {
+            var serializedArgs = args.Select(arg => JsonSerializer.SerializeForLoggingPurpose(arg)).ToArray();
+            return string.Format(CultureInfo.InvariantCulture, format, serializedArgs);
+          }
+          catch (FormatException)
+          {
+            return $"{format} -- {args.Aggregate((x, y) => $"{x ?? "null"} -- {y ?? "null"}")}";
+          }
         }
-    }
+  }
 }

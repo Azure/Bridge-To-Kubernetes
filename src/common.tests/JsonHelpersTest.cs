@@ -4,19 +4,20 @@
 // --------------------------------------------------------------------------------------------
 
 using k8s;
-using Microsoft.BridgeToKubernetes.Common.Json;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using System;
-using System.Text.Json;
 using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
 {
-    public class JsonHelpersTest
+    public class JsonSerializerTest
     {
-        private readonly JsonSerializerOptions serializerSettings = new JsonSerializerOptions()
+        private JsonSerializer _jsonSerializer;
+
+        public JsonSerializerTest()
         {
-            ReferenceHandler = null
-        };
+            _jsonSerializer = new JsonSerializer();
+        }
 
         [Fact]
         public void SerializeObjectSuccessful()
@@ -26,7 +27,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
                 Name = "Frodo"
             };
             var expected = "{\"name\":\"Frodo\",\"bestFriend\":null}";
-            Assert.Equal(expected, JsonHelpers.SerializeObject(e));
+            Assert.Equal(expected, _jsonSerializer.SerializeObject(e));
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
                 Name = "Frodo"
             };
             var expected = string.Format("{{{0}  \"name\": \"Frodo\",{0}  \"bestFriend\": null{0}}}", Environment.NewLine);
-            var result = JsonHelpers.SerializeObjectIndented(e);
+            var result = _jsonSerializer.SerializeObjectIndented(e);
             Assert.Equal(expected, result);
             Assert.True(result.Split("\n").Length > 1);
         }
@@ -58,25 +59,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
 
             p1.BestFriend = p2;
             var expected = "{\"name\":\"Samwise\",\"bestFriend\":{\"name\":\"Frodo\",\"bestFriend\":null}}";
-            Assert.Equal(expected, JsonHelpers.SerializeObject(p2));
-        }
-
-        [Fact]
-        public void SerializeObjectWithReferenceLoopCustomSettings()
-        {
-            Person p1 = new Person()
-            {
-                Name = "Frodo"
-            };
-
-            Person p2 = new Person()
-            {
-                Name = "Samwise",
-                BestFriend = p1
-            };
-
-            p1.BestFriend = p2;
-            Assert.Throws<JsonException>(() => JsonHelpers.SerializeObject(p2, serializerSettings));
+            Assert.Equal(expected, _jsonSerializer.SerializeObject(p2));
         }
 
         [Fact]
@@ -99,8 +82,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
                 BestFriend = p2
             };
 
-            var serialized = JsonHelpers.SerializeObject(p3);
-            var deserialized = JsonHelpers.DeserializeObject(serialized);
+            var serialized = _jsonSerializer.SerializeObject(p3);
+            var deserialized = _jsonSerializer.DeserializeObject<object>(serialized);
             var expected = string.Format("{{\"name\":\"Pippin\",\"bestFriend\":{{"
                  + "\"name\":\"Samwise\",\"bestFriend\":{{\"name\":\"Frodo\","
                  + "\"bestFriend\":null}}}}}}", Environment.NewLine);
@@ -111,8 +94,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
         public void SerializeWatchEventType()
         {
             var json = "{  \"type\": \"ADDED\",  \"object\": {\"kind\": \"Pod\", \"apiVersion\": \"v1\", \"metadata\": {\"resourceVersion\": \"10596\"}}}";
-            var deserialized = JsonHelpers.DeserializeObject<WatchEvent>(json);
-            
+            var deserialized = _jsonSerializer.DeserializeObject<WatchEvent>(json);
+
             Assert.Equal(WatchEventType.Added, deserialized.Type);
         }
 

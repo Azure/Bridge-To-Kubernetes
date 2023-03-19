@@ -7,9 +7,9 @@ using System;
 using System.Text;
 using System.Threading;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Library.Models;
 
 namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
@@ -19,6 +19,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
         private readonly IFileSystem _fileSystem;
         private readonly IPlatform _platform;
         private readonly ILog _log;
+        private readonly IJsonSerializer _jsonSerializer;
         private string _localAgentContainerName;
 
         public delegate ILocalAgentManager Factory(string localAgentContainerName);
@@ -27,12 +28,14 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             string localAgentContainerName,
             IFileSystem fileSystem,
             IPlatform platform,
-            ILog log)
+            ILog log,
+            IJsonSerializer jsonSerializer)
         {
             _localAgentContainerName = localAgentContainerName;
             _platform = platform;
             _fileSystem = fileSystem;
             _log = log;
+            _jsonSerializer = jsonSerializer;
         }
 
         /// <summary>
@@ -42,7 +45,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
         {
             // Serialize config to temp file
             string localAgentConfigFilePath = _fileSystem.Path.GetTempFilePath();
-            var content = JsonHelpers.SerializeObject(config);
+            var content = _jsonSerializer.SerializeObject(config);
             _fileSystem.WriteAllTextToFile(localAgentConfigFilePath, content);
 
             var commandLine = new StringBuilder();

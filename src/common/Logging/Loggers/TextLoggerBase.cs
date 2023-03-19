@@ -5,7 +5,7 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using Microsoft.BridgeToKubernetes.Common.Json;
+using Microsoft.BridgeToKubernetes.Common.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
@@ -44,7 +44,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
         protected string GetJsonLogMessage(string identifier, object obj)
         {
-            var json = JsonHelpers.SerializeObject(obj);
+            var json = JsonSerializer.SerializeForLoggingPurpose(obj);
             return GetJsonLogMessage(identifier, json);
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
         private string AppendOperationContextIfNeeded(string message)
         {
-            var operationContextJson = JsonHelpers.SerializeObject(OperationContext);
+            var operationContextJson = JsonSerializer.SerializeForLoggingPurpose(OperationContext);
             // Only appends the OperationContext if it has changed compared to the latest time it was logged.
             if (operationContextJson != this._previousOperationContextJson)
             {
