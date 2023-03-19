@@ -10,11 +10,11 @@ using Xunit;
 
 namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
 {
-    public class JsonSerializerTest
+    public class JsonSerializerTests
     {
         private JsonSerializer _jsonSerializer;
 
-        public JsonSerializerTest()
+        public JsonSerializerTests()
         {
             _jsonSerializer = new JsonSerializer();
         }
