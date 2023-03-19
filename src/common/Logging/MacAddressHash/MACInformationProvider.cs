@@ -160,7 +160,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
         {
             try
             {
-                (var exitCode, var output) = _platform.ExecuteAndReturnOutput(commandName, 
+                (var exitCode, var output) = this._platform.ExecuteAndReturnOutput(commandName, 
                                                                               commandArgs, 
                                                                               timeout: TimeSpan.FromSeconds(30), 
                                                                               stdOutCallback: null,
@@ -171,35 +171,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
             {
                 return "";
             }
-
-            //var processOutput = new StringBuilder();
-            //var process = new Process();
-            //try
-            //{
-            //    process.EnableRaisingEvents = true;
-            //    process.StartInfo.UseShellExecute = false;
-            //    process.StartInfo.CreateNoWindow = true;
-            //    process.StartInfo.RedirectStandardOutput = true;
-
-            //    process.StartInfo.RedirectStandardError = true;
-            //    process.StartInfo.FileName = commandName;
-            //    process.StartInfo.Arguments = commandArgs ?? string.Empty;
-            //    process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
-            //    {
-            //        processOutput.AppendLine(e.Data);
-            //    };
-            //    process.Start();
-            //    process.BeginOutputReadLine();
-            //    process.BeginErrorReadLine();
-            //    process.WaitForExit();
-            //    process.Close();
-            //    return processOutput.ToString();
-            //}
-            //catch (Exception)
-            //{
-            //    process.Close();
-            //    return "";
-            //}
         }
     }
 }
