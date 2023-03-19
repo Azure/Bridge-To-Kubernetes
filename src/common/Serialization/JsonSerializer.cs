@@ -481,6 +481,5 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
         }
 
         #endregion Json Converters
-
     }
 }
