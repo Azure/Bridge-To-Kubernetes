@@ -121,7 +121,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
             }
             catch (Exception)
             {
-                return $"Serialization Error when trying to serialize {input.GetType()}";
+                return "Serialization Error";
             }
         }
 
