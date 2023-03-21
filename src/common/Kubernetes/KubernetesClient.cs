@@ -21,8 +21,8 @@ using k8s.KubeConfigModels;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.RoutingManager.Traefik;
 using static Microsoft.BridgeToKubernetes.Common.Logging.LoggingConstants;
@@ -43,8 +43,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 
         public delegate IKubernetesClient InClusterFactory(bool useInClusterConfig = true, string kubectlFilePath = null);
 
-        private readonly IJsonSerializer _jsonSerializer;
-
         private string _activeKubeConfigFilePath { get; }
         private K8SConfiguration _k8SConfiguration { get; }
 
@@ -59,7 +57,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             IPlatform platform,
             IEnvironmentVariables environmentVariables,
             ILog log,
-            IJsonSerializer jsonSerializer,
             K8SConfiguration k8SConfiguration = null,
             string kubeConfigFilePath = null,
             string kubectlFilePath = null,
@@ -70,7 +67,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 throw new InvalidOperationException($"{nameof(KubernetesClient)} must have either '{nameof(useInClusterConfig)} = true', '{nameof(k8SConfiguration)}' or '{nameof(kubeConfigFilePath)}' set!");
             }
-            this._jsonSerializer = jsonSerializer;
 
             this._activeKubeConfigFilePath = kubeConfigFilePath;
             this._k8SConfiguration = k8SConfiguration;
@@ -616,7 +612,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             }
 
             var outputString = outputSb.ToString();
-            var ingressRoutesObject = _jsonSerializer.DeserializeObject<IngressRoutes>(outputString);
+            var ingressRoutesObject = JsonHelpers.DeserializeObject<IngressRoutes>(outputString);
             return ingressRoutesObject.Items;
         }
 
@@ -1095,7 +1091,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                     if (!string.IsNullOrEmpty(opEx.Response.Content))
                     {
                         // Try to construct an error message that takes advantage of all the info available to us
-                        var deserializedContent = _jsonSerializer.DeserializeObject<Dictionary<string, object>>(opEx.Response.Content);
+                        var deserializedContent = JsonHelpers.DeserializeObject<Dictionary<string, object>>(opEx.Response.Content);
                         if (deserializedContent != null && deserializedContent.TryGetValue("message", out object errorMessage))
                         {
                             var errorString = $"{opEx.Response.ReasonPhrase}: {new PII(errorMessage.ToString())}";

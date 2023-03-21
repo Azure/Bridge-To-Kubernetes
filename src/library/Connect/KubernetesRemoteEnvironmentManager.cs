@@ -9,13 +9,13 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.PortForward;
 using Microsoft.BridgeToKubernetes.Common.Restore;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.Logging;
@@ -41,7 +41,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
     {
         private readonly IKubernetesClient _kubernetesClient;
         private readonly ILog _log;
-        private readonly IJsonSerializer _jsonSerializer;
         private readonly IOperationContext _operationContext;
         private readonly IEnvironmentVariables _environmentVariables;
         private readonly IImageProvider _imageProvider;
@@ -68,7 +67,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             IKubernetesClient kubernetesClient,
             AsyncLazy<RemoteContainerConnectionDetails> connectionDetails,
             ILog log,
-            IJsonSerializer jsonSerializer,
             IOperationContext operationContext,
             IEnvironmentVariables environmentVariables,
             IImageProvider imageProvider,
@@ -81,7 +79,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             this._kubernetesClient = kubernetesClient;
             this._remoteContainerConnectionDetails = connectionDetails;
             this._log = log;
-            this._jsonSerializer = jsonSerializer;
             this._operationContext = operationContext;
             this._environmentVariables = environmentVariables;
             this._imageProvider = imageProvider;
@@ -729,7 +726,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     var serializedPatch = "";
                     try
                     {
-                        serializedPatch = this._jsonSerializer.SerializeObject(patch);
+                        serializedPatch = JsonHelpers.SerializeObject(patch);
                         await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
@@ -827,7 +824,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     var serializedPatch = "";
                     try
                     {
-                        serializedPatch = this._jsonSerializer.SerializeObject(patch);
+                        serializedPatch = JsonHelpers.SerializeObject(patch);
                         await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)

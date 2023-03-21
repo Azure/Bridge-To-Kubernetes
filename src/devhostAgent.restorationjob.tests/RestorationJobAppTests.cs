@@ -18,12 +18,12 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.TestHelpers;
 using Xunit;
 
@@ -34,22 +34,20 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
     /// </summary>
     public class RestorationJobAppTests : TestsBase
     {
-        private JsonSerializer _jsonSerializer;
+        private JsonHelpers _jsonSerializer;
         private RestorationJobApp _app;
         private IRestorationJobEnvironmentVariables _env = A.Fake<IRestorationJobEnvironmentVariables>();
         private DelegatingHandler _fakeDelegatingHandler = A.Fake<DelegatingHandler>();
 
         public RestorationJobAppTests()
         {
-            _jsonSerializer = new JsonSerializer();
+            _jsonSerializer = new JsonHelpers();
 
             A.CallTo(() => _env.Namespace).Returns("mynamespace");
             A.CallTo(() => _env.InstanceLabelValue).Returns("foo-bar-123");
             A.CallTo(() => _env.PingInterval).Returns(TimeSpan.Zero);
             A.CallTo(() => _env.RestoreTimeout).Returns(TimeSpan.Zero);
             A.CallTo(() => _env.NumFailedPingsBeforeExit).Returns(3);
-
-            _autoFake.Provide<IJsonSerializer>(_jsonSerializer);
 
             _autoFake.Provide(_env);
 
@@ -85,7 +83,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
         public void EnsureCanDeserializePatch1()
         {
             string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
-            var deploymentPatch = _jsonSerializer.DeserializeObject<DeploymentPatch>(patchStateJson);
+            var deploymentPatch = JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson);
 
             string name = deploymentPatch.Deployment.Name();
             string ns = deploymentPatch.Deployment.Namespace();
@@ -104,7 +102,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
 
             Assert.Equal(nameof(DeploymentPatch), type);
         }
-
 
         [Fact]
         public void EnsureFailedPingsExit()

@@ -6,10 +6,10 @@
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using System;
 using System.Diagnostics.Tracing;
@@ -27,13 +27,11 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
     {
         private readonly IKubernetesClient _kubernetesClient;
         private readonly ILog _log;
-        private readonly IJsonSerializer _jsonSerializer;
 
-        public WorkloadRestorationService(IKubernetesClient kubernetesClient, ILog log, IJsonSerializer jsonSerializer)
+        public WorkloadRestorationService(IKubernetesClient kubernetesClient, ILog log)
         {
             _kubernetesClient = kubernetesClient;
             _log = log;
-            _jsonSerializer = jsonSerializer;
         }
 
         /// <summary>
@@ -41,7 +39,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
         /// </summary>
         public Task RestorePodPatchAsync(PodPatch podPatch, CancellationToken cancellationToken, Action<ProgressMessage> progressCallback = null, bool noThrow = false)
         {
-            var patchString = _jsonSerializer.SerializeObject(podPatch.ReversePatch);
+            var patchString = JsonHelpers.SerializeObject(podPatch.ReversePatch);
             string originalImage = podPatch.ReversePatch.TryGetContainerImageReplacementValue();
 
             return _RestoreAsync(
@@ -120,7 +118,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
             var deployment = deploymentPatch.Deployment;
             var reversePatch = deploymentPatch.ReversePatch;
             string originalImage = reversePatch.TryGetContainerImageReplacementValue();
-            var patchString = _jsonSerializer.SerializeObject(reversePatch);
+            var patchString = JsonHelpers.SerializeObject(reversePatch);
 
             return _RestoreAsync(
                 operation: Operations.RestoreDeployment,
@@ -150,7 +148,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Restore
             var statefulSet = statefulSetPatch.StatefulSet;
             var reversePatch = statefulSetPatch.ReversePatch;
             string originalImage = reversePatch.TryGetContainerImageReplacementValue();
-            var patchString = _jsonSerializer.SerializeObject(reversePatch);
+            var patchString = JsonHelpers.SerializeObject(reversePatch);
 
             return _RestoreAsync(
                 operation: Operations.RestoreStatefulSet,

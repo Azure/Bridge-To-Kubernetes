@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.Kubernetes;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -126,7 +126,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
                                     Url = url,
                                     AuthenticationCode = authenticationCode
                                 };
-                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonSerializer.SerializeForLoggingPurpose(authenticationTarget))));
+                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonHelpers.SerializeForLoggingPurpose(authenticationTarget))));
                             }
                         };
                         int exitCode = _kubernetesClient.InvokeLongRunningKubectlCommand(KubernetesCommandName.ListPods,

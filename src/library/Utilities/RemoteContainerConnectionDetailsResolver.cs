@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
@@ -24,7 +24,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
     {
         private readonly IKubernetesClient _kubernetesClient;
         private readonly ILog _log;
-        private readonly IJsonSerializer _jsonSerializer;
         private readonly IOperationContext _operationContext;
 
         public delegate RemoteContainerConnectionDetailsResolver Factory(IKubernetesClient kubernetesClient);
@@ -32,12 +31,10 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
         public RemoteContainerConnectionDetailsResolver(
             IKubernetesClient kubernetesClient,
             ILog log,
-            IJsonSerializer jsonSerializer,
             IOperationContext operationContext)
         {
             this._kubernetesClient = kubernetesClient;
             this._log = log;
-            this._jsonSerializer = jsonSerializer;
             this._operationContext = operationContext;
         }
 
@@ -271,7 +268,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                 // Find pods with the same label selector as the service
                 if (service?.Metadata?.Annotations != null && service.Metadata.Annotations.ContainsKey(Routing.OriginalServiceSelectorAnnotation))
                 {
-                    selectors = _jsonSerializer.DeserializeObject<Dictionary<string, string>>(service.Metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
+                    selectors = JsonHelpers.DeserializeObject<Dictionary<string, string>>(service.Metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
                 }
                 else
                 {

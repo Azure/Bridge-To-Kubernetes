@@ -8,11 +8,11 @@ using k8s.Autorest;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using System;
@@ -36,7 +36,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// </summary>
         private const string RbacResourceVersion = "v2";
 
-        private readonly IJsonSerializer _jsonSerializer;
         private readonly Lazy<IImageProvider> _imageProvider;
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentVariables _environmentVariables;
@@ -45,7 +44,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         private bool _rbacEnabled = true;
 
         public RemoteRestoreJobDeployer(
-            IJsonSerializer jsonSerializer,
             IKubernetesClient kubernetesClient,
             Lazy<IImageProvider> imageProvider,
             IFileSystem fileSystem,
@@ -54,7 +52,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             IEnvironmentVariables environmentVariables)
             : base(kubernetesClient, log)
         {
-            _jsonSerializer = jsonSerializer;
             _imageProvider = imageProvider;
             _fileSystem = fileSystem;
             _environmentVariables = environmentVariables;
@@ -130,7 +127,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     try
                     {
                         string json = secret.Data[_fileSystem.Path.GetFileName(DevHostRestorationJob.PatchStateFullPath)].Utf8ToString();
-                        var patch = _jsonSerializer.DeserializeObject<T>(json);
+                        var patch = JsonHelpers.DeserializeObject<T>(json);
                         perfLogger.SetSucceeded();
                         return patch;
                     }
@@ -286,7 +283,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             var secret = KubernetesYaml.Deserialize<V1Secret>(secretTemplate);
             secret.StringData = new Dictionary<string, string>()
             {
-                { _fileSystem.Path.GetFileName(DevHostRestorationJob.PatchStateFullPath), _jsonSerializer.SerializeObjectIndented(patch) }
+                { _fileSystem.Path.GetFileName(DevHostRestorationJob.PatchStateFullPath), JsonHelpers.SerializeObjectIndented(patch) }
             };
             return secret;
         }

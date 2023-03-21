@@ -17,10 +17,10 @@ using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.IP;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.EndpointManager.Logging;
@@ -33,8 +33,6 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
     /// </summary>
     internal class EndpointManager : AppBase
     {
-        private readonly IJsonSerializer _jsonSerializer;
-
         private readonly IHostsFileManager _hostsFileManager;
         private readonly Func<ISocket> _socketFactory;
         private readonly Func<string, IServiceController> _serviceControllerFactory;
@@ -56,7 +54,6 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
         private string _socketPath;
 
         public EndpointManager(
-            IJsonSerializer jsonSerializer,
             IHostsFileManager hostsFileManager,
             Func<ISocket> socketFactory,
             Func<string, IServiceController> serviceControllerFactory,
@@ -68,7 +65,6 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
             IIPManager ipManager,
             ILog log)
         {
-            _jsonSerializer = jsonSerializer;
             _hostsFileManager = hostsFileManager;
             _socketFactory = socketFactory;
             _serviceControllerFactory = serviceControllerFactory;
@@ -231,8 +227,8 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
 
                 // Wait for request
                 var request = await socket.ReadUntilEndMarkerAsync();
-                var apiName = _jsonSerializer.DeserializeObject<EndpointManagerRequest>(request).ApiName;
-                _operationContext.CorrelationId = _jsonSerializer.DeserializeObject<EndpointManagerRequest>(request).CorrelationId + LoggingConstants.CorrelationIdSeparator + LoggingUtils.NewId();
+                var apiName = JsonHelpers.DeserializeObject<EndpointManagerRequest>(request).ApiName;
+                _operationContext.CorrelationId = JsonHelpers.DeserializeObject<EndpointManagerRequest>(request).CorrelationId + LoggingConstants.CorrelationIdSeparator + LoggingUtils.NewId();
 
                 if (!Enum.TryParse(apiName, out Constants.EndpointManager.ApiNames apiRequest))
                 {
@@ -246,27 +242,27 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
                 switch (apiRequest)
                 {
                     case Constants.EndpointManager.ApiNames.AddHostsFileEntry:
-                        var addHostsFileEntryRequest = _jsonSerializer.DeserializeObject<EndpointManagerRequest<AddHostsFileEntryArgument>>(request);
+                        var addHostsFileEntryRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<AddHostsFileEntryArgument>>(request);
                         result = this.InvokeWithExceptionHandler(() => _hostsFileManager.Add(addHostsFileEntryRequest.Argument.WorkloadNamespace, addHostsFileEntryRequest.Argument.Entries));
                         break;
 
                     case Constants.EndpointManager.ApiNames.AllocateIP:
-                        var allocateIpRequest = _jsonSerializer.DeserializeObject<EndpointManagerRequest<AllocateIPArgument>>(request);
+                        var allocateIpRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<AllocateIPArgument>>(request);
                         result = this.InvokeWithExceptionHandler<IEnumerable<EndpointInfo>>(() => _ipManager.AllocateIPs(allocateIpRequest.Argument.Endpoints, addRoutingRules: true, _cancellationToken));
                         break;
 
                     case Constants.EndpointManager.ApiNames.DisableService:
-                        var disableServiceRequest = _jsonSerializer.DeserializeObject<EndpointManagerRequest<DisableServiceArgument>>(request);
+                        var disableServiceRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<DisableServiceArgument>>(request);
                         result = this.InvokeWithExceptionHandler(() => disableServiceRequest.Argument.ServicePortMappings.ExecuteForEach(mapping => DisableService(mapping)));
                         break;
 
                     case Constants.EndpointManager.ApiNames.FreeIP:
-                        var freeIPRequest = _jsonSerializer.DeserializeObject<EndpointManagerRequest<FreeIPArgument>>(request);
+                        var freeIPRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<FreeIPArgument>>(request);
                         result = this.InvokeWithExceptionHandler(() => _ipManager.FreeIPs(freeIPRequest.Argument.IPAddresses, _hostsFileManager, removeRoutingRules: true, _cancellationToken));
                         break;
 
                     case Constants.EndpointManager.ApiNames.KillProcess:
-                        var killProcessRequest = _jsonSerializer.DeserializeObject<EndpointManagerRequest<KillProcessArgument>>(request);
+                        var killProcessRequest = JsonHelpers.DeserializeObject<EndpointManagerRequest<KillProcessArgument>>(request);
                         result = this.InvokeWithExceptionHandler(() => killProcessRequest.Argument.ProcessPortMappings.ExecuteForEach(mapping => KillProcess(mapping)));
                         break;
 
@@ -424,7 +420,7 @@ namespace Microsoft.BridgeToKubernetes.EndpointManager
         {
             try
             {
-                var serializedResult = _jsonSerializer.SerializeObject(result);
+                var serializedResult = JsonHelpers.SerializeObject(result);
                 _log.Info($"Sending response: '{serializedResult}'");
                 var numBytes = await server.SendWithEndMarkerAsync(serializedResult);
             }

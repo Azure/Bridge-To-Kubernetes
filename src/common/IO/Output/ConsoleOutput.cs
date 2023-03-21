@@ -11,8 +11,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.BridgeToKubernetes.Common.Commands;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.IO.Output
 {
@@ -122,7 +122,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
 
             if (this.OutputFormat == OutputFormat.Json)
             {
-                string formattedText = JsonSerializer.SerializeForLoggingPurposeIndented(data);
+                string formattedText = JsonHelpers.SerializeForLoggingPurposeIndented(data);
                 _console.Write(formattedText);
                 _log.WithoutTelemetry.Info($"Console output (JSON):{Environment.NewLine}{formattedText}");
             }

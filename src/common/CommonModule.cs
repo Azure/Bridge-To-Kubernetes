@@ -5,7 +5,7 @@
 
 using Autofac;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
+using Microsoft.BridgeToKubernetes.Common.Json;
 
 namespace Microsoft.BridgeToKubernetes.Common
 {
@@ -39,11 +39,6 @@ namespace Microsoft.BridgeToKubernetes.Common
             builder.RegisterType<FileSystem>()
                    .As<IFileSystem>()
                    .IfNotRegistered(typeof(IFileSystem))
-                   .SingleInstance();
-
-            builder.RegisterType<JsonSerializer>()
-                   .As<IJsonSerializer>()
-                   .IfNotRegistered(typeof(IJsonSerializer))
                    .SingleInstance();
         }
     }

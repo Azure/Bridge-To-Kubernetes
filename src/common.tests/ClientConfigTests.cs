@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using FakeItEasy;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.PersistentProperyBag;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
 using Microsoft.BridgeToKubernetes.TestHelpers;
 using Xunit;
 
@@ -27,8 +27,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
 
         public ClientConfigTests()
         {
-            _autoFake.Provide<IJsonSerializer>(new JsonSerializer());
-
             A.CallTo(() => _autoFake.Resolve<IFileSystem>().Path).Returns(_autoFake.Resolve<PathUtilities>());
             A.CallTo(() => _autoFake.Resolve<IFileSystem>().GetPersistedFilesDirectory(Common.Constants.DirectoryName.PersistedFiles)).Returns(configFileDirectoryPath);
         }

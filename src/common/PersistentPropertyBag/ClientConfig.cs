@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.Common.PersistentProperyBag
@@ -26,7 +26,6 @@ namespace Microsoft.BridgeToKubernetes.Common.PersistentProperyBag
     internal sealed class ClientConfig : IClientConfig
     {
         private readonly IFileSystem _fileSystem;
-        private readonly IJsonSerializer _jsonSerializer;
 
         private readonly string _backUpStorageLocation;
         private readonly string _storageLocation;
@@ -34,10 +33,9 @@ namespace Microsoft.BridgeToKubernetes.Common.PersistentProperyBag
         private ConcurrentDictionary<string, object> _store;
         private bool _storeWasChanged;
 
-        public ClientConfig(IFileSystem fileSystem, IJsonSerializer jsonSerializer)
+        public ClientConfig(IFileSystem fileSystem)
         {
             this._fileSystem = fileSystem;
-            this._jsonSerializer = jsonSerializer;
             this._storageLocation = _fileSystem.Path.Combine(_fileSystem.GetPersistedFilesDirectory(DirectoryName.PersistedFiles), FileNames.Config);
             this._backUpStorageLocation = GetBackupStoreLocation(this._storageLocation);
 
@@ -126,7 +124,7 @@ namespace Microsoft.BridgeToKubernetes.Common.PersistentProperyBag
                     {
                         _fileSystem.CreateDirectory(dirPath);
                     }
-                    _fileSystem.WriteAllTextToFile(path, this._jsonSerializer.SerializeObject(this._store));
+                    _fileSystem.WriteAllTextToFile(path, JsonHelpers.SerializeObject(this._store));
                 }
             }
             catch
@@ -189,7 +187,7 @@ namespace Microsoft.BridgeToKubernetes.Common.PersistentProperyBag
                     {
                         var content = _fileSystem.ReadAllTextFromFile(filepath);
                         // Workaround needed because deserialization of ConcurrentDictioanry fails.
-                        _store = new ConcurrentDictionary<string, object>(this._jsonSerializer.DeserializeObject<Dictionary<string, object>>(content));
+                        _store = new ConcurrentDictionary<string, object>(JsonHelpers.DeserializeObject<Dictionary<string, object>>(content));
                     }
                     // NewtonSoft.Json deserializes ints as longs.
                     foreach (var kvp in this._store.Where(kvp => kvp.Value is long).ToArray())

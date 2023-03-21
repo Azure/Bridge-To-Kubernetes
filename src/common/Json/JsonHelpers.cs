@@ -14,9 +14,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 
-namespace Microsoft.BridgeToKubernetes.Common.Serialization
+namespace Microsoft.BridgeToKubernetes.Common.Json
 {
-    internal class JsonSerializer : IJsonSerializer
+    internal class JsonHelpers
     {
         private static JsonSerializerOptions SerializerOptions { get; } = CreateSerializerOptions();
 
@@ -66,17 +66,17 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
             return jsonSerializerOptions;
         }
 
-        public T DeserializeObject<T>(string v)
-            => System.Text.Json.JsonSerializer.Deserialize<T>(v, SerializerOptions);
+        public static T DeserializeObject<T>(string v)
+            => JsonSerializer.Deserialize<T>(v, SerializerOptions);
 
-        public T DeserializeObjectCaseInsensitive<T>(string v)
-            => System.Text.Json.JsonSerializer.Deserialize<T>(v, SerializerSettingsCaseInsensitive);
+        public static T DeserializeObjectCaseInsensitive<T>(string v)
+            => JsonSerializer.Deserialize<T>(v, SerializerSettingsCaseInsensitive);
 
-        public string SerializeObject(object obj)
-            => System.Text.Json.JsonSerializer.Serialize(obj, SerializerOptions);
+        public static string SerializeObject(object obj)
+            => JsonSerializer.Serialize(obj, SerializerOptions);
 
-        public string SerializeObjectIndented(object obj)
-            => System.Text.Json.JsonSerializer.Serialize(obj, SerializerSettingsIndented);
+        public static string SerializeObjectIndented(object obj)
+            => JsonSerializer.Serialize(obj, SerializerSettingsIndented);
 
         /// <summary>
         /// Serialize an object to JSON. PII values are output unscrambled. Swallows serialization exceptions.
@@ -117,7 +117,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
 
             try
             {
-                return System.Text.Json.JsonSerializer.Serialize(input, settings);
+                return JsonSerializer.Serialize(input, settings);
             }
             catch (Exception)
             {
@@ -133,8 +133,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
                 // To remove it we serialize the Exception with settings that ignore TargetSite.Module and we deserialize it as a JObject that will then be logged.
                 // When touching this method please note that Exceptions can have an InnerException and possibly InnerExceptions (AggreagateException), these need to be cleaned as well.
 
-                var serializedException = System.Text.Json.JsonSerializer.Serialize(ex, SerializerOptionsForLoggingPurpose);
-                return System.Text.Json.JsonSerializer.Deserialize<object>(serializedException);
+                var serializedException = JsonSerializer.Serialize(ex, SerializerOptionsForLoggingPurpose);
+                return JsonSerializer.Deserialize<object>(serializedException);
             }
             catch { }
             return input;
@@ -144,7 +144,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
 
         private class IPAddressConverter : JsonConverter<IPAddress>
         {
-            public override IPAddress? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override IPAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 var data = reader.GetString();
                 if (data == null)
@@ -209,7 +209,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
                 // supply JsonSerializerOptions that contains this JsonConverter in it's Converters list.
                 // Don't do that, you will lose performance because of the cast needed below.
                 // Cast to avoid infinite loop: https://github.com/dotnet/docs/issues/19268
-                System.Text.Json.JsonSerializer.Serialize(writer, (IDictionary<string, object>)value);
+                JsonSerializer.Serialize(writer, value);
             }
 
             private object ExtractValue(ref Utf8JsonReader reader, JsonSerializerOptions options)
@@ -253,7 +253,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
         {
             public override bool CanConvert(Type objectType)
             {
-                return (objectType == typeof(PII));
+                return objectType == typeof(PII);
             }
 
             public override PII Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -263,7 +263,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
 
             public override void Write(Utf8JsonWriter writer, PII value, JsonSerializerOptions options)
             {
-                System.Text.Json.JsonSerializer.Serialize(writer, value);
+                JsonSerializer.Serialize(writer, value);
             }
         }
 
@@ -315,7 +315,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
 
         private class IntOrStringJsonConverter : JsonConverter<k8s.Models.IntstrIntOrString>
         {
-            public override k8s.Models.IntstrIntOrString? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override k8s.Models.IntstrIntOrString Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 switch (reader.TokenType)
                 {
@@ -332,7 +332,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
                     throw new JsonException();
                 }
 
-                k8s.Models.IntstrIntOrString? intOrString = null;
+                k8s.Models.IntstrIntOrString intOrString = null;
 
                 while (reader.Read())
                 {
@@ -424,14 +424,14 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
                 foreach (var prop in propList)
                 {
                     writer.WritePropertyName(prop.Name);
-                    System.Text.Json.JsonSerializer.Serialize(writer, prop.Value, options);
+                    JsonSerializer.Serialize(writer, prop.Value, options);
                 }
 
                 writer.WriteEndObject();
             }
         }
 
-        public class JsonStringEnumConverterEx<TEnum> : JsonConverter<TEnum> where TEnum : struct, System.Enum
+        public class JsonStringEnumConverterEx<TEnum> : JsonConverter<TEnum> where TEnum : struct, Enum
         {
             private readonly Dictionary<TEnum, string> _enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> _stringToEnum = new Dictionary<string, TEnum>();
@@ -439,7 +439,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Serialization
             public JsonStringEnumConverterEx()
             {
                 var type = typeof(TEnum);
-                var values = System.Enum.GetValues<TEnum>();
+                var values = Enum.GetValues<TEnum>();
 
                 foreach (var value in values)
                 {

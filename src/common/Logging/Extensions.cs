@@ -5,7 +5,7 @@
 
 using k8s.Autorest;
 using Microsoft.AspNetCore.Http;
-using Microsoft.BridgeToKubernetes.Common.Serialization;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.Net.Http;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
-  internal static class Extensions
+    internal static class Extensions
     {
         /// <summary>
         /// Returns a formatted string. Any exceptions are swallowed and logged. Args are serialized before being substituted into the string.
@@ -34,7 +34,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
             try
             {
-                var serializedArgs = args.Select(arg => JsonSerializer.SerializeForLoggingPurpose(arg)).ToArray();
+                var serializedArgs = args.Select(arg => JsonHelpers.SerializeForLoggingPurpose(arg)).ToArray();
                 return string.Format(CultureInfo.InvariantCulture, format, serializedArgs);
             }
             catch (Exception ex)
