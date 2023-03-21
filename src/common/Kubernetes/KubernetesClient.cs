@@ -67,7 +67,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             {
                 throw new InvalidOperationException($"{nameof(KubernetesClient)} must have either '{nameof(useInClusterConfig)} = true', '{nameof(k8SConfiguration)}' or '{nameof(kubeConfigFilePath)}' set!");
             }
-
             this._activeKubeConfigFilePath = kubeConfigFilePath;
             this._k8SConfiguration = k8SConfiguration;
 

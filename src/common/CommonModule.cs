@@ -5,7 +5,6 @@
 
 using Autofac;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
 
 namespace Microsoft.BridgeToKubernetes.Common
 {

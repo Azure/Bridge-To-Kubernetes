@@ -34,21 +34,17 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
     /// </summary>
     public class RestorationJobAppTests : TestsBase
     {
-        private JsonHelpers _jsonSerializer;
         private RestorationJobApp _app;
         private IRestorationJobEnvironmentVariables _env = A.Fake<IRestorationJobEnvironmentVariables>();
         private DelegatingHandler _fakeDelegatingHandler = A.Fake<DelegatingHandler>();
 
         public RestorationJobAppTests()
         {
-            _jsonSerializer = new JsonHelpers();
-
             A.CallTo(() => _env.Namespace).Returns("mynamespace");
             A.CallTo(() => _env.InstanceLabelValue).Returns("foo-bar-123");
             A.CallTo(() => _env.PingInterval).Returns(TimeSpan.Zero);
             A.CallTo(() => _env.RestoreTimeout).Returns(TimeSpan.Zero);
             A.CallTo(() => _env.NumFailedPingsBeforeExit).Returns(3);
-
             _autoFake.Provide(_env);
 
             _autoFake.Provide(new HttpClient(_fakeDelegatingHandler));

@@ -16,7 +16,7 @@ using System.Xml;
 
 namespace Microsoft.BridgeToKubernetes.Common.Json
 {
-    internal class JsonHelpers
+    internal static class JsonHelpers
     {
         private static JsonSerializerOptions SerializerOptions { get; } = CreateSerializerOptions();
 

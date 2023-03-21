@@ -33,7 +33,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Services.Kubernetes
         private readonly bool _skipTlsVerify;
         private readonly ServiceClientCredentials _credentials;
         private readonly ILog _log;
-
         private readonly HttpClient _httpClient;
 
         private bool _isDisposed = false;

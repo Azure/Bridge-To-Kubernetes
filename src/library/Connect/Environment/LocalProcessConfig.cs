@@ -160,6 +160,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                             {
                                 foreach (var t in entry.Tokens)
                                 {
+                                    // TODO: t.Serialize() returns "Serialization Error" when port is specified. Need to fix this at some point, but it doesn't affect the user experience at all.
                                     log.Verbose("Loaded env var '{0}' of type {1}: {2} => {3}", new PII(t.Name), t.GetType().Name, new PII(JsonHelpers.SerializeForLoggingPurpose(t)), new PII(t.Evaluate()));
                                 }
                                 _envVarEntries.Add(entry);
