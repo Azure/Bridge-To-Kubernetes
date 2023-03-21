@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using FakeItEasy;
 using Microsoft.BridgeToKubernetes.Common.IO;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.PersistentProperyBag;
 using Microsoft.BridgeToKubernetes.TestHelpers;
 using Xunit;
