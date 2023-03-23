@@ -26,5 +26,11 @@ jobs:
         dotnet publish src/dsc/dsc.csproj -c Debug -r linux-x64 --self-contained true 
         dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r linux-x64
         dotnet test src/integration.tests/integration.tests.csproj
+        echo "start local stats api"
+        cd samples/todo-app/stats-api
+        npm i
+        npm run start
+        
+
           
 
