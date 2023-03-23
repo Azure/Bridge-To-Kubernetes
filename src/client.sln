@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "routingmanager.tests", "rou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dsc.tests", "dsc.tests\dsc.tests.csproj", "{C41311CF-CF5D-42E1-91C3-9A5CFD579218}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "integration.tests", "integration.tests\integration.tests.csproj", "{45E6972B-CA29-428E-B01D-054A0630C391}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -208,6 +210,18 @@ Global
 		{C41311CF-CF5D-42E1-91C3-9A5CFD579218}.Release|x64.Build.0 = Release|Any CPU
 		{C41311CF-CF5D-42E1-91C3-9A5CFD579218}.Release|x86.ActiveCfg = Release|Any CPU
 		{C41311CF-CF5D-42E1-91C3-9A5CFD579218}.Release|x86.Build.0 = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|x64.Build.0 = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Debug|x86.Build.0 = Debug|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|x64.ActiveCfg = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|x64.Build.0 = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|x86.ActiveCfg = Release|Any CPU
+		{45E6972B-CA29-428E-B01D-054A0630C391}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
