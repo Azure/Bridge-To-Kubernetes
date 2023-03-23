@@ -15,7 +15,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Utilities
         {
             if (inputString.ContainsIgnoreCase("BEGIN PRIVATE KEY"))
             {
-                return Regex.Replace(inputString, "BEGIN PRIVATE KEY.*END PRIVATE KEY", "KEY_WAS_REMOVED");
+                return Regex.Replace(inputString, @"(BEGIN PRIVATE KEY(\s|.)*END PRIVATE KEY)", "KEY_WAS_REMOVED");
             }
             return inputString;
         }
