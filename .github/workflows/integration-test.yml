@@ -1,0 +1,30 @@
+name: integration tests for B2K
+on: [workflow_dispatch]
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    name: create minikube cluster and deploy todo-app
+    steps:
+    - uses: actions/checkout@v2
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+    - name: Try the cluster !
+      run: kubectl get pods -A
+    - name: create todo-app namespace
+      run: kubectl create namespace todo-app
+    - name: Deploy todo-app
+      run:
+        kubectl apply -f https://raw.githubusercontent.com/Azure/Bridge-To-Kubernetes/main/samples/todo-app/deployment.yaml -n todo-app
+    - name: Wait for pods to be ready
+      run: |
+        kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
+        kubectl get pods -n todo-app
+    - name: Publish and test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        dotnet publish src/dsc/dsc.csproj -c Debug -r linux-x64 --self-contained true 
+        dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r linux-x64
+        dotnet test src/integration.tests/integration.tests.csproj
+          
+
