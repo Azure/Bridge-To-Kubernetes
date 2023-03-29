@@ -198,6 +198,54 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
             method.Invoke(this, new object[] { false });
         }
 
+        [Fact]
+        public void EnsureRestoresIflastPingWithSessionsIsNullAndRestoreTimeExceeded()
+        {
+            // restore time is set to zero seconds while initializing this test class file.
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            this.DeploymentPatch_Helper(true);
+
+            this.ConfigureHttpCall(GetSuccessPingResult(0)).NumberOfTimes(1);
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default(CancellationToken));
+            Assert.Equal(0, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        }
+        [Fact]
+        public void EnsureNoRestoreIfRestoreTimeIsNotExceeded()
+        {
+            // restore time is set to 1 minute
+            A.CallTo(() => _env.RestoreTimeout).Returns(TimeSpan.FromMinutes(1));
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            this.DeploymentPatch_Helper(true);
+
+            this.ConfigureHttpCall(GetSuccessPingResult(0)).NumberOfTimes(1);
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default(CancellationToken));
+            Assert.Equal(1, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void EnsureNoRestoreIflastPingWithSessionsIsNotNull()
+        {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            this.DeploymentPatch_Helper(true);
+
+            this.ConfigureHttpCall(GetSuccessPingResult(3))
+                .NumberOfTimes(1);
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default(CancellationToken));
+            Assert.Equal(1, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustNotHaveHappened();
+        }
+
         #region Test helpers
 
         private void DeploymentPatch_Helper(bool isSetup)

@@ -452,7 +452,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     }
                 }
 
-                if ((s.Spec.Type == "ClusterIP" || s.Spec.Type == "LoadBalancer") && !string.IsNullOrWhiteSpace(s.Spec.ClusterIP) && (s.Spec.Ports?.Any() ?? false))
+                if ((s.Spec.Type == "ClusterIP" || s.Spec.Type == "LoadBalancer" || s.Spec.Type == "NodePort") && !string.IsNullOrWhiteSpace(s.Spec.ClusterIP) && (s.Spec.Ports?.Any() ?? false))
                 {
                     if (!servicesToRouteMap.ContainsKey(getMapKey(s.Metadata.Name, s.Metadata.NamespaceProperty)))
                     {

@@ -143,6 +143,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                                     Value = ManagedIdentity.SecretValue
                                 });
                         }
+
+                        if (StringComparer.OrdinalIgnoreCase.Equals(feature, EnableFeature.Probes.ToString()))
+                        {
+                            this.IsProbesEnabled = true;
+                        }
                     }
                 }
 
@@ -235,6 +240,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         /// <see cref="ILocalProcessConfig.IsManagedIdentityScenario"/>
         /// </summary>
         public bool IsManagedIdentityScenario { get; } = false;
+
+        /// <summary>
+        /// <see cref="ILocalProcessConfig.IsProbesEnabled"/>
+        /// </summary>
+        public bool IsProbesEnabled { get; } = false;
 
         /// <summary>
         /// <see cref="ILocalProcessConfig.EvaluateEnvVars"/>

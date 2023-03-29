@@ -50,6 +50,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         bool IsManagedIdentityScenario { get; }
 
         /// <summary>
+        /// Is Probes one of the enabled features
+        /// </summary>
+        bool IsProbesEnabled { get; }
+
+        /// <summary>
         /// Returns a collection with the environment variables generated from the local env file
         /// </summary>
         /// <returns></returns>
