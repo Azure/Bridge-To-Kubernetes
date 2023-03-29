@@ -23,6 +23,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager
@@ -732,6 +733,14 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                         TargetPort = port.TargetPort,
                     });
                 }
+                    
+                service.Spec.Ports.Add(new V1ServicePort
+                {
+                    Name = "devhostagent",
+                    Port = DevHostConstants.DevHostAgent.Port,
+                    Protocol = "TCP",
+                    TargetPort = DevHostConstants.DevHostAgent.Port,
+                });
                 
                 services.Add(service);
             }

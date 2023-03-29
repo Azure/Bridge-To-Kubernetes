@@ -368,7 +368,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                return new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP));
+                return new Uri(string.Format(AgentPingEndpointFormat, $"{pod.Metadata.Name}.{pod.Metadata.NamespaceProperty}"));
             }
             catch (Exception e) when (!cancellationToken.IsCancellationRequested)
             {
