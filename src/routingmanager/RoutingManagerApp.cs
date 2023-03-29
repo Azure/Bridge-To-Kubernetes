@@ -230,7 +230,8 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                         AddPodTriggersAsync(routingStateEstablisherInputMap, pods, userServices, cancellationToken),
                         AddIngressTriggersAsync(routingStateEstablisherInputMap, userIngresses, userServices, pods, cancellationToken),
                         AddLoadBalancerTriggersAsync(routingStateEstablisherInputMap, userServices, pods, cancellationToken),
-                        AddIngressRouteTriggersAsync(routingStateEstablisherInputMap, userIngressRoutes, userServices, pods, cancellationToken));
+                        AddIngressRouteTriggersAsync(routingStateEstablisherInputMap, userIngressRoutes, userServices, pods, cancellationToken)
+                    );
 
                     _log.Info("Created '{0}' pod triggers, '{1}' ingress triggers, '{2}' ingressRoute triggers and '{3}' load balancer triggers",
                         routingStateEstablisherInputMap.Select(input => input.Value.PodTriggers.Count()).Sum(),
@@ -667,15 +668,18 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                         _log.Warning(ex.Message);
                     }
 
-                    var podTriggerToAdd =
-                        new PodTriggerConfig(
-                            namespaceName: triggerService.Metadata.NamespaceProperty,
-                            triggerService: triggerService,
-                            lpkPodName: pod.Metadata.Name,
-                            routeOnHeaderKey: routeOnHeader.headerName,
-                            routeOnHeaderValue: routeOnHeader.headerValue,
-                            triggerPodIP: pod_latest == null ? pod.Status.PodIP : pod_latest.Status.PodIP,
-                            correlationId: correlationId);
+                    var routeUniqueName = pod.Metadata.Labels[Common.Constants.Routing.RouteUniqueName];
+
+                    var podTriggerToAdd = new PodTriggerConfig(
+                        namespaceName: triggerService.Metadata.NamespaceProperty,
+                        triggerService: triggerService,
+                        lpkPodName: pod.Metadata.Name,
+                        routeOnHeaderKey: routeOnHeader.headerName,
+                        routeOnHeaderValue: routeOnHeader.headerValue,
+                        triggerPodIP: pod_latest == null ? pod.Status.PodIP : pod_latest.Status.PodIP,
+                        correlationId: correlationId,
+                        routeUniqueName: routeUniqueName
+                    );
                     routingStateEstablisherInputMap.AddOrUpdateWithTrigger(triggerService, podTriggerToAdd);
                 }
             }

@@ -581,6 +581,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 }
 
                 clonedPod.Metadata.Labels[Routing.RouteFromLabelName] = sourceServiceName;
+                clonedPod.Metadata.Labels[Routing.RouteUniqueName] = clonedPod.Metadata.Name;
 
                 // Set routing annotation value to the routing header value provided by user.
                 if (clonedPod.Metadata.Annotations == null)

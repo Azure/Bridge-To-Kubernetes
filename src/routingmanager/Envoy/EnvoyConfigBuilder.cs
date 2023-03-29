@@ -38,7 +38,8 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
         /// <summary>
         /// Returns the envoy configuration based on trigger information
         /// </summary>
-        public EnvoyConfig GetEnvoyConfig(V1Service triggerService, RoutingStateEstablisherInput routingStateEstablisherInput, IEnumerable<PodTriggerConfig> allPodTriggersInNamespace)
+        public EnvoyConfig GetEnvoyConfig(V1Service triggerService, RoutingStateEstablisherInput routingStateEstablisherInput,
+            IEnumerable<PodTriggerConfig> allPodTriggersInNamespace, List<V1Service> destinationServices)
         {
             var envoyConfig = CreateEmptyEnvoyConfig();
 
@@ -62,20 +63,21 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                 ConfigureVirtualHostForMatchAllHost(triggerService, routingStateEstablisherInput.PodTriggers, servicePort, httpFilterVirtualHosts);
 
                 // Now we will start adding clusters to this envoy configuration
-                ConfigureClusters(triggerService, routingStateEstablisherInput.PodTriggers, envoyConfig, servicePort);
+                ConfigureClusters(triggerService, routingStateEstablisherInput.PodTriggers, envoyConfig, servicePort, destinationServices);
             }
             _log.Info("Envoy Config is: {0}", JsonSerializer.Serialize(envoyConfig));
             return envoyConfig;
         }
 
-        private void ConfigureClusters(V1Service triggerService, IEnumerable<PodTriggerConfig> podTriggers, EnvoyConfig envoyConfig, V1ServicePort servicePort)
+        private void ConfigureClusters(V1Service triggerService, IEnumerable<PodTriggerConfig> podTriggers, EnvoyConfig envoyConfig, V1ServicePort servicePort,
+            List<V1Service> destinationServices)
         {
             var portName = (servicePort.Name ?? string.Empty).ToLowerInvariant();
             var cloneCluster = new Cluster
             {
                 Name = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value),
                 ConnectTimeout = "1.00s",
-                Type = "strict_dns",
+                Type = "logical_dns",
                 LoadAssignment = new LoadAssignment
                 {
                     ClusterName = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value),
@@ -120,11 +122,14 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
 
             foreach (var podTrigger in podTriggers)
             {
+                var destinationService = destinationServices
+                    .Single(ds => ds.Metadata.Name == podTrigger.RouteUniqueName);
+                
                 var routeCluster = new Cluster
                 {
                     Name = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value),
                     ConnectTimeout = "1.00s",
-                    Type = "static",
+                    Type = "logical_dns",
                     LoadAssignment = new LoadAssignment
                     {
                         ClusterName = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value),
@@ -143,7 +148,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                                                 {
                                                     SocketAddress = new SocketAddress
                                                     {
-                                                        Address = podTrigger.TriggerPodIp,
+                                                        Address = $"{destinationService.Metadata.Name}.{destinationService.Metadata.NamespaceProperty}",
                                                         // envoy listens on the target port and sends the request on the target port itself
                                                         // because we are directly sending the request to the pod
                                                         PortValue = long.Parse(servicePort.TargetPort.Value)
@@ -204,7 +209,8 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                         },
                         Route = new Route
                         {
-                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, inputPodTrigger.RouteOnHeader.Key, inputPodTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value)
+                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, inputPodTrigger.RouteOnHeader.Key, inputPodTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value),
+                            AutoHostRewrite = true,
                         }
                     });
             }
@@ -219,7 +225,8 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                     },
                     Route = new Route
                     {
-                        Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value)
+                        Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value),
+                        AutoHostRewrite = true,
                     }
                 });
         }
@@ -289,14 +296,16 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                         // This means input.TriggerService has an ingress and pod trigger both, so we need to route to service_stable for the given domains
                         ingressVirtualHost.Routes.First().Route = new Route
                         {
-                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value)
+                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value),
+                            AutoHostRewrite = true,
                         };
                     }
                     else
                     {
                         ingressVirtualHost.Routes.First().Route = new Route
                         {
-                            Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value)
+                            Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value),
+                            AutoHostRewrite = true,
                         };
                     }
 
@@ -385,14 +394,16 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
                         // This means input.TriggerService has an ingress and pod trigger both, so we need to route to service_stable for the given domains
                         ingressVirtualHost.Routes.First().Route = new Route
                         {
-                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value)
+                            Cluster = string.Format(_serviceStableWithHeaderWithPortsFormatString, podTrigger.RouteOnHeader.Key, podTrigger.RouteOnHeader.Value, servicePort.Port, servicePort.TargetPort.Value),
+                            AutoHostRewrite = true,
                         };
                     }
                     else
                     {
                         ingressVirtualHost.Routes.First().Route = new Route
                         {
-                            Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value)
+                            Cluster = string.Format(_serviceCloneWithPortsFormatString, servicePort.Port, servicePort.TargetPort.Value),
+                            AutoHostRewrite = true,
                         };
                     }
 

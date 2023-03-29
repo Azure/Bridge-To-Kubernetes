@@ -21,7 +21,9 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig
             string routeOnHeaderKey,
             string routeOnHeaderValue,
             string triggerPodIP,
-            string correlationId)
+            string correlationId,
+            string routeUniqueName
+            )
         {
             NamespaceName = string.IsNullOrWhiteSpace(namespaceName) ? throw new ArgumentNullException(nameof(namespaceName)) : namespaceName;
             TriggerService = triggerService ?? throw new ArgumentNullException(nameof(triggerService));
@@ -32,6 +34,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig
             TriggerPodIp = triggerPodIP ?? throw new ArgumentNullException(nameof(triggerPodIP));
             TriggerEntityName = string.IsNullOrWhiteSpace(lpkPodName) ? throw new ArgumentNullException(nameof(lpkPodName)) : lpkPodName;
             CorrelationId = correlationId;
+            RouteUniqueName = routeUniqueName;
         }
 
         /// <summary>
@@ -53,6 +56,11 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig
         /// LPK agent pod name
         /// </summary>
         public string TriggerEntityName { get; }
+        
+        /// <summary>
+        /// the unique name of the pod used to expose it via a service
+        /// </summary>
+        public string RouteUniqueName { get; }
 
         /// <summary>
         /// LPK agent Pod IP

@@ -109,9 +109,14 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
                                 _log.Verbose("Namespace '{0}' : Trigger service name : '{1}'", new PII(input.Key.Metadata.NamespaceProperty), new PII(input.Key.Metadata.Name));
+                                
+                                var destinationServices = GenerateDestinationServices(input);
+                                var envoyConfig =  _envoyConfigBuilder.GetEnvoyConfig(input.Key, input.Value, allPodTriggersInNamespace, destinationServices);
+                                
+                                expectedServices.AddRange(destinationServices);
                                 expectedServices.Add(GenerateClonedService(input));
                                 expectedDeployments.Add(GenerateEnvoyDeployment(input));
-                                expectedConfigMaps.Add(GenerateEnvoyConfigMap(input, _envoyConfigBuilder.GetEnvoyConfig(input.Key, input.Value, allPodTriggersInNamespace)));
+                                expectedConfigMaps.Add(GenerateEnvoyConfigMap(input, envoyConfig));
                             }
                         },
                         cancellationToken: cancellationToken)
@@ -195,8 +200,8 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                 }
             }
 
-            if (expectedServices.Count() != expectedDeployments.Count()
-                    || expectedServices.Count() != expectedConfigMaps.Count())
+            if ((expectedServices.Count - inputs.Sum(i => i.Value.PodTriggers.Count)) != expectedDeployments.Count
+                || (expectedServices.Count - inputs.Sum(i => i.Value.PodTriggers.Count)) != expectedConfigMaps.Count)
             {
                 _log.Error("Number of generated envoy resources do not match. ");
                 throw new RoutingException(Resources.FailedToValidateEnvoyResources);
@@ -485,13 +490,13 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
                             {
                                 new V1Container
                                 {
-                                    Name = "envoy",
+                                    Name = "btk-envoy",
                                     Image = Constants.EnvoyImageName,
                                     Command = new List<string> { "/bin/bash" },
                                     Args = new List<string>
                                     {
                                         "-c",
-                                        "touch envoy-logs.txt && /usr/local/bin/envoy --log-path envoy-logs.txt --log-level trace --config-path /etc/envoy/envoy.yaml"
+                                        "touch envoy-logs.txt && /usr/local/bin/envoy --log-path envoy-logs.txt --log-level trace --base-id 3 --config-path /etc/envoy/envoy.yaml"
                                     },
                                     Ports = containerPorts,
                                     VolumeMounts = new List<V1VolumeMount>
@@ -682,6 +687,56 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
             }
 
             return clonedService;
+        }
+        
+        /// <summary>
+        /// Generates services that exposes the target pods with a cluster IP
+        /// </summary>
+        /// <param name="input"></param>
+        private List<V1Service> GenerateDestinationServices(KeyValuePair<V1Service, RoutingStateEstablisherInput> input)
+        {
+            var services = new List<V1Service>();
+            
+            foreach (var pod in input.Value.PodTriggers)
+            {
+                var service = new V1Service
+                {
+                    Metadata = new V1ObjectMeta
+                    {
+                        Name = pod.RouteUniqueName,
+                        NamespaceProperty = pod.NamespaceName,
+                        Labels = new Dictionary<string, string>
+                        {
+                            [Routing.GeneratedLabel] = "true",
+                        },
+                    },
+                    Spec = new V1ServiceSpec
+                    {
+                        Selector = new Dictionary<string, string>
+                        {
+                            [Routing.RouteUniqueName] = pod.RouteUniqueName,
+                        },
+                        Type = "ClusterIP",
+                        Ports = new List<V1ServicePort>(),
+                    },
+                };
+
+                foreach (var port in input.Key.Spec.Ports)
+                {
+                    service.Spec.Ports.Add(new V1ServicePort
+                    {
+                        AppProtocol = port.AppProtocol,
+                        Name = port.Name,
+                        Port = port.Port,
+                        Protocol = port.Protocol,
+                        TargetPort = port.TargetPort,
+                    });
+                }
+                
+                services.Add(service);
+            }
+
+            return services;
         }
 
         /// <summary>
