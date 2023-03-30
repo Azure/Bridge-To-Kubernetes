@@ -169,6 +169,68 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     [ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = "http://127.0.0.1:5050/metadata/identity/oauth2/token",
                 }
             };
+
+            // single basic endpoint in another ns
+            yield return new object[]
+            {
+                new[] {
+                    new EndpointInfo
+                    {
+                        DnsName = "foo.k8sns", // when !isInWorkloadNamespace
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[] { new PortPair(5050, 80) }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["FOO_K8SNS_SERVICE_HOST"] = "127.0.0.1",
+                    ["FOO_K8SNS_SERVICE_PORT"] = "5050",
+                    ["FOO_K8SNS_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports
+                    ["FOO_K8SNS_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["FOO_K8SNS_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["FOO_K8SNS_PORT_5050_TCP_PORT"] = "5050",
+                    ["FOO_K8SNS_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                }
+            };
+
+            // single endpoint with multiple named ports in another ns
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = "foo.k8sns", // when !isInWorkloadNamespace
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[]
+                        {
+                            new PortPair(5050, 80, "tcp", "http"),
+                            new PortPair(5051, 443, "tcp", "tls")
+                        }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["FOO_K8SNS_SERVICE_HOST"] = "127.0.0.1",
+                    ["FOO_K8SNS_SERVICE_PORT"] = "5050",
+                    ["FOO_K8SNS_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports for first port pair
+                    ["FOO_K8SNS_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["FOO_K8SNS_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["FOO_K8SNS_PORT_5050_TCP_PORT"] = "5050",
+                    ["FOO_K8SNS_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_K8SNS_SERVICE_PORT_HTTP"] = "5050",
+                    // named ports for second port pair
+                    ["FOO_K8SNS_PORT_5051_TCP_PROTO"] = "tcp",
+                    ["FOO_K8SNS_PORT_5051_TCP"] = "tcp://127.0.0.1:5051",
+                    ["FOO_K8SNS_PORT_5051_TCP_PORT"] = "5051",
+                    ["FOO_K8SNS_PORT_5051_TCP_ADDR"] = "127.0.0.1",
+                    ["FOO_K8SNS_SERVICE_PORT_TLS"] = "5051",
+                }
+            };
         }
 
         [Theory]
