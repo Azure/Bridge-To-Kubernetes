@@ -1015,9 +1015,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                     $"exec {podName} -c {containerName} -n {namespaceName} -- env",
                     onStdOut: outputHandler,
                     onStdErr: (string error) => errorSb.Append(error),
-                    cancellationToken,
-                    timeoutMs: (int)TimeSpan.FromSeconds(10).TotalMilliseconds);
-
+                    cancellationToken;
                 if (exitCode == 0)
                 {
                     return true;
