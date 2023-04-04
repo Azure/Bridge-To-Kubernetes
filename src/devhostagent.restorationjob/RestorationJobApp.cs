@@ -91,6 +91,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
                 DateTimeOffset? lastPingWithSessions = null;
+                DateTimeOffset? timeSinceLastPingIsNull = null;
                 bool restoredWorkload = false;
                 while (!cancellationToken.IsCancellationRequested && !restoredWorkload)
                 {
@@ -140,8 +141,19 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         else
                         {
                             perfLogger.SetProperty(HasConnectedClients, false);
+                            TimeSpan? disconnectedTimeSpan = null;
+                            if (lastPingWithSessions == null)
+                            {
+                                // first loop timeUntilLastPingIsNull will be set to current time and then next while loop it will preserve that time.
+                                // if lastPingWithSessions is being null for last 60 seconds or more then restoration will happen.
+                                timeSinceLastPingIsNull = timeSinceLastPingIsNull == null ? DateTimeOffset.Now : timeSinceLastPingIsNull;
+                                disconnectedTimeSpan = DateTimeOffset.Now - timeSinceLastPingIsNull;
+                            } else
+                            {
+                                disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            }
 
-                            var disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            
                             if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
                             {
                                 // Restore workload
