@@ -3,10 +3,11 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Linq;
+using k8s.Autorest;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Json;
-using Microsoft.Rest;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
@@ -34,7 +35,7 @@ namespace System.Net.Http
             string content = null;
             try
             {
-                content = request?.Content?.AsString();
+                content = request?.Content?.ReadAsStringAsync().GetAwaiter().GetResult();
             }
             catch { }
 
@@ -46,7 +47,7 @@ namespace System.Net.Http
             string content = null;
             try
             {
-                content = response?.Content?.AsString();
+                content = response?.Content?.ReadAsStringAsync().GetAwaiter().GetResult();
             }
             catch { }
 

@@ -13,8 +13,9 @@ using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.RoutingManager.Traefik;
 using Microsoft.BridgeToKubernetes.RoutingManager.TriggerConfig;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
+using System.Text.Json;
 
 namespace Microsoft.BridgeToKubernetes.RoutingManager
 {
@@ -88,7 +89,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
 
         public static IDictionary<string, string> GetOriginalServiceSelectors(this V1ObjectMeta metadata)
         {
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(metadata.Annotations[Routing.OriginalServiceSelectorAnnotation]);
         }
 
         public static string GetCorrelationId(this V1ObjectMeta metadata)

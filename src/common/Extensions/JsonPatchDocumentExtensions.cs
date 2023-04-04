@@ -3,11 +3,11 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Text.RegularExpressions;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using System.Text.RegularExpressions;
+using SystemTextJsonPatch.Operations;
 
-namespace Microsoft.AspNetCore.JsonPatch
+namespace SystemTextJsonPatch
 {
     internal static class JsonPatchDocumentExtensions
     {
@@ -34,10 +34,10 @@ namespace Microsoft.AspNetCore.JsonPatch
             foreach (var op in patch.Operations)
             {
                 if (op.OperationType == OperationType.Replace
-                    && !string.IsNullOrEmpty(op.path)
-                    && Regex.IsMatch(op.path, "/spec/containers/[0-9]+/image$"))
+                    && !string.IsNullOrEmpty(op.Path)
+                    && Regex.IsMatch(op.Path, "/spec/containers/[0-9]+/image$"))
                 {
-                    return op.value as string;
+                    return op.Value as string;
                 }
             }
 

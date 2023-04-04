@@ -4,26 +4,27 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
-    internal class PIIJsonConverter : JsonConverter
+    internal class PIIJsonConverter : JsonConverter<PII>
     {
         public override bool CanConvert(Type objectType)
         {
             return (objectType == typeof(PII));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override PII Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return new PII(JToken.Load(reader).ToString());
+            return new PII(JsonNode.Parse(ref reader).ToString());
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, PII value, JsonSerializerOptions options)
         {
-            JToken.FromObject(value.ToString()).WriteTo(writer);
+            writer.WriteStringValue(value.ToString());
         }
     }
 }

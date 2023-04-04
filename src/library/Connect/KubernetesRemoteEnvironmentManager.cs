@@ -3,16 +3,9 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
@@ -28,8 +21,14 @@ using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
-using Microsoft.Rest;
-using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using SystemTextJsonPatch;
 using static k8s.Models.V1Patch;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
@@ -114,22 +113,22 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         break;
                     // Clone pod spec and replace container with agent
                     case RemoteAgentHostingMode.NewPodWithContext:
-                        podAndContainer = await this._ClonePodAsync(remoteContainerConnectionDetails, cancellationToken);
+                        podAndContainer = await this._ClonePodAsync(remoteContainerConnectionDetails, localProcessConfig, cancellationToken);
                         break;
                     // Replace existing deployment/pod to host agent in the selected container
                     case RemoteAgentHostingMode.Replace:
                         switch (remoteContainerConnectionDetails.SourceEntityType)
                         {
                             case KubernetesEntityType.Deployment:
-                                podAndContainer = await this._PatchDeploymentAsync(remoteContainerConnectionDetails, cancellationToken);
+                                podAndContainer = await this._PatchDeploymentAsync(remoteContainerConnectionDetails, localProcessConfig, cancellationToken);
                                 break;
 
                             case KubernetesEntityType.StatefulSet:
-                                podAndContainer = await this._PatchStatefulSetAsync(remoteContainerConnectionDetails, cancellationToken);
+                                podAndContainer = await this._PatchStatefulSetAsync(remoteContainerConnectionDetails, localProcessConfig, cancellationToken);
                                 break;
 
                             case KubernetesEntityType.Pod:
-                                podAndContainer = await this._ClonePodAsync(remoteContainerConnectionDetails, cancellationToken);
+                                podAndContainer = await this._ClonePodAsync(remoteContainerConnectionDetails, localProcessConfig, cancellationToken);
                                 break;
 
                             default:
@@ -422,7 +421,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// <summary>
         /// Clone a pod spec and replace the container image with devhostagent
         /// </summary>
-        private V1Pod _GetClonedPodSpec(V1Pod pod, string containerName, string agentImage, bool isRoutingSession)
+        private V1Pod _GetClonedPodSpec(V1Pod pod, string containerName, string agentImage, bool isRoutingSession, ILocalProcessConfig localProcessConfig)
         {
             var newPodName = isRoutingSession ? $"{RemoteEnvironmentUtilities.SanitizedUserName()}-{pod.Metadata.Name}" : pod.Metadata.Name;
             if (newPodName.Length > 253)
@@ -478,11 +477,20 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.CorrelationId, _operationContext.CorrelationId));
 
                     c.Env = newEnv;
+
+                    // If probes option is not enabled or not set, remove any probe in the new pod.
+                    if (localProcessConfig?.IsProbesEnabled != true)
+                    {
+                        c.LivenessProbe = null;
+                        c.ReadinessProbe = null;
+                        c.StartupProbe = null;
+                    }
                 }
                 else
                 {
                     c.LivenessProbe = null;
                     c.ReadinessProbe = null;
+                    c.StartupProbe = null;
                 }
             }
 
@@ -534,6 +542,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// </summary>
         private async Task<(V1Pod pod, V1Container container)> _ClonePodAsync(
             RemoteContainerConnectionDetails remoteContainerConnectionDetails,
+            ILocalProcessConfig localProcessConfig,
             CancellationToken cancellationToken)
         {
             // If we are cloning because of routing and the pod has istio we should fail and let the user know that we do not support this scenario
@@ -549,7 +558,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 }
             }
 
-            V1Pod clonedPod = _GetClonedPodSpec(remoteContainerConnectionDetails.Pod, remoteContainerConnectionDetails.ContainerName, _imageProvider.DevHostImage, isRoutingSession: isRoutingSession);
+            V1Pod clonedPod = _GetClonedPodSpec(remoteContainerConnectionDetails.Pod, remoteContainerConnectionDetails.ContainerName, _imageProvider.DevHostImage, isRoutingSession, localProcessConfig);
             V1Pod userPodToRestore = null;
 
             // If routing option is selected, add a routing label and annotation to the new pod.
@@ -704,6 +713,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// </summary>
         private async Task<(V1Pod pod, V1Container container)> _PatchDeploymentAsync(
             RemoteContainerConnectionDetails remoteContainerConnectionDetails,
+            ILocalProcessConfig localProcessConfig,
             CancellationToken cancellationToken)
         {
             using (var perfLogger = _log.StartPerformanceLogger(Events.KubernetesRemoteEnvironmentManager.AreaName, Events.KubernetesRemoteEnvironmentManager.Operations.PatchDeployment))
@@ -718,17 +728,13 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 }
 
                 // Patch is null if there is no change in the deployment spec
-                var (patch, reversePatch) = this._GetDeploymentJsonPatch(remoteContainerConnectionDetails.Deployment, remoteContainerConnectionDetails.Container, _imageProvider.DevHostImage);
+                var (patch, reversePatch) = this._GetDeploymentJsonPatch(remoteContainerConnectionDetails.Deployment, remoteContainerConnectionDetails.Container, _imageProvider.DevHostImage, localProcessConfig);
                 V1Pod result = null;
                 if (patch != null)
                 {
                     try
                     {
-                        var settings = new Newtonsoft.Json.JsonSerializerSettings 
-                        { 
-                            ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver { NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy() }
-                        };
-                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(Newtonsoft.Json.JsonConvert.SerializeObject(patch, settings), PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -804,6 +810,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// </summary>
         private async Task<(V1Pod pod, V1Container container)> _PatchStatefulSetAsync(
             RemoteContainerConnectionDetails remoteContainerConnectionDetails,
+            ILocalProcessConfig localProcessConfig,
             CancellationToken cancellationToken)
         {
             using (var perfLogger = _log.StartPerformanceLogger(Events.KubernetesRemoteEnvironmentManager.AreaName, Events.KubernetesRemoteEnvironmentManager.Operations.PatchStatefulSet))
@@ -818,7 +825,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 }
 
                 // Patch is null if there is no change in the statefulset spec
-                var (patch, reversePatch) = this._GetStatefulSetJsonPatch(remoteContainerConnectionDetails.StatefulSet, remoteContainerConnectionDetails.Container, _imageProvider.DevHostImage);
+                var (patch, reversePatch) = this._GetStatefulSetJsonPatch(remoteContainerConnectionDetails.StatefulSet, remoteContainerConnectionDetails.Container, _imageProvider.DevHostImage, localProcessConfig);
                 V1Pod result = null;
                 if (patch != null)
                 {
@@ -1027,13 +1034,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// Returns a modified deployment spec by replacing the container image with devhostagent and other changes.
         /// If there are no changes to the original spec, returns null.
         /// </summary>
-        private (JsonPatchDocument<V1Deployment> patch, JsonPatchDocument<V1Deployment> reversePatch) _GetDeploymentJsonPatch(V1Deployment deployment, V1Container container, string agentImage)
+        private (JsonPatchDocument<V1Deployment> patch, JsonPatchDocument<V1Deployment> reversePatch) _GetDeploymentJsonPatch(V1Deployment deployment, V1Container container, string agentImage, ILocalProcessConfig localProcessConfig)
         {
             bool dirty = false;
             var patch = new JsonPatchDocument<V1Deployment>();
             var reversePatch = new JsonPatchDocument<V1Deployment>();
-            patch.ContractResolver = new STJCamelCaseContractResolver();
-            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = deployment.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (deployment.Spec.Replicas != null && deployment.Spec.Replicas.Value != 1)
@@ -1103,6 +1108,28 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 dirty = true;
             }
 
+            // If probes option is not enabled or not set, remove any probe in the new pod.
+            if (localProcessConfig?.IsProbesEnabled != true)
+            {
+                if (deployment.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, deployment.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
+                }
+
+                if (deployment.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, deployment.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
+                }
+
+                if (deployment.Spec.Template.Spec.Containers[containerIndex].StartupProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe, deployment.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
+                }
+            }
+
             _log.Info($"Deployment patch created: {dirty}");
             return dirty ? (patch, reversePatch) : (null, null);
         }
@@ -1112,13 +1139,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         /// If there are no changes to the original spec, returns null.
         /// TODO: Bug 1292855: Find a way to re-use code between deployment & statefulset patching logic
         /// </summary>
-        private (JsonPatchDocument<V1StatefulSet> patch, JsonPatchDocument<V1StatefulSet> reversePatch) _GetStatefulSetJsonPatch(V1StatefulSet statefulSet, V1Container container, string agentImage)
+        private (JsonPatchDocument<V1StatefulSet> patch, JsonPatchDocument<V1StatefulSet> reversePatch) _GetStatefulSetJsonPatch(V1StatefulSet statefulSet, V1Container container, string agentImage, ILocalProcessConfig localProcessConfig)
         {
             bool dirty = false;
             var patch = new JsonPatchDocument<V1StatefulSet>();
             var reversePatch = new JsonPatchDocument<V1StatefulSet>();
-            patch.ContractResolver = new STJCamelCaseContractResolver();
-            reversePatch.ContractResolver = new STJCamelCaseContractResolver();
             int containerIndex = statefulSet.Spec.Template.Spec.Containers.ToList().FindIndex(c => c.Name == container.Name);
 
             if (statefulSet.Spec.Replicas != null && statefulSet.Spec.Replicas.Value != 1)
@@ -1133,20 +1158,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 // update statefulset to disable process namespace sharing
                 patch.Replace(d => d.Spec.Template.Spec.ShareProcessNamespace, false);
                 reversePatch.Replace(d => d.Spec.Template.Spec.ShareProcessNamespace, true);
-                dirty = true;
-            }
-            if (statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
-            {
-                // update statefulset to disable liveness probe
-                patch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, null);
-                reversePatch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
-                dirty = true;
-            }
-            if (statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe != null)
-            {
-                // update statefulset to disable readiness probe
-                patch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, null);
-                reversePatch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
                 dirty = true;
             }
             if (statefulSet.Spec.Template.Spec.Containers[containerIndex].Command != null)
@@ -1193,6 +1204,28 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 patch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].Env, newEnv);
                 reversePatch.Replace(d => d.Spec.Template.Spec.Containers[containerIndex].Env, statefulSet.Spec.Template.Spec.Containers[containerIndex].Env);
                 dirty = true;
+            }
+
+            // If probes option is not enabled or not set, remove any probe in the new pod.
+            if (localProcessConfig?.IsProbesEnabled != true)
+            {
+                if (statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].LivenessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].LivenessProbe);
+                }
+
+                if (statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].ReadinessProbe);
+                }
+
+                if (statefulSet.Spec.Template.Spec.Containers[containerIndex].StartupProbe != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
+                }
             }
 
             _log.Info($"StatefulSet patch created: {dirty}");

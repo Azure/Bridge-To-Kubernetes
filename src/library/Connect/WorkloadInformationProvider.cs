@@ -106,7 +106,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         {
                             DnsName = externalEndpoint.Name,
                             // Here we are not taking into account the ports to ignore, since this code path is handling endpoints user explicitly added for tracking.
-                            Ports = externalEndpoint.Ports.Select(p => new PortPair(remotePort: p)).ToArray(), 
+                            Ports = externalEndpoint.Ports.Select(p => new PortPair(remotePort: p)).ToArray(),
                             IsExternalEndpoint = true,
                             IsInWorkloadNamespace = false
                         });
@@ -132,7 +132,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         try {
                             List<int> ignorePorts = ports.Split(",").Select(p => int.Parse(p)).ToList();
                             servicePortsToIgnore.Add(service.Metadata.Name, ignorePorts);
-                        } 
+                        }
                         catch {
                             throw new UserVisibleException(_operationContext, $"bridgetokubernetes/ignore-ports configuration value {ports} is invalid. It must be a comma separated list of integer ports");
                         }
@@ -344,7 +344,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         if (configMap?.Data != null)
                         {
                             envNames.AddRange(configMap.Data.Keys);
-                            foreach (var env in configMap.Data) 
+                            foreach (var env in configMap.Data)
                             {
                                 specValues.TryAdd(env.Key, new string(env.Value));
                             }
@@ -443,16 +443,16 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
                     if (!headlessServiceEndpointsToRouteMap.ContainsKey(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty)))
                     {
-                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);                        
+                        headlessServiceEndpointsToRouteMap.TryAdd(getMapKey(endpoint.Metadata.Name, endpoint.Metadata.NamespaceProperty), endpoint);
                         // Map portsToIgnore from Service.Metadata.Name to Endpoints.Metadata.Name
                         if (portsToIgnoreForService.ContainsKey(s.Metadata.Name)) {
                             portToIgnoreForHeadlessServiceEndpoints.Add(endpoint.Metadata.Name, portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name));
-                        } 
+                        }
                         continue;
                     }
                 }
 
-                if ((s.Spec.Type == "ClusterIP" || s.Spec.Type == "LoadBalancer") && !string.IsNullOrWhiteSpace(s.Spec.ClusterIP) && (s.Spec.Ports?.Any() ?? false))
+                if ((s.Spec.Type == "ClusterIP" || s.Spec.Type == "LoadBalancer" || s.Spec.Type == "NodePort") && !string.IsNullOrWhiteSpace(s.Spec.ClusterIP) && (s.Spec.Ports?.Any() ?? false))
                 {
                     if (!servicesToRouteMap.ContainsKey(getMapKey(s.Metadata.Name, s.Metadata.NamespaceProperty)))
                     {
@@ -462,12 +462,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
             }
 
             var servicesToRouteEndpointInfos = servicesToRouteMap.Values.Select(s => new EndpointInfo()
-            { 
+            {
                 DnsName = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace) ?
                             s.Metadata.Name :
                             $"{s.Metadata.Name}.{s.Metadata.Namespace()}",
-                            // portsToIgnore is a directory which contains a separate list of ports to ignore for each service, when picking ports for a service any port which is in the portsToIgnore is not used.
-                Ports = s.Spec.Ports?.Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !(portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name)?.Contains(p.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                // portsToIgnore is a directory which contains a separate list of ports to ignore for each service, when picking ports for a service any port which is in the portsToIgnore is not used.
+                Ports = s.Spec.Ports?
+                    .Where(p => this._IsSupportedProtocol(p.Protocol, s.Metadata.Name) && !(portsToIgnoreForService.GetValueOrDefault(s.Metadata.Name)?.Contains(p.Port) ?? false))
+                    .Select(p => new PortPair(remotePort: p.Port, name: p.Name))
+                    .ToArray() ?? new PortPair[] { },
                 IsInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(s.Metadata.Namespace(), workloadNamespace)
             }).ToList();
 
@@ -477,22 +480,37 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 var isInWorkloadNamespace = StringComparer.OrdinalIgnoreCase.Equals(endpoint.Metadata.Namespace(), workloadNamespace);
                 foreach (var subset in endpoint.Subsets)
                 {
-                    // For headless service, we only add entries that specify hostname,
-                    // if hostname its not specify there is no dsn to reach the replicate.
-                    var addresses = subset.Addresses?.Where(a => !string.IsNullOrWhiteSpace(a?.Hostname));
-                    if (addresses == null || !addresses.Any())
+                    if (subset.Addresses == null)
                     {
                         continue;
                     }
-
-                    foreach (var address in addresses)
+                    
+                    foreach (var address in  subset.Addresses)
                     {
+                        if (address == null) {
+                            continue;
+                        }
+                        string dns = "";
+                        // If hostname is empty for the address, then dns used is that of the endpoint
+                        if (!string.IsNullOrWhiteSpace(address.Hostname))
+                        {
+                            dns = isInWorkloadNamespace ?
+                                    $"{address.Hostname}.{endpoint.Metadata.Name}" :
+                                    $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}";
+                        }
+                        else
+                        {
+                            dns = isInWorkloadNamespace ? 
+                                    endpoint.Metadata.Name : 
+                                    $"{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}";
+                        }
                         servicesToRouteEndpointInfos.Add(new EndpointInfo()
                         {
-                            DnsName = isInWorkloadNamespace ?
-                                        $"{address.Hostname}.{endpoint.Metadata.Name}" :
-                                        $"{address.Hostname}.{endpoint.Metadata.Name}.{endpoint.Metadata.Namespace()}",
-                            Ports = subset.Ports?.Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false)).Select(p => new PortPair(remotePort: p.Port)).ToArray() ?? new PortPair[] { },
+                            DnsName = dns,
+                            Ports = subset.Ports?
+                                .Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false))
+                                .Select(p => new PortPair(remotePort: p.Port, p.Name))
+                                .ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
                     }

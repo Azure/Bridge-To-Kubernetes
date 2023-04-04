@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
 using Microsoft.BridgeToKubernetes.Common.IO;
@@ -22,7 +21,7 @@ using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Logging;
-using Newtonsoft.Json.Serialization;
+using SystemTextJsonPatch;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 using static Microsoft.BridgeToKubernetes.Common.DevHostAgent.DevHostConstants;
 using static Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Logging.Events.RestorationJob.Properties;
@@ -92,6 +91,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
                 DateTimeOffset? lastPingWithSessions = null;
+                DateTimeOffset? timeSinceLastPingIsNull = null;
                 bool restoredWorkload = false;
                 while (!cancellationToken.IsCancellationRequested && !restoredWorkload)
                 {
@@ -141,8 +141,19 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         else
                         {
                             perfLogger.SetProperty(HasConnectedClients, false);
+                            TimeSpan? disconnectedTimeSpan = null;
+                            if (lastPingWithSessions == null)
+                            {
+                                // first loop timeUntilLastPingIsNull will be set to current time and then next while loop it will preserve that time.
+                                // if lastPingWithSessions is being null for last 60 seconds or more then restoration will happen.
+                                timeSinceLastPingIsNull = timeSinceLastPingIsNull == null ? DateTimeOffset.Now : timeSinceLastPingIsNull;
+                                disconnectedTimeSpan = DateTimeOffset.Now - timeSinceLastPingIsNull;
+                            } else
+                            {
+                                disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            }
 
-                            var disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            
                             if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
                             {
                                 // Restore workload
@@ -245,8 +256,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                deploymentPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(deploymentPatch.ReversePatch.TryGetContainerImageReplacementValue()))
                 {
@@ -291,8 +300,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                statefulSetPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
                 var devhostAgentPod = pods.Items.Single();
                 if (devhostAgentPod.Spec.Containers.Select(c => c.Image).Contains(statefulSetPatch.ReversePatch.TryGetContainerImageReplacementValue()))
                 {
@@ -320,8 +327,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// </summary>
         private async Task<Uri> _GetAgentEndpointAsync(PodPatch podPatch, CancellationToken cancellationToken)
         {
-            podPatch.ReversePatch.ContractResolver = new STJCamelCaseContractResolver();
-
             string ns = podPatch.Pod.Namespace();
             string name = podPatch.Pod.Name();
             try

@@ -30,19 +30,29 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         }
 
         [Theory]
-        [InlineData(1, 100)]
-        [InlineData(5, 20)]
-        [InlineData(10, 3)]
-        [InlineData(1, 3)]
-        public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses)
+        [InlineData(1, 100, true)]
+        [InlineData(5, 20, false)]
+        [InlineData(10, 3, true)]
+        [InlineData(2, 3, false)]
+        public async void GetReachableServicesAsync_HeadlessService(int numServices, int numAddresses, bool isInWorkloadNamespace)
         {
-            ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}");
-            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
+            List<string> expectedDnsList = ConfigureHeadlessService(numServices: numServices, namingFunction: (i) => $"myapp-{i}", numAddresses: numAddresses, addressHostNamingFunction: (i) => $"Host-{i}", isInWorkloadNamespace);
+            var resultRechableEndpoints = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: isInWorkloadNamespace ? "testNamespace" : "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
             // Doing numServices-1 when calculating because we are adding empty subset for one service and that will be skipped
-            Assert.Equal((numServices-1) * (numAddresses), result.Count());
-            foreach (var endpoint in result) {
+            Assert.Equal((numServices-1) * (numAddresses), resultRechableEndpoints.Count());
+            foreach (var endpoint in resultRechableEndpoints) {
                 if (endpoint.Ports.Any()) {
                     Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
+                    bool found = false;
+                    foreach (var dns in expectedDnsList) {
+                        if (string.Equals(endpoint.DnsName, dns))
+                        {
+                            found = true;
+                            expectedDnsList.Remove(dns);
+                            break;
+                        }
+                    }
+                    Assert.True(found);
                 }
             }  
         }
@@ -99,7 +109,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
             servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
 
-            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts, servicePorts);
+            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts, servicePorts, "NodePort");
             // Generate service endpoints
             var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));                       
             
@@ -201,6 +211,43 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
         [Theory]
         [InlineData(1)]
+        public async void GetReachableServicesAsync_NoPortsToIgnore_NodePortService(int numAddresses) 
+        {
+            Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
+            ignorePorts.Add("ServiceA", null);
+            ignorePorts.Add("ServiceB", null);
+
+            Dictionary<string, List<int>> servicePorts = new Dictionary<string, List<int>>();
+            servicePorts.Add("ServiceA", new List<int>{234, 421, 300, 121});
+            servicePorts.Add("ServiceB", new List<int>{89, 23, 111, 324});
+
+            ConfigureServiceWithIgnorePorts(isHeadLessService: false, numAddresses, ignorePorts, servicePorts, "NodePort");
+            var result = await _workloadInformationProvider.GetReachableEndpointsAsync(namespaceName: "", localProcessConfig: null, includeSameNamespaceServices: true, cancellationToken: default(CancellationToken));
+            
+            // Find all ports which were allocated to each service
+            Dictionary<string, List<int>> portsAllocatedToService = new Dictionary<string, List<int>>();
+            foreach (var endpointInfo in result) 
+            {
+                var ports = portsAllocatedToService.GetOrAdd(endpointInfo.DnsName, () => new List<int>());
+                ports.AddRange(endpointInfo.Ports.Select( p => p.RemotePort));               
+            }  
+            
+            // For each service ensure that none of the ignore ports are in the ports allocated and all other servicePorts are allocated to the service
+            Assert.True(CompareLists(ignorePorts.Keys.Select( s => $"{s}.").ToList(), portsAllocatedToService.Keys.ToList()));
+            
+            foreach(var serviceName in ignorePorts.Keys) 
+            {
+                // Identify expected ports for a service.
+                var ignorePortsList = ignorePorts.GetValueOrDefault(serviceName)?.Split(",").Select(p => int.Parse(p)).ToList() ?? new List<int>();
+                var expectedPortsForService = servicePorts.GetValueOrDefault(serviceName)?.Where( p => !ignorePortsList.Contains(p)) ?? new List<int>();
+
+                // Check if the allocated ports (from result) are same as the expected ports for the service.
+                Assert.True(CompareLists(expectedPortsForService.ToList(), portsAllocatedToService.GetValueOrDefault($"{serviceName}.")));
+            }        
+        }
+
+        [Theory]
+        [InlineData(1)]
         public async void GetReachableServicesAsync_PortsToIgnoreIncorrectFormat_HeadlessService(int numAddresses) {
             Dictionary<string, string> ignorePorts = new Dictionary<string, string>();
             ignorePorts.Add("ServiceA", "19o, abc");
@@ -227,7 +274,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             return list1.All( item => list2.Contains(item));
         }
 
-        private void ConfigureServiceWithIgnorePorts(bool isHeadLessService, int numAddresses, Dictionary<string, string> ignorePorts, Dictionary<string, List<int>> servicePorts = null) 
+        private void ConfigureServiceWithIgnorePorts(bool isHeadLessService, int numAddresses, Dictionary<string, string> ignorePorts, Dictionary<string, List<int>> servicePorts = null, string serviceType = "ClusterIP") 
         {
             var serviceList = new List<V1Service>();
             // ignorePorts.Keys has all services used in the test.
@@ -237,7 +284,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                 {
                     Spec = new V1ServiceSpec() 
                     {
-                        Type = "ClusterIP",
+                        Type = serviceType,
                         ClusterIP = isHeadLessService ? "None" : "10.1.1.1", 
                         Ports = servicePorts?.GetValueOrDefault(serviceName).Select(p => new V1ServicePort(port: p, protocol: "TCP")).ToList() ?? new List<V1ServicePort> { new V1ServicePort(port: 80, protocol: "TCP")}, 
                         Selector = new Dictionary<string, string> { { "app", "myapp" } }
@@ -281,8 +328,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListServicesInNamespaceAsync(default, default, default)).WithAnyArguments().Returns(new V1ServiceList(serviceList));
         }
 
-        private void ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction)
+        private List<string> ConfigureHeadlessService(int numServices, Func<int, string> namingFunction, int numAddresses, Func<int, string> addressHostNamingFunction, bool isInWorkloadNamespace)
         {
+            var result = new List<string>();
             var serviceList = new List<V1Service>();
             // introducing this variable so we can add an endpoint with empty subset to have crash coverage
             bool addSubset = false;
@@ -299,7 +347,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     },
                     Metadata = new V1ObjectMeta()
                     {
-                        Name = namingFunction(i)
+                        Name = namingFunction(i),
+                        NamespaceProperty = "testNamespace"
                     }
                 });
                 var subsets = new List<V1EndpointSubset>()
@@ -319,17 +368,32 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     Subsets = subsets,
                     Metadata = new V1ObjectMeta()
                     {
-                        Name = $"{namingFunction(i)}"
+                        Name = $"{namingFunction(i)}",
+                        NamespaceProperty = "testNamespace"
                     }
                 };
                 if (addSubset)
                 {
                     for (int j = 0; j < numAddresses; j++)
                     {
+                        // Allow empty hostname for better coverage
+                        string hostname = j%2 == 0 ? addressHostNamingFunction(j) : "";
                         endPoint.Subsets[0].Addresses.Add(new V1EndpointAddress
                         {
-                            Hostname = addressHostNamingFunction(j)
+                            Hostname = hostname
                         });
+                        if (!string.IsNullOrEmpty(hostname))
+                        {
+                            result.Add(isInWorkloadNamespace ?
+                                    $"{hostname}.{namingFunction(i)}" :
+                                    $"{hostname}.{namingFunction(i)}.testNamespace");
+                        }
+                        else
+                        {
+                            result.Add(isInWorkloadNamespace ? 
+                                    namingFunction(i) : 
+                                    $"{namingFunction(i)}.testNamespace");
+                        }
                     }
                 }
                 else
@@ -340,6 +404,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                 A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().GetEndpointInNamespaceAsync(namingFunction(i), A<string>._, A<CancellationToken>._)).Returns(endPoint);
             }
             A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListServicesInNamespaceAsync(default, default, default)).WithAnyArguments().Returns(new V1ServiceList(serviceList));
+            return result;
         }
     }
 }

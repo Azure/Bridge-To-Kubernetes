@@ -3,12 +3,8 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.IO;
@@ -19,7 +15,11 @@ using Microsoft.BridgeToKubernetes.Common.Models.LocalConnect;
 using Microsoft.BridgeToKubernetes.Common.Restore;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Logging;
-using Microsoft.Rest;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 using static Microsoft.BridgeToKubernetes.Common.DevHostAgent.DevHostConstants;
 

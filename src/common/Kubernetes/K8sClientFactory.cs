@@ -12,7 +12,6 @@ using k8s.KubeConfigModels;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
-using Org.BouncyCastle.X509;
 
 namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 {
@@ -22,13 +21,44 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentVariables _environmentVariables;
 
-        private static readonly object _syncObj = new object();
-
         public K8sClientFactory(ILog log, IFileSystem fileSystem, IEnvironmentVariables environmentVariables)
         {
             _log = log;
             _fileSystem = fileSystem;
             _environmentVariables = environmentVariables;
+        }
+
+        /// <summary>
+        /// Builds a InCluster configuration based on enviroment variables
+        /// </summary>
+        public KubernetesClientConfiguration BuildInClusterConfigFromEnvironmentVariables()
+        {
+            // Based on https://github.com/kubernetes-client/csharp/blob/master/src/KubernetesClient/KubernetesClientConfiguration.InCluster.cs
+            // when KubernetesInClusterConfigOverwrite is specified, overwrite the hard-coded in-cluster config location /var/run/secrets/kubernetes.io/serviceaccount/
+            var host = _environmentVariables.KubernetesServiceHost;
+            var port = _environmentVariables.KubernetesServicePort;
+
+            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(port))
+            {
+                throw new KubeConfigException(
+                    "unable to load in-cluster configuration, KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined");
+            }
+
+            var token = this._fileSystem.ReadAllTextFromFile(Path.Combine(_environmentVariables.KubernetesInClusterConfigOverwrite, "token"));
+            var rootCAFile = Path.Combine(_environmentVariables.KubernetesInClusterConfigOverwrite, "ca.crt");
+
+            X509Certificate2Collection certCollection = new X509Certificate2Collection();
+            using (var stream = _fileSystem.OpenFileForRead(rootCAFile))
+            {
+                certCollection.ImportFromPem(new StreamReader(stream).ReadToEnd());
+            }
+
+            return new KubernetesClientConfiguration
+            {
+                Host = new UriBuilder("https", host, Convert.ToInt32(port)).ToString(),
+                AccessToken = token,
+                SslCaCerts = certCollection
+            };
         }
 
         /// <summary>
@@ -43,40 +73,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             }
             else
             {
-                // Based on https://github.com/kubernetes-client/csharp/blob/master/src/KubernetesClient/KubernetesClientConfiguration.InCluster.cs
-                // when KubernetesInClusterConfigOverwrite is specified, overwrite the hard-coded in-cluster config location /var/run/secrets/kubernetes.io/serviceaccount/
-                var host = _environmentVariables.KubernetesServiceHost;
-                var port = _environmentVariables.KubernetesServicePort;
-
-                if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(port))
-                {
-                    throw new KubeConfigException(
-                        "unable to load in-cluster configuration, KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined");
-                }
-
-                var token = this._fileSystem.ReadAllTextFromFile(_fileSystem.Path.Combine(_environmentVariables.KubernetesInClusterConfigOverwrite, "token"));
-                var rootCAFile = _fileSystem.Path.Combine(_environmentVariables.KubernetesInClusterConfigOverwrite, "ca.crt");
-
-                X509Certificate2Collection certCollection = new X509Certificate2Collection();
-                using (var stream = FileUtils.FileSystem().File.OpenRead(rootCAFile))
-                {
-                    var certs = new X509CertificateParser().ReadCertificates(stream);
-
-                    // Convert BouncyCastle X509Certificates to the .NET cryptography implementation and add
-                    // it to the certificate collection
-                    //
-                    foreach (Org.BouncyCastle.X509.X509Certificate cert in certs)
-                    {
-                        certCollection.Add(new X509Certificate2(cert.GetEncoded()));
-                    }
-                }
-
-                config = new KubernetesClientConfiguration
-                {
-                    Host = new UriBuilder("https", host, Convert.ToInt32(port)).ToString(),
-                    AccessToken = token,
-                    SslCaCerts = certCollection
-                };
+                config = BuildInClusterConfigFromEnvironmentVariables();
             }
             return new k8s.Kubernetes(config);
         }
