@@ -26,6 +26,7 @@
     <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
     <IsPackable>true</IsPackable>
     <NuspecFile>bin\$(Configuration)\net6.0\win-x64\publish\dsc.nuspec</NuspecFile>
+    <EnableStaticWebAssets>false</EnableStaticWebAssets>
   </PropertyGroup>
 
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
