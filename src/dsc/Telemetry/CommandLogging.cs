@@ -54,8 +54,7 @@ namespace Microsoft.BridgeToKubernetes.Exe.Telemetry
             if (!string.IsNullOrWhiteSpace(failureReason))
             {
                 // Ensure no secrets are logged
-
-                properties.Add("FailureReason", StringManipulation.RemovePrivateKeyIfNeeded(failureReason));
+                properties.Add("FailureReason2", StringManipulation.RemovePrivateKeyIfNeeded(failureReason));
             }
 
             this._log?.Event(
