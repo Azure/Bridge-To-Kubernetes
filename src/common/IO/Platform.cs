@@ -26,17 +26,9 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
         [DllImport("libc", SetLastError = true)]
         private static extern int waitpid(int pid, out int status, int options);
 
-        private readonly Version OSX_Catalina = new Version(10, 15);
-
-        private readonly Lazy<bool> _isWindows = new Lazy<bool>(() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-        private readonly Lazy<bool> _isOSX = new Lazy<bool>(() => RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
-        private readonly Lazy<bool> _isLinux = new Lazy<bool>(() => RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
-
-        public bool IsWindows => _isWindows.Value;
-
-        public bool IsOSX => _isOSX.Value;
-
-        public bool IsLinux => _isLinux.Value;
+        public bool IsWindows => OperatingSystem.IsWindows();
+        public bool IsOSX => OperatingSystem.IsMacOS();
+        public bool IsLinux => OperatingSystem.IsLinux();
 
         public async Task<(int exitCode, string userName)> DetermineCurrentUserWithRetriesAsync(CancellationToken cancellationToken)
         {
