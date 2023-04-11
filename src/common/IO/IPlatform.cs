@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,10 +17,13 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
     /// </summary>
     internal interface IPlatform
     {
+        [SupportedOSPlatformGuard("Windows")]
         bool IsWindows { get; }
 
+        [SupportedOSPlatformGuard("OSX")]
         bool IsOSX { get; }
 
+        [SupportedOSPlatformGuard("Linux")]
         bool IsLinux { get; }
 
         /// <summary>
