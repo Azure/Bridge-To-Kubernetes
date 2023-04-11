@@ -19,7 +19,7 @@ COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /src/publish devhostAgent.csproj
+RUN dotnet publish -c ${Configuration} -o /src/publish -r linux-musl-arm64 devhostAgent.csproj
 
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
@@ -27,7 +27,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
 RUN tdnf clean all && \
  tdnf check-update && \
  tdnf upgrade -y && \
- tdnf install -y bind-utils
+ tdnf install -y bind-utils && \
+ tdnf install -y tar
 
 WORKDIR /src/devhostagent
 COPY --from=build /src/publish /src/devhostagent

@@ -15,7 +15,7 @@ COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /output devhostAgent.restorationjob.csproj
+RUN dotnet publish -c ${Configuration} -o /output -r linux-musl-arm64 devhostAgent.restorationjob.csproj
 
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
