@@ -19,7 +19,7 @@ COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /src/publish -r linux-musl-arm64 devhostAgent.csproj
+RUN dotnet publish -c ${Configuration} -o /src/publish devhostAgent.csproj
 
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
