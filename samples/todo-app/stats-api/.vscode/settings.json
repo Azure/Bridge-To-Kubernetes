@@ -1,3 +1,6 @@
 {
-    "debug.javascript.usePreview": false
+    "debug.javascript.usePreview": false,
+    "vscode-nmake-tools.workspaceBuildDirectories": [
+        "."
+    ]
 }

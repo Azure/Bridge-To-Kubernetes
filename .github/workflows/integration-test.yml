@@ -1,5 +1,5 @@
 name: integration tests for B2K
-on: [workflow_dispatch]
+on: [push]
 jobs:
   job1:
     runs-on: ubuntu-latest
