@@ -18,7 +18,7 @@ namespace integration.tests
             startInfo.RedirectStandardError = true;
             startInfo.RedirectStandardInput = true;
             startInfo.EnvironmentVariables["BRIDGE_ENVIRONMENT"] = "dev";
-            startInfo.Arguments = "connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables";
+            startInfo.Arguments = "connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -y -- npm i & npm run start";
 
             return Process.Start(startInfo);
         }
@@ -47,16 +47,16 @@ namespace integration.tests
             finally {
                 if (process != null)
                 {
+                    // make http call to localhost:controlport to shutdown b2k cli
+                    using var httpClient = new HttpClient();
+                    var stopRemotingUriBuilder = new UriBuilder();
+                    stopRemotingUriBuilder.Scheme = "http";
+                    stopRemotingUriBuilder.Host = "localhost";
+                    stopRemotingUriBuilder.Port = 51424;
+                    stopRemotingUriBuilder.Path = "api/remoting/stop/";
+                    httpClient.PostAsync(stopRemotingUriBuilder.Uri, new StringContent(""));
                     process.Kill();
                 }
-                // make http call to localhost:controlport to shutdown b2k cli
-                using var httpClient = new HttpClient();
-                var stopRemotingUriBuilder = new UriBuilder();
-                stopRemotingUriBuilder.Scheme = "http";
-                stopRemotingUriBuilder.Host = "localhost";
-                stopRemotingUriBuilder.Port = 51424;
-                stopRemotingUriBuilder.Path = "api/remoting/stop/";
-                httpClient.PostAsync(stopRemotingUriBuilder.Uri, new StringContent(""));
             }
         }
     }
