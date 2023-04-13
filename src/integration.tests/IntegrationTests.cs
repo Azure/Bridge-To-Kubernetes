@@ -10,8 +10,8 @@ namespace integration.tests
         public Process startBridge()
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = @"/home/runner/work/Bridge-To-Kubernetes/Bridge-To-Kubernetes/src/dsc/bin/Debug/net6.0/linux-x64/dsc";
-
+            //startInfo.FileName = @"/home/runner/work/Bridge-To-Kubernetes/Bridge-To-Kubernetes/src/dsc/bin/Debug/net6.0/linux-x64/dsc";
+            startInfo.FileName = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\src\dsc\bin\Debug\net6.0\dsc.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Minimized;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
@@ -43,6 +43,9 @@ namespace integration.tests
                 Assert.Equal("dsc", process.ProcessName);
 
                 // add more asserts here.
+            } catch(Exception ex)
+            {
+                // log something.
             }
             finally {
                 if (process != null)
