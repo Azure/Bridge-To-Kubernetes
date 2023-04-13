@@ -1008,7 +1008,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                 result.Add(output.Substring(0, equalIndex), output.Substring(equalIndex + 1));
             };
 
-            var gotEnvSuccessfully = await WebUtilities.RetryUntilTimeWithWaitAsync((i) =>
+            var gotEnvSuccessfully = await WebUtilities.RetryUntilTimeWithWaitAsync(async (i) =>
             {
                 var exitCode = this.RunShortRunningCommand(
                     KubernetesCommandName.GetContainerEnvironment,
