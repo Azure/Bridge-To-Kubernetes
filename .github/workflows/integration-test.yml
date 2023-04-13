@@ -29,8 +29,8 @@ jobs:
         dotnet test ../../../src/integration.tests/integration.tests.csproj
         echo 'Starting minikube tunnel'
         minikube tunnel  > /dev/null 2>&1 & tunnelPID=$!
-        sleep 120
-        curl http://127.0.0.1/api/stats
+        sleep 60
+        curl http://127.0.0.1/api/stats -H 'Accept:*/*' -H 'Content-Type:application/json; charset=utf-8'
         kill $tunnelPID
 
           
