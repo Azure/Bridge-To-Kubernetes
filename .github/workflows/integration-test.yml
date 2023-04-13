@@ -25,14 +25,20 @@ jobs:
       run: |
         dotnet publish src/dsc/dsc.csproj -c Debug -r linux-x64 --self-contained true 
         dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r linux-x64
+        echo 'cd into stats-api folder'
         cd samples/todo-app/stats-api
+        echo 'npm install'
+        npm i
         echo 'Starting minikube tunnel'
         minikube tunnel  > /dev/null 2>&1 & tunnelPID=$!
         sleep 60
         echo 'verifying if minikube tunnel works'
         curl $(minikube service frontend -n todo-app --url)/api/stats
+        sleep 30
         echo 'Starting Bridge'
-        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm i & npm run start & curl $(minikube service frontend -n todo-app --url)/api/stats
+        ## & for parallel execution , && for sequential execution
+        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start && curl $(minikube service frontend -n todo-app --url)/api/stats
+        sleep 60
         kill $tunnelPID
 
           
