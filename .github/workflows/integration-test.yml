@@ -27,6 +27,7 @@ jobs:
         dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r linux-x64
         cd samples/todo-app/stats-api
         dotnet test ../../../src/integration.tests/integration.tests.csproj
+        curl $(minikube service frontend --url)/api/stats
         
 
           
