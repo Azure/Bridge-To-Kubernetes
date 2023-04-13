@@ -30,9 +30,9 @@ jobs:
         minikube tunnel  > /dev/null 2>&1 & tunnelPID=$!
         sleep 60
         echo 'verifying if minikube tunnel works'
-        curl http://127.0.0.1/api/stats -H 'Accept:*/*' -H 'Content-Type:application/json; charset=utf-8'
+        curl $(minikube service frontend -n todo-app --url)/api/stats
         echo 'Starting Bridge'
-        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm i & npm run start & curl http://127.0.0.1/api/stats -H 'Accept:*/*' -H 'Content-Type:application/json; charset=utf-8'
+        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm i & npm run start & curl $(minikube service frontend -n todo-app --url)/api/stats
         kill $tunnelPID
 
           
