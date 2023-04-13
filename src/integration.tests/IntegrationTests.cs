@@ -12,7 +12,7 @@ namespace integration.tests
             ProcessStartInfo startInfo = new ProcessStartInfo();
             //startInfo.FileName = @"/home/runner/work/Bridge-To-Kubernetes/Bridge-To-Kubernetes/src/dsc/bin/Debug/net6.0/linux-x64/dsc";
             startInfo.FileName = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\src\dsc\bin\Debug\net6.0\dsc.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Minimized;
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
@@ -41,14 +41,14 @@ namespace integration.tests
                 // Assert
                 Assert.NotNull(process);
                 Assert.Equal("dsc", process.ProcessName);
-
+                Assert.Equal(0, process.ExitCode);
                 // add more asserts here.
             } catch(Exception ex)
             {
-                // log something.
+                throw;
             }
             finally {
-                if (process != null)
+                if (process != null && process.ExitCode != 1)
                 {
                     // make http call to localhost:controlport to shutdown b2k cli
                     using var httpClient = new HttpClient();
