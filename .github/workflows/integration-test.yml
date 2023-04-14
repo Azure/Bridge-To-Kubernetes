@@ -41,11 +41,27 @@ jobs:
         echo "b2k process ID is $b2kPID"
         sleep 30
         echo "evaluating curl response after b2k debugging"
-        curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats
-        sleep 30
-        echo "killing minikube tunnel and b2k"
-        kill $tunnelPID
+        CURL_OUTPUT=curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats
+        if [$CURL_OUTPUT =~ 200]; then
+            echo "B2K Debugging was successful"
+            B2K_LIVE_TEST_FAILED=false
+        else 
+            echo "B2K Debugging failed"
+            B2K_LIVE_TEST_FAILED=true
+        fi
+        sleep 60
+        echo "stopping b2k debugging via control port"
+        curl -X POST http://localhost:51424/api/remoting/stop
+        echo "killing b2k"
         kill $b2kPID
+        echo "killing minikube"
+        kill $tunnelPID
+        echo "live test result (true - failure, false - passed):$$B2K_LIVE_TEST_FAILED"
+        if [$B2K_LIVE_TEST_FAILED == true]; then
+            exit 1
+        else 
+            exit 0
+        fi
 
           
 
