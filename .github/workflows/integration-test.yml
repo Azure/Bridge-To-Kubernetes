@@ -38,11 +38,12 @@ jobs:
         echo '\nStarting Bridge'
         ## & for parallel execution , && for sequential execution
         ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
-        echo "b2k process ID is $b2kPID"
         sleep 30
+        echo "b2k process ID is $b2kPID"
         echo "evaluating curl response after b2k debugging"
         curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats > CURL_OUTPUT
-        if [${CURL_OUTPUT} =~ '200']; then
+        echo "curl response is:$CURL_OUTPUT"
+        if [ '${CURL_OUTPUT}' =~ '200' ]; then
             echo "B2K Debugging was successful"
             B2K_LIVE_TEST_FAILED=false
         else 
@@ -52,12 +53,13 @@ jobs:
         sleep 60
         echo "stopping b2k debugging via control port"
         curl -X POST http://localhost:51424/api/remoting/stop/
+        sleep 15
         echo "killing b2k"
         kill $b2kPID
         echo "killing minikube"
         kill $tunnelPID
-        echo "live test result (true - failure, false - passed):$$B2K_LIVE_TEST_FAILED"
-        if [$B2K_LIVE_TEST_FAILED == true]; then
+        echo "live test result (true - failure, false - passed):$B2K_LIVE_TEST_FAILED"
+        if [ '$B2K_LIVE_TEST_FAILED' == true ]; then
             exit 1
         else 
             exit 0
