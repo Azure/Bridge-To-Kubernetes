@@ -20,7 +20,7 @@ jobs:
         kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
         kubectl get pods -n todo-app
     - name: Publish and test
-      timeout-minutes: 5
+      timeout-minutes: 10
       shell: bash
       run: |
         dotnet publish src/dsc/dsc.csproj -c Debug -r linux-x64 --self-contained true 
