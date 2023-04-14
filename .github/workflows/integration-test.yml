@@ -37,14 +37,17 @@ jobs:
         #sleep 10
         echo '\nStarting Bridge'
         ## & for parallel execution , && for sequential execution
-        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables & b2kPID=$!
+        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
         sleep 30
         echo "b2k process ID is $b2kPID"
-        echo "starting samples/todo-app/stats-api"
-        npm run start & npmPID=$!
-        sleep 5
-        echo "npm processID is $npmPID"
         echo "evaluating curl response after b2k debugging"
+        ## see if b2k pods are present
+        RESTORE_POD=kubectl get pod -n todo-app -o json | jq '.items[] | select(.metadata.name | contains("restore"))'
+        echo "Restore Pod name is:$RESTORE_POD"
+        if [ -z $RESTORE_POD ]; then
+          echo "B2K restore pod is not found"
+          exit 1
+        fi
         CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
         echo "curl response is:$CURL_OUTPUT"
         if [[ "$CURL_OUTPUT" =~ "200" ]]; then
@@ -55,8 +58,7 @@ jobs:
             B2K_LIVE_TEST_FAILED=true
         fi
         sleep 5
-        echo "killing npm process"
-        kill $npmPID
+        echo "killing b2k process"
         echo "stopping b2k debugging via control port"
         curl -X POST http://localhost:51424/api/remoting/stop/
         sleep 5
