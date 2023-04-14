@@ -51,6 +51,9 @@ jobs:
             B2K_LIVE_TEST_FAILED=true
         fi
         sleep 5
+        echo "finding PID of samples/todo-app/stats-api app npm run and killing it"
+        ps -eaf | grep npm run start | grep -v grep | awk  '{print $2}' | xargs kill -9
+        sleep 1
         echo "stopping b2k debugging via control port"
         curl -X POST http://localhost:51424/api/remoting/stop/
         sleep 10
