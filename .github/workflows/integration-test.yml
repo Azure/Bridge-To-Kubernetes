@@ -43,7 +43,7 @@ jobs:
         echo "evaluating curl response after b2k debugging"
         CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
         echo "curl response is:$CURL_OUTPUT"
-        if [ '${CURL_OUTPUT}' =~ '200' ]; then
+        if [[ "$CURL_OUTPUT" =~ "200" ]]; then
             echo "B2K Debugging was successful"
             B2K_LIVE_TEST_FAILED=false
         else 
