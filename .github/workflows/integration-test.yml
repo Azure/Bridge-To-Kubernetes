@@ -37,9 +37,13 @@ jobs:
         #sleep 10
         echo '\nStarting Bridge'
         ## & for parallel execution , && for sequential execution
-        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
+        ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables & b2kPID=$!
         sleep 30
         echo "b2k process ID is $b2kPID"
+        echo "starting samples/todo-app/stats-api"
+        npm run start & npmPID=$!
+        sleep 5
+        echo "npm processID is $npmPID"
         echo "evaluating curl response after b2k debugging"
         CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
         echo "curl response is:$CURL_OUTPUT"
@@ -51,12 +55,11 @@ jobs:
             B2K_LIVE_TEST_FAILED=true
         fi
         sleep 5
-        echo "finding PID of samples/todo-app/stats-api app npm run and killing it"
-        ps -eaf | grep node | grep -v grep | awk  '{print $2}' | xargs kill -9
-        sleep 1
+        echo "killing npm process"
+        kill $npmPID
         echo "stopping b2k debugging via control port"
         curl -X POST http://localhost:51424/api/remoting/stop/
-        sleep 10
+        sleep 5
         echo "killing minikube"
         kill $tunnelPID
         echo "live test result (true - failure, false - passed):$B2K_LIVE_TEST_FAILED"
