@@ -31,10 +31,10 @@ jobs:
         npm i
         echo 'Starting minikube tunnel'
         minikube tunnel  > /dev/null 2>&1 & tunnelPID=$!
-        sleep 30
+        sleep 10
         echo 'verifying if minikube tunnel works'
         curl $(minikube service frontend -n todo-app --url)/api/stats
-        #sleep 30
+        #sleep 10
         echo '\nStarting Bridge'
         ## & for parallel execution , && for sequential execution
         ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
@@ -50,16 +50,18 @@ jobs:
             echo "B2K Debugging failed"
             B2K_LIVE_TEST_FAILED=true
         fi
-        sleep 60
+        sleep 5
         echo "stopping b2k debugging via control port"
         curl -X POST http://localhost:51424/api/remoting/stop/
-        sleep 15
+        sleep 10
         echo "killing minikube"
         kill $tunnelPID
         echo "live test result (true - failure, false - passed):$B2K_LIVE_TEST_FAILED"
         if [ '$B2K_LIVE_TEST_FAILED' == true ]; then
+            echo "exit 1"
             exit 1
         else 
+            echo "exit 0"
             exit 0
         fi
 
