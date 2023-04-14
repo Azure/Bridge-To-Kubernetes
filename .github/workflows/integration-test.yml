@@ -39,21 +39,28 @@ jobs:
         ## & for parallel execution , && for sequential execution
         ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
         echo "b2k process ID is $b2kPID"
-        jobs -l | grep "dsc"
+        sleep 30
+        B2KJOB=jobs -l | grep "dsc"
+        if [$B2KJOB =~ 'Running']; then
+            echo "b2k is running"
+        fi
         echo "evaluating curl response after b2k debugging"
-        CURL_RETURN_CODE=0
-        CURL_OUTPUT=curl -w httpcode=%{http_code} $(minikube service frontend -n todo-app --url)/api/stats 2> /dev/null || CURL_RETURN_CODE=$?
-        if [ ${CURL_RETURN_CODE} -ne 0 ]; then  
-            echo "Curl connection failed with return code - ${CURL_RETURN_CODE}"
-        else
-            echo "Curl connection success"
+        #CURL_RETURN_CODE=0
+        #CURL_OUTPUT=curl -w httpcode=%{http_code} $(minikube service frontend -n todo-app --url)/api/stats 2> /dev/null || CURL_RETURN_CODE=$?
+        #if [ ${CURL_RETURN_CODE} -ne 0 ]; then  
+        #    echo "Curl connection failed with return code - ${CURL_RETURN_CODE}"
+        #else
+        #    echo "Curl connection success"
         # Check http code for curl operation/response in  CURL_OUTPUT
-        httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
-        if [ ${httpCode} -ne 200 ]; then
-            echo "Curl operation/command failed due to server return code - ${httpCode}"
-        fi
-        fi
-        echo "killing minikube tunnel and b2k"
+        #httpCode=$(echo "${CURL_OUTPUT}" | sed -e 's/.*\httpcode=//')
+        #if [ ${httpCode} -ne 200 ]; then
+        #    echo "Curl operation/command failed due to server return code - ${httpCode}"
+        #fi
+        #fi
+        #echo "killing minikube tunnel and b2k"
+        curl $(minikube service frontend -n todo-app --url)/api/stats
         kill $tunnelPID
+        kill $b2kPID
+
           
 
