@@ -7,6 +7,15 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Visual Studio 2019 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro#whats-new)
 - [Visual Studio 2022 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro2022#whats-new)
 
+## [1.0.20230327.2]
+- Address [Remove BouncyCastle Nuget package since .NET 6 can handle this internally](https://github.com/Azure/Bridge-To-Kubernetes/pull/183)
+- Address [Remove minimatch and replace it with internal .NET package](https://github.com/Azure/Bridge-To-Kubernetes/pull/184)
+- Address [Restore job failure fix ](https://github.com/Azure/Bridge-To-Kubernetes/pull/203)
+- Address [Introduce new telemetry data for FailureReason excluding PII data](https://github.com/Azure/Bridge-To-Kubernetes/pull/208)
+- Address [Disable probes feature](https://github.com/Azure/Bridge-To-Kubernetes/pull/164)
+- Address [Support nodeport services for bridge](https://github.com/Azure/Bridge-To-Kubernetes/pull/206)
+- Other minor dependant bot fixes
+
 ## [1.0.20230310.3]
 - Address [issue around named port environment variables not being created](https://github.com/Azure/Bridge-To-Kubernetes/issues/165) 
 - Address [migrating from netwonsoft to stj](https://github.com/Azure/Bridge-To-Kubernetes/issues/134)

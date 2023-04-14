@@ -37,6 +37,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dsc.tests", "dsc.tests\dsc.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dsc", "dsc\dsc.csproj", "{32C5446A-CFB6-47CF-AB6A-17109CDA3C9C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution files", "Solution files", "{74317FC8-6CD7-4155-BFBD-0EBFCD67F831}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -192,12 +197,12 @@ Global
 		{49DF73FE-1E7D-4AF6-87B5-194BF4A35ADB}.Release|x86.ActiveCfg = Release|Any CPU
 		{49DF73FE-1E7D-4AF6-87B5-194BF4A35ADB}.Release|x86.Build.0 = Release|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Release|x64.ActiveCfg = Release|Any CPU
 		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Release|x86.ActiveCfg = Release|Any CPU
-		{B406D9B1-35B1-42CC-B39C-9E6E691EB99E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3F0EE30-9187-43D8-B2C7-86CD61635561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C3F0EE30-9187-43D8-B2C7-86CD61635561}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3F0EE30-9187-43D8-B2C7-86CD61635561}.Debug|x64.ActiveCfg = Debug|Any CPU
