@@ -8,7 +8,7 @@ stop_b2k() {
     echo "killing minikube"
     kill $tunnelPID
     echo "killing node"
-    kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
+    sudo kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
     sleep 5
 }
 
