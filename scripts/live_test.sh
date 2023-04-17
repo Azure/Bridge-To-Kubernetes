@@ -51,8 +51,9 @@ validate_restore_pod_status() {
 ensure_b2k_is_disconnected() {
     echo "ensure b2k is disconnected successfully"
     ## see if b2k pods are present, future iterations check the image name
-    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
-    if [ -z $RESTORE_POD_NAME ]; then
+    RESTORE_POD_NAME_FOR_DISCONNECT=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+    echo "restore pod name after disconnection:$RESTORE_POD_NAME_FOR_DISCONNECT"
+    if [ -z $RESTORE_POD_NAME_FOR_DISCONNECT ]; then
         echo "B2K restore pod is not present after disconnection"
         exit 0
     else 
