@@ -19,9 +19,9 @@ validate_b2k_is_running() {
         exit 1
     else 
         # make sure restore pod is in running state
-        RESTORE_POD_STATUS=$(kubectl get pods -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
+        RESTORE_POD_STATUS=$(kubectl get pods -n todo-app -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
         echo "restore pod status is:$RESTORE_POD_STATUS"
-        if [ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]; then 
+        if [[ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]]; then 
             echo "restore pod is not in running state"
             exit 1
         fi
