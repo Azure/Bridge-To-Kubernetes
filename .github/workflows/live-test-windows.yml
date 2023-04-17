@@ -1,0 +1,27 @@
+name: Live tests for B2K
+on: [push]
+jobs:
+  job1:
+    runs-on: windows-latest
+    name: create minikube cluster and deploy todo-app
+    steps:
+    - uses: actions/checkout@v2
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+    - name: Try the cluster !
+      run: kubectl get pods -A
+    - name: create todo-app namespace
+      run: kubectl create namespace todo-app
+    - name: Deploy todo-app
+      run:
+        kubectl apply -f https://raw.githubusercontent.com/Azure/Bridge-To-Kubernetes/main/samples/todo-app/deployment.yaml -n todo-app
+    - name: Wait for pods to be ready
+      run: |
+        kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
+        kubectl get pods -n todo-app
+    - name: Publish and test
+      timeout-minutes: 10
+      shell: bash
+      run: |
+       chmod +x scripts/live_test.sh
+       ./scripts/live_test.sh win-x64

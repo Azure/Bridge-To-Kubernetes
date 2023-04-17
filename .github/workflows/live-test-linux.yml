@@ -1,4 +1,4 @@
-name: integration tests for B2K
+name: Live tests for B2K
 on: [push]
 jobs:
   job1:
@@ -24,4 +24,4 @@ jobs:
       shell: bash
       run: |
        chmod +x scripts/live_test.sh
-       ./scripts/live_test.sh
+       ./scripts/live_test.sh linux-x64

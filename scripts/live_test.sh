@@ -12,11 +12,19 @@ stop_b2k() {
 validate_b2k_is_running() {
     echo "evaluating curl response after b2k debugging"
     ## see if b2k pods are present
-    RESTORE_POD=$(kubectl get pod -n todo-app -o json | jq '.items[] | select(.metadata.name | contains("restore"))')
-    #echo "Restore Pod name is:$RESTORE_POD"
-    if [ -z $RESTORE_POD ]; then
+    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+    echo "Restore Pod name is:$RESTORE_POD_NAME"
+    if [ -z $RESTORE_POD_NAME ]; then
         echo "B2K restore pod is not found"
         exit 1
+    else 
+        # make sure restore pod is in running state
+        RESTORE_POD_STATUS=$(kubectl get pods -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
+        echo "restore pod status is:$RESTORE_POD_STATUS"
+        if [ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]; then 
+            echo "restore pod is not in running state"
+            exit 1
+        fi
     fi
     CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
     echo "curl response is:$CURL_OUTPUT"
@@ -33,7 +41,7 @@ validate_b2k_is_running() {
 start_b2k() {
     echo 'Starting Bridge'
     ## & for parallel execution , && for sequential execution
-    ../../../src/dsc/bin/Debug/net6.0/linux-x64/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
+    ../../../src/dsc/bin/Debug/net6.0/$OS/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
     sleep 30
     echo "b2k process ID is $b2kPID"
 }
@@ -55,8 +63,8 @@ set_up_stats_api() {
 
 dotnet_publish_for_b2k() {
     echo "dotnet publishing dsc"
-    dotnet publish src/dsc/dsc.csproj -c Debug -r linux-x64 --self-contained true 
-    dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r linux-x64
+    dotnet publish src/dsc/dsc.csproj -c Debug -r $OS --self-contained true 
+    dotnet publish src/endpointmanager/endpointmanager.csproj -c Debug -r $OS
 }
 
 # Check JQ Processor and download if not present
@@ -95,7 +103,7 @@ log() {
 }
 
 start_live_test() {
-    echo "Starting live testing for B2K"
+    echo "Starting live testing for $OS"
     check_kubectl_present
     check_jq_processor_present
 
@@ -117,5 +125,5 @@ start_live_test() {
         exit 0
     fi
 }
-
+OS=$1
 start_live_test
