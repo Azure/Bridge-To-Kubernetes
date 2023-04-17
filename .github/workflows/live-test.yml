@@ -1,8 +1,11 @@
 name: Live tests for B2K
 on: [push]
 jobs:
-  job1:
-    runs-on: ubuntu-latest
+  liveTest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     name: create minikube cluster and deploy todo-app
     steps:
     - uses: actions/checkout@v2
@@ -23,5 +26,14 @@ jobs:
       timeout-minutes: 10
       shell: bash
       run: |
-       chmod +x scripts/live_test.sh
-       ./scripts/live_test.sh linux-x64
+       echo "RUNNER OS IS: $RUNNER_OS"
+       if [ "$RUNNER_OS" == "Linux" ]; then
+        chmod +x scripts/live_test.sh
+        RUN_TIME=linux-x64
+       elif[ "$RUNNER_OS" == "Windows" ]; then
+        RUN_TIME=win-x64
+       else
+        chmod +x scripts/live_test.sh
+        RUN_TIME=osx-x64
+       fi
+       ./scripts/live_test.sh $RUN_TIME
