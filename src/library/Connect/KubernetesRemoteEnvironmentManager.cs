@@ -831,7 +831,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     try
                     {
-                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(patch, PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
