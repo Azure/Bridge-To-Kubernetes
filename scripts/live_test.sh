@@ -3,7 +3,7 @@ set -ef
 
 stop_b2k() {
     echo "killing npm"
-    sudo kill -9 $(ps aux | grep -v grep | grep '\snpm run start\s' | awk '{print $2}')
+    sudo kill -9 $(ps aux | grep '\snpm\s' | awk '{print $2}')
     echo "stopping b2k debugging via control port"
     curl -X POST http://localhost:51424/api/remoting/stop/
     sleep 5
