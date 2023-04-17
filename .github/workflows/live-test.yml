@@ -9,6 +9,14 @@ jobs:
     name: live test for b2k
     steps:
     - uses: actions/checkout@v2
+    - name: Enable hyperV for windows-latest
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Tools-All -All
+    - name: Setup kubectl for macos-latest
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: azure/setup-kubectl@v3
+      with:
+       version: latest
     - name: Start minikube
       uses: medyagh/setup-minikube@master
     - name: Try the cluster !
