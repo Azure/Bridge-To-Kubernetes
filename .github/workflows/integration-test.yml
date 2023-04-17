@@ -24,6 +24,6 @@ jobs:
       shell: bash
       run: |
        cd scripts
-       ./scripts/live_test.sh
+       ./live_test.sh
           
 
