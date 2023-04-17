@@ -2,12 +2,12 @@
 set -ef
 
 stop_b2k() {
-    echo "killing npm"
-    sudo kill -9 $(ps aux | grep '\snpm\s' | awk '{print $2}')
     echo "stopping b2k debugging via control port"
     curl -X POST http://localhost:51424/api/remoting/stop/
-    sleep 5
-    echo "killing minikube"
+    sleep 
+    echo "killing npm"
+    sudo kill -9 $(ps aux | grep '\snpm\s' | awk '{print $2}')
+    echo "  "
     kill $tunnelPID
     sleep 5
 }
