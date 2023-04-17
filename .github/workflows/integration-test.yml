@@ -24,6 +24,6 @@ jobs:
       shell: bash
       run: |
        cd scripts
-       ./live_test.sh
+       sudo ./live_test.sh
           
 
