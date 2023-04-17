@@ -7,6 +7,9 @@ stop_b2k() {
     sleep 5
     echo "killing minikube"
     kill $tunnelPID
+    echo "killing node"
+    kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
+    sleep 5
 }
 
 validate_b2k_is_running() {
@@ -46,8 +49,7 @@ validate_restore_pod_status() {
 }
 
 ensure_b2k_is_disconnected() {
-    echo "ensure b2k is disconnected succesfully"
-    sleep 5  #to give time for disconnetion to complete
+    echo "ensure b2k is disconnected successfully"
     ## see if b2k pods are present, future iterations check the image name
     RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
     if [ -z $RESTORE_POD_NAME ]; then
