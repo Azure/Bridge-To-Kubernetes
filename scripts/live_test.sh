@@ -13,10 +13,10 @@ validate_b2k_is_running() {
     echo "evaluating curl response after b2k debugging"
     ## see if b2k pods are present
     RESTORE_POD=$(kubectl get pod -n todo-app -o json | jq '.items[] | select(.metadata.name | contains("restore"))')
-    echo "Restore Pod name is:$RESTORE_POD"
+    #echo "Restore Pod name is:$RESTORE_POD"
     if [ -z $RESTORE_POD ]; then
-    echo "B2K restore pod is not found"
-    exit 1
+        echo "B2K restore pod is not found"
+        exit 1
     fi
     CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
     echo "curl response is:$CURL_OUTPUT"
