@@ -22,6 +22,6 @@ jobs:
     - name: Publish and test
       timeout-minutes: 10
       shell: bash
-      run: ./scripts/live_test.sh
+      run: ${PWD}/scripts/live_test.sh
           
 
