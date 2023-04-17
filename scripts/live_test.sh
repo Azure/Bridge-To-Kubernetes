@@ -11,21 +11,8 @@ stop_b2k() {
 
 validate_b2k_is_running() {
     echo "evaluating curl response after b2k debugging"
-    ## see if b2k pods are present
-    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
-    echo "Restore Pod name is:$RESTORE_POD_NAME"
-    if [ -z $RESTORE_POD_NAME ]; then
-        echo "B2K restore pod is not found"
-        exit 1
-    else 
-        # make sure restore pod is in running state
-        RESTORE_POD_STATUS=$(kubectl get pods -n todo-app -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
-        echo "restore pod status is:$RESTORE_POD_STATUS"
-        if [[ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]]; then 
-            echo "restore pod is not in running state"
-            exit 1
-        fi
-    fi
+    check_if_restore_pod_exists
+    validate_restore_pod_status
     CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
     echo "curl response is:$CURL_OUTPUT"
     if [[ "$CURL_OUTPUT" =~ "200" ]]; then
@@ -36,6 +23,40 @@ validate_b2k_is_running() {
         B2K_LIVE_TEST_FAILED=true
     fi
     sleep 5
+}
+
+check_if_restore_pod_exists() {
+    ## see if b2k pods are present
+    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+    echo "Restore Pod name is:$RESTORE_POD_NAME"
+    if [ -z $RESTORE_POD_NAME ]; then
+        echo "B2K restore pod is not found"
+        exit 1
+    fi
+}
+
+validate_restore_pod_status() {
+    # make sure restore pod is in running state
+    RESTORE_POD_STATUS=$(kubectl get pods -n todo-app -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
+    echo "restore pod status is:$RESTORE_POD_STATUS"
+    if [[ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]]; then 
+        echo "restore pod is not in running state"
+        exit 1
+    fi
+}
+
+ensure_b2k_is_disconnected() {
+    echo "ensure b2k is disconnected succesfully"
+    sleep 5  #to give time for disconnetion to complete
+    ## see if b2k pods are present, future iterations check the image name
+    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+    if [ -z $RESTORE_POD_NAME ]; then
+        echo "B2K restore pod is not present after disconnection"
+        exit 0
+    else 
+        echo "B2K restore pod is still present after disconnection"
+        exit 1
+    fi
 }
 
 start_b2k() {
@@ -115,6 +136,8 @@ start_live_test() {
     validate_b2k_is_running
 
     stop_b2k
+
+    ensure_b2k_is_disconnected
 
     echo "live test result (true - failure, false - passed):$B2K_LIVE_TEST_FAILED"
     if [ '$B2K_LIVE_TEST_FAILED' == true ]; then
