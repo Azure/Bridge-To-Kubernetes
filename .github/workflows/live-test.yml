@@ -37,7 +37,7 @@ jobs:
        if [ "$RUNNER_OS" == "Linux" ]; then
         chmod +x scripts/live_test.sh
         RUN_TIME=linux-x64
-       elif[ "$RUNNER_OS" == "Windows" ]; then
+       elif [ "$RUNNER_OS" == "Windows" ]; then
         RUN_TIME=win-x64
        else
         chmod +x scripts/live_test.sh
