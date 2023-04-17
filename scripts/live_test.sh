@@ -12,7 +12,7 @@ stop_b2k() {
 validate_b2k_is_running() {
     echo "evaluating curl response after b2k debugging"
     ## see if b2k pods are present
-    RESTORE_POD=kubectl get pod -n todo-app -o json | jq '.items[] | select(.metadata.name | contains("restore"))'
+    RESTORE_POD=$(kubectl get pod -n todo-app -o json | jq '.items[] | select(.metadata.name | contains("restore"))')
     echo "Restore Pod name is:$RESTORE_POD"
     if [ -z $RESTORE_POD ]; then
     echo "B2K restore pod is not found"

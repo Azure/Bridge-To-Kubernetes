@@ -4,14 +4,14 @@
         {
             "label": "bridge-to-kubernetes.resource",
             "type": "bridge-to-kubernetes.resource",
-            "resource": "stats-api-7f56bcb5c6-ngwfq",
-            "resourceType": "pod",
+            "resource": "stats-api",
+            "resourceType": "service",
             "ports": [
                 3001
             ],
-            "targetCluster": "hari-aks",
-            "targetNamespace": "todo-app-ingress",
-            "useKubernetesServiceEnvironmentVariables": false
+            "targetCluster": "minikube",
+            "targetNamespace": "todo-app",
+            "useKubernetesServiceEnvironmentVariables": true
         }
     ]
 }
