@@ -22,6 +22,6 @@ jobs:
     - name: Publish and test
       timeout-minutes: 10
       shell: bash
-      run: sudo ${PWD}/scripts/live_test.sh
-          
-
+      run: |
+       chmod +x scripts/live_test.sh
+       ./scripts/live_test.sh
