@@ -19,6 +19,8 @@ jobs:
        version: latest
     - name: Start minikube
       uses: medyagh/setup-minikube@master
+      with:
+       driver: docker
     - name: Try the cluster !
       run: kubectl get pods -A
     - name: create todo-app namespace
