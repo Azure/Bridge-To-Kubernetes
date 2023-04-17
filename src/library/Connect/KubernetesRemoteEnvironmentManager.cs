@@ -468,11 +468,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     c.Image = agentImage;
                     c.Command = new List<string>();
                     c.Args = new List<string>();
+                    
+                    // When creating new env variables, the previous env variables are not retained to ensure only one is present.
                     var newEnv = new List<V1EnvVar>();
-                    if (c.Env != null)
-                    {
-                        newEnv.AddRange(c.Env);
-                    }
 
                     newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.CollectTelemetry, _environmentVariables.CollectTelemetry.ToString()));
                     newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.ConsoleVerbosity, LoggingVerbosity.Verbose.ToString()));
@@ -833,7 +831,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     try
                     {
-                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(patch, PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        await _kubernetesClient.PatchV1StatefulSetAsync(namespaceName, statefulSetName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
