@@ -78,6 +78,22 @@ check_kubectl_present() {
     log INFO "Locally installed kubectl version is $kubectlversion"
 }
 
+check_if_exists() {
+    log INFO "checking if $1 exists"
+    if ! [[ -x "$(command -v $1)" ]]; then
+        log INFO "Error: $1 is not installed." >&2
+        result=1
+    else 
+        result=0
+    fi
+}
+
+log() {
+    local level=$1
+    shift
+    echo "$(date -u $now) - $level - $*"
+}
+
 start_live_test() {
     echo "Starting live testing for B2K"
     check_kubectl_present
