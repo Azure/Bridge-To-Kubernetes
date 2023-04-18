@@ -29,6 +29,8 @@ verify_if_restore_pod_exists() {
 verify_if_multiple_pods_exists() {
     echo "Verifying if multiple pods exists"
     STATS_API=$(kubectl get pods -n todo-app | grep "stats-api")
+    echo "stats api pods: $STATS_API"
+    echo "stats api length: ${#STATS_API}"
     count=0
     MULTIPLE_POD_EXISTS=false
     while [ "$count" -le 3 ]; do
