@@ -47,7 +47,7 @@ jobs:
     - name: verify if B2K disconnected successfully
       run: |
        restore_pod_exists=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
-       if [[ -z restore_pod_exists ]]; then
+       if [[ -z $restore_pod_exists ]]; then
           echo "B2K disconnection was successful"
           exit 0
        else 
