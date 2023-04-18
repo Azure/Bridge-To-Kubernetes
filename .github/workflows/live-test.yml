@@ -47,6 +47,7 @@ jobs:
     - name: verify if B2K disconnected successfully
       shell: bash
       run: |
+        echo "verifying if cluster is restored to original state"
         RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
         echo "Restore Pod name is:$RESTORE_POD_NAME"
         if [ -z $RESTORE_POD_NAME ]; then
