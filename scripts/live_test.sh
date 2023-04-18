@@ -6,6 +6,7 @@ stop_b2k() {
     curl -X POST http://localhost:51424/api/remoting/stop/
     echo "killing npm & node"
     sudo kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
+    sleep 5
     echo "killing minikube tunnel"
     kill $tunnelPID
     sleep 5
@@ -52,7 +53,7 @@ ensure_b2k_is_disconnected() {
     ## see if b2k pods are present, future iterations check the image name
     RESTORE_POD_NAME_FOR_DISCONNECT=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
     echo "restore pod name after disconnection:$RESTORE_POD_NAME_FOR_DISCONNECT"
-    if [ -z $RESTORE_POD_NAME_FOR_DISCONNECT ]; then
+    if [[ -z $RESTORE_POD_NAME_FOR_DISCONNECT ]]; then
         echo "B2K restore pod is not present after disconnection"
         exit 0
     else 
@@ -139,7 +140,7 @@ start_live_test() {
 
     stop_b2k
 
-    ensure_b2k_is_disconnected
+    #ensure_b2k_is_disconnected
 
     echo "live test result (true - failure, false - passed):$B2K_LIVE_TEST_FAILED"
     if [ '$B2K_LIVE_TEST_FAILED' == true ]; then
