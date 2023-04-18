@@ -8,6 +8,7 @@ verify() {
     echo "multiple pod var is: $MULTIPLE_POD_EXISTS"
     if [ $MULTIPLE_POD_EXISTS == 'true' ]; then
         echo "exit 1"
+        kubectl get pods -n todo-app
         exit 1
     fi 
     exit 0;
