@@ -45,12 +45,14 @@ jobs:
        fi
        ./scripts/live_test.sh $RUN_TIME
     - name: verify if B2K disconnected successfully
+      shell: bash
       run: |
-       restore_pod_exists=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
-       if [[ -z $restore_pod_exists ]]; then
-          echo "B2K disconnection was successful"
+        RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+        echo "Restore Pod name is:$RESTORE_POD_NAME"
+        if [ -z $RESTORE_POD_NAME ]; then
+          echo "B2K restore pod is not found after disconnection"
           exit 0
-       else 
-          echo "B2K disconnection was not successful"
+        else
+          echo "B2K restore pod is found after disconnection" 
           exit 1
-       fi
+        fi

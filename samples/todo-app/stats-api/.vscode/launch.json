@@ -16,7 +16,7 @@
             "type": "node-terminal",
             "name": "Run Script: dev",
             "request": "launch",
-            "command": "npm run dev",
+            "command": "npm run start",
             "cwd": "${workspaceFolder}"
         }
     ]
