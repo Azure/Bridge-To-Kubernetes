@@ -47,5 +47,7 @@ jobs:
     - name: verify if B2K disconnected successfully
       shell: bash
       run: |
-        echo "verifying if cluster is restored to original state"
-        kubectl get pods -n todo-app
+        if [ "$RUNNER_OS" != "Windows" ]; then
+          chmod +x scripts/verify.sh
+        fi
+        ./scripts/verify.sh
