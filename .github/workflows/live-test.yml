@@ -48,12 +48,4 @@ jobs:
       shell: bash
       run: |
         echo "verifying if cluster is restored to original state"
-        RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
-        echo "Restore Pod name is:$RESTORE_POD_NAME"
-        if [ -z $RESTORE_POD_NAME ]; then
-          echo "B2K restore pod is not found after disconnection"
-          exit 0
-        else
-          echo "B2K restore pod is found after disconnection" 
-          exit 1
-        fi
+        kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore"
