@@ -40,21 +40,12 @@ check_if_restore_pod_exists() {
 
 validate_restore_pod_status() {
     # make sure restore pod is in running state
-    count=0
-    while [ "$count" -le 3 ]; do
-        RESTORE_POD_STATUS=$(kubectl get pods -n todo-app -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
-        echo "restore pod status is:$RESTORE_POD_STATUS"
-        if [[ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]]; then
-            ((count++))
-            echo "restore pod is not in running state, retry count:$count"
-            sleep 5
-            if [ "$count" -eq 3 ]; then
-                echo "restore pod still in $RESTORE_POD_STATUS state,retry exhausted count:$count"
-                exit 1
-            fi
-        fi
-    done
-    
+    RESTORE_POD_STATUS=$(kubectl get pods -n todo-app -l mindaro.io/component=lpkrestorationjob -o=jsonpath='{.items[*].status.phase}')
+    echo "restore pod status is:$RESTORE_POD_STATUS"
+    if [[ -z $RESTORE_POD_STATUS || $RESTORE_POD_STATUS != 'Running' ]]; then 
+        echo "restore pod is not in running state"
+        exit 1
+    fi
 }
 
 ensure_b2k_is_disconnected() {
@@ -143,6 +134,8 @@ start_live_test() {
     dotnet_publish_for_b2k
     set_up_stats_api
     start_minikube_tunnel
+    #set bridge as dev environment to run live test because some of image tags might noe be available in production
+    export BRIDGE_ENVIRONMENT='dev'
     start_b2k
 
     validate_b2k_is_running
