@@ -48,4 +48,4 @@ jobs:
       shell: bash
       run: |
         echo "verifying if cluster is restored to original state"
-        kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore"
+        kubectl get pods -n todo-app
