@@ -19,7 +19,7 @@ jobs:
       with:
        version: latest
     - name: Start minikube
-      uses: medyagh/setup-minikube@master
+      uses: medyagh/setup-minikube@c8adc427cd854219da7bdea2f5fce5d23c89512a
       with:
        driver: docker
     - name: Try the cluster !
