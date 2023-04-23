@@ -22,7 +22,6 @@ using Microsoft.BridgeToKubernetes.Common.IO;
 using System.Threading.Tasks;
 using FakeItEasy.Core;
 using System.Linq;
-using Microsoft.BridgeToKubernetes.Common.Models.Kubernetes;
 using SystemTextJsonPatch;
 using static k8s.Models.V1Patch;
 
