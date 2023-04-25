@@ -56,7 +56,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             const string ExpectedTestRow = "name1          Name2  name3";
             const string ExpectedTestItemJson = @"[
               {
-                ""Name1"": ""name1"",
+                ""name1"": ""name1"",
                 ""Name2Override"": ""Name2"",
                 ""Name3JsonOverride"": ""name3""
               }
@@ -86,7 +86,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             const string ExpectedTestRow = "                      name3";
             const string ExpectedTestItemJson = @"[
               {
-                ""Name1"": null,
+                ""name1"": null,
                 ""Name2Override"": null,
                 ""Name3JsonOverride"": ""name3""
               }

@@ -55,8 +55,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         private static JsonSerializerOptions CreateSerializerOptionsForLoggingPurpose(bool indented = false)
         {
-
             var jsonSerializerOptions = new JsonSerializerOptions();
+            jsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             jsonSerializerOptions.WriteIndented = indented;
 
