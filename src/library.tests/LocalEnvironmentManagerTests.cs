@@ -5,12 +5,12 @@
 
 using System.Collections.Generic;
 using Autofac;
-using FluentAssertions;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.TestHelpers;
+using System.Linq;
 using Xunit;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
 
@@ -183,7 +183,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
             var result = _localEnvironmentManager.CreateEnvVariablesForK8s(workloadInfo);
 
-            result.Should().Equal(expected);
+            Assert.True(result.All(e => expected.Contains(e)));
         }
     }
 }

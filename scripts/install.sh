@@ -223,7 +223,7 @@ copy_b2k_files() {
         remove_tmp_dirs $installdir sudo
         sudo cp -r $HOME/tmp/bridgetokubernetes/  $installdir
         sudo chmod -R +x $installdir/dsc $installdir/kubectl $installdir/EndpointManager/EndpointManager
-        create_sym_link $installdir/dsc /usr/local/bin/dsc
+        create_sym_link $installdir/dsc /usr/local/bin/dsc sudo
     fi
     cd ~
     remove_tmp_dirs $HOME/tmp/bridgetokubernetes
@@ -239,11 +239,7 @@ remove_tmp_dirs() {
 create_sym_link() {
     log INFO "creating or overwriting sym link for :$1"
     # ln -sf source destination - creates symlink for dsc command to run from anywhere ex: any folder or location in the file system.
-    if [[ $OSTYPE == "msys"* ]]; then
-        ln -sf $1 $2
-    else 
-        sudo ln -sf $1 $2
-    fi
+    $3 ln -sf $1 $2
 }
 
 install() {
