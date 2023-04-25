@@ -75,6 +75,14 @@
     <EndpointManagerSourcePath>$(EndpointManagerPublishDirectory)\$(EndpointManagerFileName)</EndpointManagerSourcePath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn></NoWarn>
+  </PropertyGroup>
+
   <!-- During build, only publish EndpointManager.csproj if EndpointManager.exe doesn't already exist (because publishing is slow) -->
   <Target Name="PublishEndpointManagerOnBuild" BeforeTargets="BeforeBuild" Condition="'$(ConsumeEndpointManager)'=='true'">
     <CallTarget Targets="PublishEndpointManager" Condition="!Exists('$(EndpointManagerSourcePath)')" />
@@ -120,9 +128,7 @@
   </Target>
 
   <ItemGroup>
-    <None Include="
-              $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
-              $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+    <None Include="&#xD;&#xA;              $(MSBuildThisFileDirectory)..\..\NOTICE.txt;&#xD;&#xA;              $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
