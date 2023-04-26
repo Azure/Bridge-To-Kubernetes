@@ -1,0 +1,55 @@
+name: Live tests for B2K
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  liveTest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    name: live test for b2k
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup kubectl for macos-latest
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: azure/setup-kubectl@v3
+      with:
+       version: latest
+    - name: Start minikube
+      uses: medyagh/setup-minikube@c8adc427cd854219da7bdea2f5fce5d23c89512a
+      with:
+       driver: docker
+    - name: create todo-app namespace
+      run: kubectl create namespace todo-app
+    - name: Deploy todo-app
+      run:
+        kubectl apply -f ./samples/todo-app/deployment.yaml -n todo-app
+    - name: Wait for pods to be ready
+      run: |
+        kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
+        kubectl get pods -n todo-app
+    - name: Publish and test
+      timeout-minutes: 10
+      shell: bash
+      run: |
+       echo "RUNNER OS IS: $RUNNER_OS"
+       if [ "$RUNNER_OS" == "Linux" ]; then
+        chmod +x scripts/live_test.sh
+        RUN_TIME=linux-x64
+       elif [ "$RUNNER_OS" == "Windows" ]; then
+        RUN_TIME=win-x64
+       else
+        chmod +x scripts/live_test.sh
+        RUN_TIME=osx-x64
+       fi
+       ./scripts/live_test.sh $RUN_TIME
+    - name: verify if B2K disconnected successfully
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" != "Windows" ]; then
+          chmod +x scripts/verify.sh
+        fi
+        ./scripts/verify.sh
