@@ -51,5 +51,7 @@ namespace Microsoft.BridgeToKubernetes.Common
         string DotNetRoot { get; }
 
         bool IsCodespaces { get; }
+
+        string KubectlProxy { get; }
     }
 }

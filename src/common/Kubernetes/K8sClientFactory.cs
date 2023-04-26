@@ -109,7 +109,14 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// </summary>
         public IKubernetes CreateFromKubeConfig(K8SConfiguration kubeConfig)
         {
-            var config = KubernetesClientConfiguration.BuildConfigFromConfigObject(kubeConfig);
+            KubernetesClientConfiguration config = null;
+            if (_environmentVariables.KubectlProxy != null)
+            {
+                config = new KubernetesClientConfiguration { Host = _environmentVariables.KubectlProxy };
+            } else
+            {
+                config = KubernetesClientConfiguration.BuildConfigFromConfigObject(kubeConfig);
+            }
             return new k8s.Kubernetes(config);
         }
 
