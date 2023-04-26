@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using System.Collections.Generic;
 using System.Net;
 
