@@ -33,11 +33,9 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
             var jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = camelCaseContextResolver ? JsonNamingPolicy.CamelCase : null,
-                WriteIndented = indented,
-                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-                PropertyNameCaseInsensitive = caseInsensitive,
-
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = indented,
+                PropertyNameCaseInsensitive = caseInsensitive,
             };
 
             jsonSerializerOptions.Converters.Add(new Iso8601TimeSpanConverter());
@@ -55,10 +53,12 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         private static JsonSerializerOptions CreateSerializerOptionsForLoggingPurpose(bool indented = false)
         {
-            var jsonSerializerOptions = new JsonSerializerOptions();
-            jsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            jsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            jsonSerializerOptions.WriteIndented = indented;
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = indented
+            };
 
             var exceptionConverter = new ExceptionConverter<Exception>();
             jsonSerializerOptions.Converters.Add(exceptionConverter);

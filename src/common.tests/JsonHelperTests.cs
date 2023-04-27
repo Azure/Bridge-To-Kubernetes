@@ -5,6 +5,7 @@
 
 using k8s;
 using Microsoft.BridgeToKubernetes.Common.Json;
+using Microsoft.BridgeToKubernetes.Common.Logging;
 using System;
 using Xunit;
 
@@ -13,7 +14,75 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
     public class JsonHelperTests
     {
         [Fact]
-        public void SerializeObjectSuccessful()
+        public void DeserializeObject_DeserializeStringWithReferenceLoop_ReturnsObject()
+        {
+            var serialized = string.Format("{{\"name\":\"Pippin\",\"bestFriend\":{{"
+                 + "\"name\":\"Samwise\",\"bestFriend\":{{\"name\":\"Frodo\","
+                 + "\"bestFriend\":null}}}}}}", Environment.NewLine);
+
+
+            var deserialized = JsonHelpers.DeserializeObject<Person>(serialized);
+
+            Assert.Equal("Pippin", deserialized.Name);
+            Assert.Equal("Samwise", deserialized.BestFriend.Name);
+            Assert.Equal("Frodo", deserialized.BestFriend.BestFriend.Name);
+        }
+
+        [Fact]
+        public void DeserializeObject_DeserializeStringWithInvalidCase_ReturnsNull()
+        {
+            var serialized = "{\"Name\":\"Pippin\"}";
+            var deserialized = JsonHelpers.DeserializeObject<Person>(serialized);
+            Assert.Null(deserialized.Name);
+        }
+
+        [Fact]
+        public void DeserializeObjectCaseInsensitive_DeserializeStringWithInvalidCase_ReturnsObject()
+        {
+            var serialized = "{\"Name\":\"Pippin\"}";
+            var deserialized = JsonHelpers.DeserializeObjectCaseInsensitive<Person>(serialized);
+            Assert.Equal("Pippin", deserialized.Name);
+        }
+
+        [Fact]
+        public void SerializeForLoggingPurpose_SerializeString_ReturnsString()
+        {
+            const string expected = "Test string";
+            Assert.Equal(expected, JsonHelpers.SerializeForLoggingPurpose(expected));
+        }
+
+        [Fact]
+        public void SerializeForLoggingPurpose_SerializePII_ReturnsPIIValue()
+        {
+            var e = new PII("Frodo");
+            var expected = e.Value;
+            Assert.Equal(expected, JsonHelpers.SerializeForLoggingPurpose(e));
+        }
+
+        [Fact]
+        public void SerializeForLoggingPurpose_SerilizeObject_ReturnsJson()
+        {
+            Person e = new Person()
+            {
+                Name = "Frodo"
+            };
+            var expected = "{\"name\":\"Frodo\",\"bestFriend\":null}";
+            Assert.Equal(expected, JsonHelpers.SerializeForLoggingPurpose(e));
+        }
+
+        [Fact]
+        public void SerializeForLoggingPurposeIndented_SerilaizeObject_ReturnsIndentedJson()
+        {
+            Person e = new Person()
+            {
+                Name = "Frodo"
+            };
+            var expected = string.Format("{{{0}  \"name\": \"Frodo\",{0}  \"bestFriend\": null{0}}}", Environment.NewLine);
+            Assert.Equal(expected, JsonHelpers.SerializeForLoggingPurposeIndented(e));
+        }
+
+        [Fact]
+        public void SerializeObject_SerilaizeObject_ReturnsJson()
         {
             Person e = new Person()
             {
@@ -24,7 +93,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
         }
 
         [Fact]
-        public void SerializeObjectIndentedSuccessful()
+        public void SerializeObjectIndented_SerilaizeObject_ReturnsIndentedJson()
         {
             Person e = new Person()
             {
@@ -37,7 +106,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
         }
 
         [Fact]
-        public void SerializeObjectWithReferenceLoopDefaultSettings()
+        public void SerializeObject_SerializeObjectWithReferenceLoop_ReturnsJson()
         {
             Person p1 = new Person()
             {
@@ -53,34 +122,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
             p1.BestFriend = p2;
             var expected = "{\"name\":\"Samwise\",\"bestFriend\":{\"name\":\"Frodo\",\"bestFriend\":null}}";
             Assert.Equal(expected, JsonHelpers.SerializeObject(p2));
-        }
-
-        [Fact]
-        public void SerializeAndDeserializeDefaultSettings()
-        {
-            Person p1 = new Person()
-            {
-                Name = "Frodo"
-            };
-
-            Person p2 = new Person()
-            {
-                Name = "Samwise",
-                BestFriend = p1
-            };
-
-            Person p3 = new Person()
-            {
-                Name = "Pippin",
-                BestFriend = p2
-            };
-
-            var serialized = JsonHelpers.SerializeObject(p3);
-            var deserialized = JsonHelpers.DeserializeObject<object>(serialized);
-            var expected = string.Format("{{\"name\":\"Pippin\",\"bestFriend\":{{"
-                 + "\"name\":\"Samwise\",\"bestFriend\":{{\"name\":\"Frodo\","
-                 + "\"bestFriend\":null}}}}}}", Environment.NewLine);
-            Assert.Equal(expected, deserialized.ToString());
         }
 
         [Fact]
