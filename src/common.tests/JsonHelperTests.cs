@@ -82,6 +82,29 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
         }
 
         [Fact]
+        public void SerializeForLoggingPurpose_SerializeAggregateException_DoesNotContainModule()
+        {
+            Exception ex;
+            try
+            {
+                try
+                {
+                    throw new Exception("TestException");
+                }
+                catch (Exception e)
+                {
+                    throw new AggregateException(e);
+                }
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.DoesNotContain("module", JsonHelpers.SerializeForLoggingPurpose(ex));
+        }
+
+        [Fact]
         public void SerializeObject_SerilaizeObject_ReturnsJson()
         {
             Person e = new Person()
@@ -125,13 +148,14 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Json
         }
 
         [Fact]
-        public void SerializeWatchEventType()
+        public void SerializeObject_SerializeWatchEvent_ReturnsJson()
         {
             var json = "{  \"type\": \"ADDED\",  \"object\": {\"kind\": \"Pod\", \"apiVersion\": \"v1\", \"metadata\": {\"resourceVersion\": \"10596\"}}}";
             var deserialized = JsonHelpers.DeserializeObject<WatchEvent>(json);
 
             Assert.Equal(WatchEventType.Added, deserialized.Type);
         }
+
 
         private class Person
         {
