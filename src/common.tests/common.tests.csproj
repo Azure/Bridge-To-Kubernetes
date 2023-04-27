@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>Microsoft.BridgeToKubernetes.Common.Tests</AssemblyName>
     <RootNamespace>Microsoft.BridgeToKubernetes.Common.Tests</RootNamespace>
     <IsPackable>false</IsPackable>

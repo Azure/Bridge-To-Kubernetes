@@ -12,7 +12,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     - name: Setup NuGet.exe for use with actions
       uses: NuGet/setup-nuget@v1.0.6
     - name: Restore dependencies using Nuget
@@ -26,7 +26,7 @@ jobs:
       if: ${{ matrix.mode == 'win-x64' }}
       with:
         inlineScript: |
-          Copy-Item -Path ${{ github.workspace }}\src\EndpointManagerLauncher\bin\Release\net6.0\win-x64\publish\ -Destination ${{ github.workspace }}\src\dsc\bin\Release\net6.0\win-x64\publish\EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
+          Copy-Item -Path ${{ github.workspace }}\src\EndpointManagerLauncher\bin\Release\net7.0\win-x64\publish\ -Destination ${{ github.workspace }}\src\dsc\bin\Release\net7.0\win-x64\publish\EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
         azPSVersion: '3.1.0'
     - name: Download Kubectl
       uses: Azure/powershell@v1
@@ -48,8 +48,8 @@ jobs:
           Write-Output "url is: "$url
           Write-Output "directory is: "$dir
           Write-Output "file is: "$file
-          New-Item -Path '${{ github.workspace }}\src\dsc\bin\Release\net6.0\${{ matrix.mode }}\publish\kubectl' -ItemType Directory
-          $filePath = '${{ github.workspace }}\src\dsc\bin\Release\net6.0\${{ matrix.mode }}\publish\kubectl\'+$dir
+          New-Item -Path '${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\kubectl' -ItemType Directory
+          $filePath = '${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\kubectl\'+$dir
           Write-Output "file path is: "$filePath
           New-Item -Path $filePath -ItemType Directory
           $fileName = $filePath + '\' + $file
@@ -61,7 +61,7 @@ jobs:
       with:
         type: 'zip'
         filename: 'lpk-${{ matrix.mode }}.zip'
-        path: ${{ github.workspace }}\src\dsc\bin\Release\net6.0\${{ matrix.mode }}\publish\**
+        path: ${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\**
         exclusions: '**/*.pdb **/*.xml **/*.nuspec **/cs/* **/de/* **/es/* **/fr/* **/it/* **/ja/* **/ko/* **/pl/* **/pt-BR/* **/ru/* **/tr/* **/zh-Hans/* **/zh-Hant/*'
     - name: Upload Release
       uses: actions/upload-artifact@v3

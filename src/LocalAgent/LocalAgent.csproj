@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
     <AssemblyName>Microsoft.BridgeToKubernetes.LocalAgent</AssemblyName>
     <RootNamespace>Microsoft.BridgeToKubernetes.LocalAgent</RootNamespace>
