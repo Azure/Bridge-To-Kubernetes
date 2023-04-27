@@ -6,6 +6,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -149,15 +150,27 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                 {
                     while (!cancellation.IsCancellationRequested)
                     {
-                        int cRead = await tcpClient.GetStream().ReadAsync(buffer, 0, buffer.Length, cancellation);
+                        int cRead = 0;
+                        try
+                        {
+                            cRead = await tcpClient.GetStream().ReadAsync(buffer, 0, buffer.Length, cancellation);
+                        }
+                        catch (IOException ex) when (ex.InnerException is OperationCanceledException)
+                        {
+                            // Cancellation requested
+                        }
+
                         _log.Verbose($"ReversePortForwarder receive {cRead} bytes from port {_port.Port} on id {streamId}");
+
                         if (cRead == 0)
                         {
                             await _agentClient.ReversePortForwardStopAsync(_port.Port, streamId, cancellation);
                             break;
                         }
+
                         byte[] content = new byte[cRead];
                         Array.Copy(buffer, content, cRead);
+
                         try
                         {
                             await _agentClient.ReversePortForwardSendAsync(_port.Port, streamId, content, cancellation);

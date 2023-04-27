@@ -171,7 +171,16 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
 
                         while (!requestProcessingCancellationTokenSource.Token.IsCancellationRequested)
                         {
-                            int cRead = await stream.ReadAsync(buffer, 0, buffer.Length, requestProcessingCancellationTokenSource.Token);
+                            int cRead = 0;
+                            try
+                            {
+                                cRead = await stream.ReadAsync(buffer, 0, buffer.Length, requestProcessingCancellationTokenSource.Token);
+                            }
+                            catch (IOException ex) when (ex.InnerException is OperationCanceledException)
+                            {
+                                // Cancellation requested
+                            }
+
                             if (cRead == 0)
                             {
                                 _log.Verbose($"ServicePortForward: stream {streamId}: StopLocal");
