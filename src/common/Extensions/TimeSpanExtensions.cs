@@ -3,16 +3,12 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Diagnostics;
-
 namespace System
 {
     internal static class TimeSpanExtensions
     {
         public static string GetUIFormattedString(this TimeSpan elapsed, bool roundToLargestUnitOfTime = false)
         {
-            Debug.Assert(elapsed != null);
-
             if (elapsed.TotalSeconds < 1)
             {
                 return "<1s";
