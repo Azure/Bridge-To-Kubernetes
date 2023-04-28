@@ -166,7 +166,7 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                                 // Cancellation requested
                                 break;
                             }
-                            if (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.ConnectionReset)
+                            if (ex.InnerException is SocketException se && (se.SocketErrorCode == SocketError.ConnectionReset || se.SocketErrorCode == SocketError.OperationAborted))
                             {
                                 _log.Verbose($"Connection is already closed by DevHostAgent on socket {streamId} (StartReceivingAsync)");
                                 break;
