@@ -4,7 +4,7 @@ depends on each project.
 -->
 <Project>
 	<PropertyGroup>
-		<DisableUsernameInAssemblyVersion></DisableUsernameInAssemblyVersion>
+		<DisableUsernameInAssemblyVersion>true</DisableUsernameInAssemblyVersion>
 	</PropertyGroup>
     <PropertyGroup Condition=" '$(Version)' == '' ">
         <BUILD_BUILDNUMBER Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$(MINDARO_BUILD_NUMBER)</BUILD_BUILDNUMBER>

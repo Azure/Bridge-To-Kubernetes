@@ -128,8 +128,12 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                     Task.Run(() => this.StartReceivingAsync(t, streamId, _cancellationToken)).Forget();
                     return t;
                 });
-                await tcpClient.GetStream().WriteAsync(data, 0, data.Length);
-                _log.Verbose($"Sent {data.Length} bytes to workload on id {streamId}.");
+
+                if (tcpClient.Connected)
+                {
+                    await tcpClient.GetStream().WriteAsync(data, 0, data.Length);
+                    _log.Verbose($"Sent {data.Length} bytes to workload on id {streamId}.");
+                }
             }
 
             private void OnClosed(int streamId)
@@ -153,11 +157,22 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                         int cRead = 0;
                         try
                         {
-                            cRead = await tcpClient.GetStream().ReadAsync(buffer, 0, buffer.Length, cancellation);
+                            cRead = await tcpClient.GetStream().ReadAsync(buffer, cancellation);
                         }
-                        catch (IOException ex) when (ex.InnerException is OperationCanceledException)
+                        catch (IOException ex)
                         {
-                            // Cancellation requested
+                            if (ex.InnerException is OperationCanceledException)
+                            {
+                                // Cancellation requested
+                                break;
+                            }
+                            if (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.ConnectionReset)
+                            {
+                                _log.Verbose($"Connection is already closed by DevHostAgent on socket {streamId} (StartReceivingAsync)");
+                                break;
+                            }
+
+                            throw;
                         }
 
                         _log.Verbose($"ReversePortForwarder receive {cRead} bytes from port {_port.Port} on id {streamId}");
