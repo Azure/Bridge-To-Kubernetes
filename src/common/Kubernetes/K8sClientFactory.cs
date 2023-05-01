@@ -113,10 +113,9 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
             if (_environmentVariables.KubectlProxy != null)
             {
                 config = new KubernetesClientConfiguration { Host = _environmentVariables.KubectlProxy };
-            } else
-            {
-                config = KubernetesClientConfiguration.BuildConfigFromConfigObject(kubeConfig);
-            }
+                return new k8s.Kubernetes(config);
+            } 
+            config = KubernetesClientConfiguration.BuildConfigFromConfigObject(kubeConfig);
             return new k8s.Kubernetes(config);
         }
 
