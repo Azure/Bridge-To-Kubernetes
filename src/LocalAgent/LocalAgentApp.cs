@@ -66,7 +66,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             // Add iptables rules
-            //_ipManager.AllocateIPs(_config.ReachableEndpoints, addRoutingRules: true, cancellationToken);
+            _ipManager.AllocateIPs(_config.ReachableEndpoints, addRoutingRules: true, cancellationToken);
 
             // Start service port forward
             var remoteAgentLocalPort = await _connectManagementClient.ConnectToRemoteAgentAsync(_config.RemoteAgentInfo, cancellationToken);

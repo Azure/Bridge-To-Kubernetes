@@ -1,5 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-cbl-mariner2.0 AS build
 
 RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
 
@@ -12,17 +12,17 @@ ARG DEVDIV_PKGS_PASSWORD
 
 ARG VSS_NUGET_EXTERNAL_FEED_ENDPOINTS="{'endpointCredentials': [{'endpoint':'https://devdiv.pkgs.visualstudio.com/_packaging/Mindaro/nuget/v3/index.json', 'username':'${DEVDIV_PKGS_USERNAME}', 'password':'${DEVDIV_PKGS_PASSWORD}'}]}"
 
-WORKDIR /src/localagent
+WORKDIR /src/LocalAgent
 COPY /src/nuget.config .
 COPY /src/nuget.config /src/library/
-COPY /src/localagent/localagent.csproj .
+COPY /src/LocalAgent/LocalAgent.csproj .
 COPY /src/common/common.csproj /src/common/
 COPY /src/library/library.csproj /src/library/
 COPY /deployment/settings/services/imagetag.setting /deployment/settings/services/imagetag.setting
 RUN dotnet restore
-COPY /src/localagent/ /src/localagent/
+COPY /src/LocalAgent/ /src/LocalAgent/
 COPY /src/common/ /src/common/
-copy /src/library/ /src/library/
+COPY /src/library/ /src/library/
 COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
@@ -30,14 +30,17 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -o /src/publish
 
 # Final container
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 as final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
 
 # Setup common tools
-COPY /build/setup-alpine-tools.sh .
-RUN chmod +x ./setup-alpine-tools.sh \
-    && ./setup-alpine-tools.sh \
-    && rm -f ./setup-alpine-tools.sh
+RUN tdnf clean all && \
+  tdnf check-update && \
+  tdnf upgrade -y
 
-WORKDIR /src/localagent
-COPY --from=build /src/publish /src/localagent
-ENTRYPOINT ["dotnet", "/src/localagent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]
+RUN tdnf install -y \
+  procps \
+  bind-utils
+
+WORKDIR /src/LocalAgent
+COPY --from=build /src/publish /src/LocalAgent
+ENTRYPOINT ["dotnet", "/src/LocalAgent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]
