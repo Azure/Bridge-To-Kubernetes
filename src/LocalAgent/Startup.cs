@@ -64,6 +64,10 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
                 .As<IIPManager>()
                 .SingleInstance();
 
+            builder.RegisterType<PortMappingManager>()
+                .As<IPortMappingManager>()
+                .SingleInstance();
+
             builder.RegisterType<ConsoleOutput>()
                    .As<IConsoleOutput>()
                    .SingleInstance();

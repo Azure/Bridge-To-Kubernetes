@@ -28,13 +28,15 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         private IProgress<ProgressUpdate> _progress;
         private readonly IConsoleOutput _out;
         private readonly IConnectManagementClient _connectManagementClient;
+        private readonly IPortMappingManager _portMappingManager;
 
         public LocalAgentApp(
             IManagementClientFactory managementClientFactory,
             IIPManager ipManager,
             ILog log,
             IConsoleOutput consoleOutput,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            IPortMappingManager portMappingManager)
         {
             _ipManager = ipManager;
             _log = log;
@@ -61,15 +63,18 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             var kubeConfigManagementClient = managementClientFactory.CreateKubeConfigClient();
             var kubeConfigDetails = kubeConfigManagementClient.GetKubeConfigDetails();
             _connectManagementClient = managementClientFactory.CreateConnectManagementClient(null, kubeConfigDetails, false, false);
+            _portMappingManager = portMappingManager;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            // assign local Ips for reachable services
+            _config.ReachableEndpoints = _portMappingManager.AddLocalPortMappings(_config.ReachableEndpoints);
             // Add iptables rules
             _ipManager.AllocateIPs(_config.ReachableEndpoints, addRoutingRules: true, cancellationToken);
 
             // Start service port forward
-            var remoteAgentLocalPort = await _connectManagementClient.ConnectToRemoteAgentAsync(_config.RemoteAgentInfo, cancellationToken);
+            int remoteAgentLocalPort = await _connectManagementClient.ConnectToRemoteAgentAsync(_config.RemoteAgentInfo, cancellationToken);
             await _connectManagementClient.StartServicePortForwardingsAsync(remoteAgentLocalPort, _config.ReachableEndpoints, _config.ReversePortForwardInfo, cancellationToken);
         }
 
