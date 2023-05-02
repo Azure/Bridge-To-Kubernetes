@@ -52,7 +52,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             try
             {
                 _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
-                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\Users\lolodi\localAgentConfig.json"));
+                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile("/home/hsubramanian/endPointInfo.json"));
             }
             catch (Exception ex)
             {

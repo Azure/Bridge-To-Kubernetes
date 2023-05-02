@@ -217,7 +217,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IP
                         {
                             if (_linuxRoutingRules.Add(rule))
                             {
-                                (var exitCode, var output) = RunUtility("iptables", rule, cancellationToken); // Only apply the rule if it wasn't previously present in the ruleset
+                                (var exitCode, var output) = RunUtility("sudo iptables", rule, cancellationToken); // Only apply the rule if it wasn't previously present in the ruleset
                                 if (exitCode != 0)
                                 {
                                     throw new InvalidUsageException(_log.OperationContext, $"Running 'iptables' failed with exit code '{exitCode}': '{output}'");
