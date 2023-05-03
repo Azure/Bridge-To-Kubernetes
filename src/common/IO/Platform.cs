@@ -92,7 +92,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                WorkingDirectory = ""
+                WorkingDirectory = Directory.GetCurrentDirectory(),
             };
 
             var process = new ProcessEx(psi);
