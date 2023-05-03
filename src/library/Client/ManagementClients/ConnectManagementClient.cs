@@ -401,8 +401,8 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                         perfLogger.SetProperty("NumOfContainerPorts", workloadInfo.ReversePortForwardInfo.Count());
                         perfLogger.SetProperty("NumOfVolumeMounts", workloadInfo.VolumeMounts.Count());
 
-                        var remoteAgentLocalPort = this._remoteEnvironmentManager.GetRemoteAgentLocalPort();
-                        var result = await _localEnvironmentManager.GetLocalEnvironment(remoteAgentLocalPort, workloadInfo, workloadLocalPorts, this._localProcessConfigFile.Value, cancellationToken);
+                        // var remoteAgentLocalPort = this._remoteEnvironmentManager.GetRemoteAgentLocalPort();
+                        var result = await _localEnvironmentManager.GetLocalEnvironment(0, workloadInfo, workloadLocalPorts, this._localProcessConfigFile.Value, cancellationToken);
                         perfLogger.SetSucceeded();
                         return result;
                     }

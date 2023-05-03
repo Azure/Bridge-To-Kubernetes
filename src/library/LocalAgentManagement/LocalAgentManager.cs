@@ -58,6 +58,9 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             // Add the NET_ADMIN privileges: this is used to run iptables
             commandLine.Append($"--cap-add=NET_ADMIN ");
 
+            // expose a PORT for the local agent to listen on
+            commandLine.Append($"-p 54411:7891 ");
+
             // Create --add-host arguments
             foreach (var endpoint in config.ReachableEndpoints)
             {
@@ -68,7 +71,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
                     commandLine.Append($"--add-host \"{serviceAlias}:{endpoint.LocalIP}\" ");
                 }
             }
-            commandLine.Append("hsubramanian/localagent:v12");
+            commandLine.Append("hsubramanian/localagent:v13");
 
             this.RunDockerCommand(commandLine.ToString());
         }

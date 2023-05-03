@@ -525,7 +525,7 @@ Additional Arguments
                 {
                     _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
                 }
-
+                this.ReportProgress(EventLevel.LogAlways, string.Format("LocalAgent started running"));
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     if (_waitProcesses.Any() && !_waitProcesses.Where(p => !p.HasExited).Any())
@@ -554,7 +554,7 @@ Additional Arguments
                     _log.Error($"ServiceConnectCommand.ExecuteInnerContainerizedAsync caught exception {ex.ToString()}");
                     _out.Error(Resources.Error_ConnectOperationFailed);
                 }
-                throw;
+                throw ex;
             }
             finally
             {

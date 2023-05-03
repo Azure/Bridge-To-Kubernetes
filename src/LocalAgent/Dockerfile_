@@ -43,6 +43,8 @@ RUN tdnf install -y \
 
 RUN tdnf install -y iptables
 
+EXPOSE 54411
+
 WORKDIR /src/LocalAgent
 COPY --from=build /src/publish /src/LocalAgent
 ENTRYPOINT ["dotnet", "/src/LocalAgent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]

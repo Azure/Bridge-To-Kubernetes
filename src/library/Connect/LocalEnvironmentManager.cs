@@ -303,7 +303,10 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         {
             using (var perfLogger = _log.StartPerformanceLogger(Events.LocalEnvironmentManager.AreaName, Events.LocalEnvironmentManager.Operations.GetLocalEnvironment))
             {
-                await this._LoadAdditionalServiceEnvAsync(remoteAgentLocalPort, workloadInfo, localProcessConfig, cancellationToken);
+                if (localProcessConfig != null)
+                {
+                    await this._LoadAdditionalServiceEnvAsync(remoteAgentLocalPort, workloadInfo, localProcessConfig, cancellationToken);
+                }
                 var result = this.CreateEnvVariablesForK8s(workloadInfo);
                 perfLogger.SetSucceeded();
                 perfLogger.SetProperty("EnvVarCount", result.Count);
