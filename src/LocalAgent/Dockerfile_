@@ -41,6 +41,8 @@ RUN tdnf install -y \
   procps \
   bind-utils
 
+RUN tdnf install -y iptables
+
 WORKDIR /src/LocalAgent
 COPY --from=build /src/publish /src/LocalAgent
 ENTRYPOINT ["dotnet", "/src/LocalAgent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]
