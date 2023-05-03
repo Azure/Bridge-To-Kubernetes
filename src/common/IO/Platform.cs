@@ -91,7 +91,8 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
                 Arguments = command,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                WorkingDirectory = ""
             };
 
             var process = new ProcessEx(psi);
