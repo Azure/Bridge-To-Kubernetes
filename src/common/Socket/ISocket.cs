@@ -20,7 +20,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Socket
         bool Connected { get; }
 
         /// <summary>
-        /// <see cref="System.Net.Sockets.Socket.AcceptAsync"/>
+        /// <see cref="System.Net.Sockets.Socket.AcceptAsync()"/>
         /// </summary>
         Task<ISocket> AcceptAsync();
 
@@ -35,7 +35,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Socket
         void Close();
 
         /// <summary>
-        /// <see cref="System.Net.Sockets.Socket.Listen"/>
+        /// <see cref="System.Net.Sockets.Socket.Listen()"/>
         /// </summary>
         void Listen();
 
