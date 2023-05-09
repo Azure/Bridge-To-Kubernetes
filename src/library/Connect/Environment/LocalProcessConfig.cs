@@ -149,6 +149,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                         {
                             this.IsProbesEnabled = true;
                         }
+
+                        if (StringComparer.OrdinalIgnoreCase.Equals(feature, EnableFeature.LifecycleHooks.ToString()))
+                        {
+                            this.IsLifecycleHooksEnabled = true;
+                        }
                     }
                 }
 
@@ -246,6 +251,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         /// <see cref="ILocalProcessConfig.IsProbesEnabled"/>
         /// </summary>
         public bool IsProbesEnabled { get; } = false;
+
+        /// <summary>
+        /// <see cref="ILocalProcessConfig.IsLifecycleHooksEnabled"/>
+        /// </summary>
+        public bool IsLifecycleHooksEnabled { get; } = false;
 
         /// <summary>
         /// <see cref="ILocalProcessConfig.EvaluateEnvVars"/>
