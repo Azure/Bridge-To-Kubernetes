@@ -121,7 +121,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
             }
             catch (Exception)
             {
-                return "Serialization Error";
+                return $"Serialization Error of type: {input.GetType()}";
             }
         }
 
