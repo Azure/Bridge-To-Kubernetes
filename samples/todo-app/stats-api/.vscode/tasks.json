@@ -4,15 +4,14 @@
         {
             "label": "bridge-to-kubernetes.resource",
             "type": "bridge-to-kubernetes.resource",
-            "resource": "<yourservicename>",
+            "resource": "stats-api",
             "resourceType": "service",
             "ports": [
                 3001
             ],
-            "targetCluster": "<yourclustername>",
-            "targetNamespace": "<yournamespace>",
-            "useKubernetesServiceEnvironmentVariables": false,
-            "isolateAs": "yourisolatedroute"
+            "targetCluster": "hari-aks",
+            "targetNamespace": "todo-app",
+            "useKubernetesServiceEnvironmentVariables": true
         }
     ]
 }

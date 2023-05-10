@@ -71,7 +71,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
                     commandLine.Append($"--add-host \"{serviceAlias}:{endpoint.LocalIP}\" ");
                 }
             }
-            commandLine.Append("hsubramanian/localagent:v13");
+            commandLine.Append("hsubramanian/localagent:v15");
 
             this.RunDockerCommand(commandLine.ToString());
         }
