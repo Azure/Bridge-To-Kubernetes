@@ -27,9 +27,9 @@ app.get('/stats', async function (req, res) {
     var completed = 0;
     var deleted =0;
     try{
-        var created = await cache.get('todosCreated');
-        var completed = await cache.get('todosCompleted');
-        var deleted = await cache.get('todosDeleted');
+        // var created = await cache.get('todosCreated');
+        // var completed = await cache.get('todosCompleted');
+        // var deleted = await cache.get('todosDeleted');
     } catch(err) {
         console.log(err);
     }

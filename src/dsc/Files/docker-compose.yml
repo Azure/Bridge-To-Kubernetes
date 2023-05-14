@@ -1,0 +1,45 @@
+﻿version: '3.8'
+services:
+  devcontainer:
+    container_name: hari-aks-todoapp-stats-api
+    image: docker.io/hsubramanian/stats-api:local4
+    volumes:
+      - ../..:/workspaces:cached      
+    network_mode: service:localagent
+    command: sleep infinity
+
+  localagent:
+    container_name: hari-aks-todoapp-stats-api-localAgent
+    image: docker.io/hsubramanian/localagent:v15
+    restart: unless-stopped
+    volumes:
+      - C:\Users\hsubramanian\AppData\Local\Temp\tmp2A2B.tmp:/etc/localAgent/localAgentConfig.json
+      - C:\Users\hsubramanian\.kube\config:/etc/localAgent/kubeconfig
+    environment:
+      - KUBECONFIG=/etc/localAgent/kubeconfig
+    cap_add:
+      - "NET_ADMIN"
+    extra_hosts:
+      - "todos-db:127.1.1.1"
+      - "todos-db.todo-app:127.1.1.1" 
+      - "todos-db.todo-app.svc:127.1.1.1" 
+      - "todos-db.todo-app.svc.cluster.local:127.1.1.1" 
+      - "frontend:127.1.1.2"
+      - "frontend.todo-app:127.1.1.2"
+      - "frontend.todo-app.svc:127.1.1.2" 
+      - "frontend.todo-app.svc.cluster.local:127.1.1.2" 
+      - "stats-queue:127.1.1.3" 
+      - "stats-queue.todo-app:127.1.1.3" 
+      - "stats-queue.todo-app.svc:127.1.1.3" 
+      - "stats-queue.todo-app.svc.cluster.local:127.1.1.3" 
+      - "database-api:127.1.1.4" 
+      - "database-api.todo-app:127.1.1.4" 
+      - "database-api.todo-app.svc:127.1.1.4" 
+      - "database-api.todo-app.svc.cluster.local:127.1.1.4" 
+      - "stats-cache:127.1.1.5" 
+      - "stats-cache.todo-app:127.1.1.5" 
+      - "stats-cache.todo-app.svc:127.1.1.5" 
+      - "stats-cache.todo-app.svc.cluster.local:127.1.1.5" 
+      - "stats-api:127.1.1.6" 
+      - "stats-api.todo-app.svc:127.1.1.6"
+      - "stats-api.todo-app:127.1.1.6"  

@@ -92,7 +92,6 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                WorkingDirectory = Directory.GetCurrentDirectory(),
             };
 
             var process = new ProcessEx(psi);
@@ -180,7 +179,13 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
                 int exitCode;
                 using (cancellationToken.Register(killProcess))
                 {
-                    process.Start();
+                    try {
+                        process.Start();
+                    } catch(Exception e)
+                    {
+                        throw;
+                    }
+                    
                     process.BeginErrorReadLine();
                     process.BeginOutputReadLine();
 

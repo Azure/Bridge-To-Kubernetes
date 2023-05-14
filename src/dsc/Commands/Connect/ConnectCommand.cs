@@ -291,6 +291,7 @@ Additional Arguments
                 }
 
                 ExitCode exitCode = ExitCode.Success;
+                _envScriptPath = string.IsNullOrEmpty(_updateScript) ? this.CreateEnvScriptPath() : _updateScript;
                 if (_runContainerized)
                 {
                     return await this.ExecuteInnerContainerizedAsync(connectManagementClient, kubeConfigDetails, this._connectionCancellationSource.Token, routingManagementClient);
@@ -319,7 +320,6 @@ Additional Arguments
                     }
                 }
 
-                _envScriptPath = string.IsNullOrEmpty(_updateScript) ? this.CreateEnvScriptPath() : _updateScript;
 
                 if (!_useKubernetesServiceEnvironmentVariables && (this._elevationRequests != null && this._elevationRequests.Any()))
                 {
@@ -526,6 +526,17 @@ Additional Arguments
                     _fileSystem.Value.WriteAllTextToFile(_envJsonPath, JsonHelpers.SerializeObjectIndented(envVars));
                 }
                 this.ReportProgress(EventLevel.LogAlways, string.Format("LocalAgent started running"));
+                /*this.ReportProgress(EventLevel.LogAlways, $"##################### {Resources.Progress_EnvironmentStarted} #############################################################");
+                if (string.IsNullOrEmpty(_updateScript))
+                {
+                    var consoleProcess = _consoleLauncher.Value.LaunchTerminalWithEnv(envVars, _envScriptPath, launchCommand: _commandLineArgumentsManager.CommandExecuteArguments);
+                    _waitProcesses.Add(consoleProcess);
+                }
+                else
+                {
+                    _consoleLauncher.Value.LaunchTerminalWithEnv(envVars, _envScriptPath, performLaunch: false);
+                }
+                this.ReportProgress(EventLevel.LogAlways, string.Format(Resources.Progress_RunScriptToConnect, _envScriptPath));*/
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     if (_waitProcesses.Any() && !_waitProcesses.Where(p => !p.HasExited).Any())

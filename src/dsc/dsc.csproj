@@ -27,6 +27,7 @@
     <IsPackable>true</IsPackable>
     <NuspecFile>bin\$(Configuration)\net6.0\win-x64\publish\dsc.nuspec</NuspecFile>
   </PropertyGroup>
+ 
 
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
@@ -120,15 +121,19 @@
   </Target>
 
   <ItemGroup>
-    <None Include="
-              $(MSBuildThisFileDirectory)..\..\NOTICE.txt;
-              $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
+    <None Include="&#xD;&#xA;              $(MSBuildThisFileDirectory)..\..\NOTICE.txt;&#xD;&#xA;              $(MSBuildThisFileDirectory)..\..\LICENSE.txt">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
     <None Include="dsc.nuspec">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Files\docker-compose.yml">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
