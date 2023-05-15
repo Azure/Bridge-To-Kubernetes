@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
+    /// <summary>
+    /// Utillities for logging
+    /// </summary>
     public static class LoggingUtils
     {
         /// <summary>
