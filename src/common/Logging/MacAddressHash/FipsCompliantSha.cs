@@ -11,6 +11,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
     internal class FipsCompliantSha
     {
         // FIPS compliant SHA256 hash algorithm.
-        public static readonly HashAlgorithm Sha256 = HashAlgorithm.Create(typeof(SHA256CryptoServiceProvider).AssemblyQualifiedName);
+        public static readonly SHA256 Sha256 = SHA256.Create();
     }
 }
