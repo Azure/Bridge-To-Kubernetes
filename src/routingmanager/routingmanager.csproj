@@ -24,10 +24,6 @@
     <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn></NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>
