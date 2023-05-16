@@ -81,6 +81,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             var commandLine = new StringBuilder();
             string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
             AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");
+            commandLine.Append("-p localagent ");
             commandLine.Append($"-f \"{filePath}\" ");
             commandLine.Append("up -d");
             this.RunDockerComposeUpCommand(commandLine.ToString());
@@ -108,6 +109,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             var commandLine = new StringBuilder();
             string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
             AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");
+            commandLine.Append("-p localagent ");
             commandLine.Append($"-f \"{filePath}\" ");
             commandLine.Append("down");
             this.RunDockerComposeUpCommand(commandLine.ToString());

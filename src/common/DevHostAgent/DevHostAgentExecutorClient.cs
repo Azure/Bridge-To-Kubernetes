@@ -326,7 +326,14 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
                     };
                 }).AddMessagePackProtocol()
                 .Build();
-            await connection.StartAsync(cancellationToken);
+            try
+            {
+                await connection.StartAsync(cancellationToken);
+            } catch (Exception ex)
+            {
+                _log.Error("signalR start async failed:", ex);
+                throw;
+            }
             return connection;
         }
 

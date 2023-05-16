@@ -177,7 +177,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 _devHostAgenPortForwardCancellationTokenSource = new CancellationTokenSource();
             }
 
-            _log.Verbose($"Preparing to connect to the remote agent running in {remoteAgentInfo.NamespaceName}/{remoteAgentInfo.PodName}...");
+            _log.Info($"Preparing to connect to the remote agent running in {remoteAgentInfo.NamespaceName}/{remoteAgentInfo.PodName}...");
             this._ReportProgress(Resources.PreparingToRunBridgeToKubernetesFormat, Product.Name, remoteAgentInfo.NamespaceName, remoteAgentInfo.PodName);
 
             // Find a free port to start portforwarding for devhostagent
