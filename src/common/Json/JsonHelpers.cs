@@ -103,7 +103,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         private class IPAddressConverter : JsonConverter<IPAddress>
         {
-            public override IPAddress? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override IPAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 var data = reader.GetString();
                 if (data == null)
@@ -274,7 +274,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         private class IntOrStringJsonConverter : JsonConverter<k8s.Models.IntstrIntOrString>
         {
-            public override k8s.Models.IntstrIntOrString? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override k8s.Models.IntstrIntOrString Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 switch (reader.TokenType)
                 {
@@ -291,7 +291,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
                     throw new JsonException();
                 }
 
-                k8s.Models.IntstrIntOrString? intOrString = null;
+                k8s.Models.IntstrIntOrString intOrString = null;
 
                 while (reader.Read())
                 {
