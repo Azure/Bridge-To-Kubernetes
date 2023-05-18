@@ -12,6 +12,9 @@ ARG DEVDIV_PKGS_PASSWORD
 
 ARG VSS_NUGET_EXTERNAL_FEED_ENDPOINTS="{'endpointCredentials': [{'endpoint':'https://devdiv.pkgs.visualstudio.com/_packaging/Mindaro/nuget/v3/index.json', 'username':'${DEVDIV_PKGS_USERNAME}', 'password':'${DEVDIV_PKGS_PASSWORD}'}]}"
 
+FROM build AS debug
+
+
 WORKDIR /src/LocalAgent
 COPY /src/nuget.config .
 COPY /src/nuget.config /src/library/
