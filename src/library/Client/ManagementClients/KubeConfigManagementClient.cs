@@ -121,7 +121,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                     {
                         _log.Error("Failed to set {0} as current context.", new PII(_targetKubeConfigContext));
                         _log.Exception(ex);
-                        throw ex;
+                        throw;
                     }
                     _log.Info("Re-pulling kubeconfig...");
                     config = KubernetesClientConfiguration.LoadKubeConfig(_kubeConfigPath.Value);
