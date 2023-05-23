@@ -32,4 +32,9 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- other property settings -->
+    <DockerfileFastModeStage>debug</DockerfileFastModeStage>
+  </PropertyGroup>
 </Project>

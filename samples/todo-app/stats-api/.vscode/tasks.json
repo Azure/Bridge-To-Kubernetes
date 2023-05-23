@@ -10,8 +10,8 @@
                 3001
             ],
             "targetCluster": "hari-aks",
-            "targetNamespace": "todo-app",
-            "useKubernetesServiceEnvironmentVariables": true
+            "targetNamespace": "broken-cluster",
+            "useKubernetesServiceEnvironmentVariables": false
         }
     ]
 }

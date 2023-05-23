@@ -10,7 +10,7 @@ services:
 
   localagent:
     container_name: hari-aks-todoapp-stats-api-localAgent
-    image: docker.io/hsubramanian/localagent:v16
+    image: docker.io/hsubramanian/localagent:nonmariner
     restart: unless-stopped
     volumes:
       - C:\Users\hsubramanian\AppData\Local\Temp\tmp2A2B.tmp:/etc/localAgent/localAgentConfig.json
