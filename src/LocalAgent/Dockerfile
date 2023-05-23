@@ -1,27 +1,43 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-cbl-mariner2.0 AS build
-WORKDIR /src
-COPY ["nuget.config", "."]
-COPY ["LocalAgent/LocalAgent.csproj", "LocalAgent/"]
-COPY ["library/library.csproj", "library/"]
-COPY ["common/common.csproj", "common/"]
-RUN dotnet restore "LocalAgent/LocalAgent.csproj"
-COPY . .
-WORKDIR "/src/LocalAgent"
-RUN dotnet build "LocalAgent.csproj" -c Release -o /app/build
+ARG Configuration=Debug
+ARG TelemetryType=TELEMETRY_DEVELOPMENT
+ARG MindaroBuildNumber=0.0
 
-FROM build AS publish
-RUN dotnet publish "LocalAgent.csproj" -c Release -o /app/publish
+ARG DEVDIV_PKGS_USERNAME
+ARG DEVDIV_PKGS_PASSWORD
 
-FROM base AS final
-RUN tdnf clean all & tdnf check-update & tdnf upgrade -y
-RUN tdnf install -y iptables
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Microsoft.BridgeToKubernetes.LocalAgent.dll"]
+ARG VSS_NUGET_EXTERNAL_FEED_ENDPOINTS="{'endpointCredentials': [{'endpoint':'https://devdiv.pkgs.visualstudio.com/_packaging/Mindaro/nuget/v3/index.json', 'username':'${DEVDIV_PKGS_USERNAME}', 'password':'${DEVDIV_PKGS_PASSWORD}'}]}"
+
+WORKDIR /src/LocalAgent
+COPY /src/nuget.config .
+COPY /src/nuget.config /src/library/
+COPY /src/LocalAgent/LocalAgent.csproj .
+COPY /src/common/common.csproj /src/common/
+COPY /src/library/library.csproj /src/library/
+COPY /deployment/settings/services/imagetag.setting /deployment/settings/services/imagetag.setting
+RUN dotnet restore
+COPY /src/LocalAgent/ /src/LocalAgent/
+COPY /src/common/ /src/common/
+COPY /src/library/ /src/library/
+COPY /build/ /build/
+ENV TelemetryType=${TelemetryType}
+ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
+
+RUN dotnet publish -c ${Configuration} -o /src/publish
+
+# Final container
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+
+# Setup common tools
+RUN apt update && \
+  apt upgrade -y
+
+RUN apt install iptables -y
+
+WORKDIR /src/LocalAgent
+COPY --from=build /src/publish /src/LocalAgent
+ENTRYPOINT ["dotnet", "/src/LocalAgent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]
