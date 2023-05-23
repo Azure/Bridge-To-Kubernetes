@@ -82,14 +82,14 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Kubernetes
         internal IDictionary<string, object> GetEventParameters()
         {
             return new Dictionary<string, object>
-            {
-                { nameof(Name), new PII(Name) },
-                { nameof(Labels), new PII(JsonHelpers.SerializeDictionary(Labels)) },
-                { nameof(Status),  Status },
-                { nameof(ConfigName),  ConfigName },
-                { nameof(LastUpdateTimestamp), LastUpdateTimestamp },
-                { nameof(UserContainer), UserContainer.GetEventParameters() }
-            };
+                  {
+                      { nameof(Name), new PII(Name) },
+                      { nameof(Labels), new PII(JsonHelpers.SerializeObject(Labels)) },
+                      { nameof(Status),  Status },
+                      { nameof(ConfigName),  ConfigName },
+                      { nameof(LastUpdateTimestamp), LastUpdateTimestamp },
+                      { nameof(UserContainer), UserContainer.GetEventParameters() }
+                  };
         }
     }
 }

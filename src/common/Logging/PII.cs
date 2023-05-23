@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using Microsoft.BridgeToKubernetes.Common.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,7 +99,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
             if (input is IDictionary<string, object> properties)
             {
                 var sanitizedProperties = properties.ToDictionary(p => p.Key, p => SanitizeOutput(p.Value, GetPiiValue));
-                return sanitizedProperties.Serialize();
+                return JsonHelpers.SerializeForLoggingPurpose(sanitizedProperties);
             }
 
             if (input is Enum enumType) // for logging purpose, get the string value of an enum
@@ -106,7 +107,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
                 input = enumType.GetStringValue();
             }
 
-            return input is PII pii ? GetPiiValue(pii) : input.Serialize();
+            return input is PII pii ? GetPiiValue(pii) : JsonHelpers.SerializeForLoggingPurpose(input);
         }
     }
 }
