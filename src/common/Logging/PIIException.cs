@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using Microsoft.BridgeToKubernetes.Common.Json;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -71,7 +72,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
             try
             {
-                var serializedArgs = args.Select(arg => arg.Serialize()).ToArray();
+                var serializedArgs = args.Select(arg => JsonHelpers.SerializeForLoggingPurpose(arg)).ToArray();
                 return string.Format(CultureInfo.InvariantCulture, format, serializedArgs);
             }
             catch (FormatException)

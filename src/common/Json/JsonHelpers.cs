@@ -10,9 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Xml;
 
@@ -20,28 +18,53 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 {
     internal static class JsonHelpers
     {
-        public static Encoding DefaultEncoding { get; } = Encoding.UTF8;
-
-        private static IList<JsonConverter> DefaultConverters { get; } = new List<JsonConverter>
-        {
-            new Iso8601TimeSpanConverter(),
-            new KubernetesDateTimeConverter(),
-            new KubernetesDateTimeOffsetConverter(),
-            new IntOrStringJsonConverter(),
-            new IPAddressConverter(),
-            new DictionaryStringObjectJsonConverter(),
-            new PIIJsonConverter(),
-            new SystemTextJsonPatch.Converters.JsonPatchDocumentConverterFactory(),
-            new JsonStringEnumConverterEx<k8s.WatchEventType>()
-        };
-
         private static JsonSerializerOptions SerializerOptions { get; } = CreateSerializerOptions();
 
         private static JsonSerializerOptions SerializerSettingsIndented { get; } = CreateSerializerOptions(indented: true);
 
         private static JsonSerializerOptions SerializerSettingsCaseInsensitive { get; } = CreateSerializerOptions(caseInsensitive: true);
 
-        private static JsonSerializerOptions SerializerSettingsDefaultContractResolver { get; } = CreateSerializerOptions(camelCaseContextResolver: false);
+        private static JsonSerializerOptions SerializerOptionsForLoggingPurpose { get; } = CreateSerializerOptionsForLoggingPurpose();
+
+        private static JsonSerializerOptions SerializerOptionsForLoggingPurposeIndented { get; } = CreateSerializerOptionsForLoggingPurpose(indented: true);
+
+        private static JsonSerializerOptions CreateSerializerOptions(bool indented = false, bool camelCaseContextResolver = true, bool caseInsensitive = false)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = camelCaseContextResolver ? JsonNamingPolicy.CamelCase : null,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = indented,
+                PropertyNameCaseInsensitive = caseInsensitive,
+            };
+
+            jsonSerializerOptions.Converters.Add(new Iso8601TimeSpanConverter());
+            jsonSerializerOptions.Converters.Add(new KubernetesDateTimeConverter());
+            jsonSerializerOptions.Converters.Add(new KubernetesDateTimeOffsetConverter());
+            jsonSerializerOptions.Converters.Add(new IntOrStringJsonConverter());
+            jsonSerializerOptions.Converters.Add(new IPAddressConverter());
+            jsonSerializerOptions.Converters.Add(new DictionaryStringObjectJsonConverter());
+            jsonSerializerOptions.Converters.Add(new PIIJsonConverter());
+            jsonSerializerOptions.Converters.Add(new SystemTextJsonPatch.Converters.JsonPatchDocumentConverterFactory());
+            jsonSerializerOptions.Converters.Add(new JsonStringEnumConverterEx<k8s.WatchEventType>());
+
+            return jsonSerializerOptions;
+        }
+
+        private static JsonSerializerOptions CreateSerializerOptionsForLoggingPurpose(bool indented = false)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = indented
+            };
+
+            var exceptionConverter = new ExceptionConverter<Exception>();
+            jsonSerializerOptions.Converters.Add(exceptionConverter);
+
+            return jsonSerializerOptions;
+        }
 
         public static T DeserializeObject<T>(string v)
             => JsonSerializer.Deserialize<T>(v, SerializerOptions);
@@ -49,61 +72,79 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
         public static T DeserializeObjectCaseInsensitive<T>(string v)
             => JsonSerializer.Deserialize<T>(v, SerializerSettingsCaseInsensitive);
 
-        public static object DeserializeObject(string v)
-            => JsonSerializer.Deserialize<object>(v, SerializerOptions);
-
-        public static string SerializeObject(object obj, JsonSerializerOptions settings = null)
-            => JsonSerializer.Serialize(obj, settings != null ? settings : SerializerOptions);
+        public static string SerializeObject(object obj)
+            => JsonSerializer.Serialize(obj, SerializerOptions);
 
         public static string SerializeObjectIndented(object obj)
             => JsonSerializer.Serialize(obj, SerializerSettingsIndented);
 
-        public static string SerializeObjectDefaultContractResolver(object obj)
-            => JsonSerializer.Serialize(obj, SerializerSettingsDefaultContractResolver);
-
-        public static Dictionary<string, string> DeserializeDictionary(string json)
-            => DeserializeObject<Dictionary<string, string>>(json);
-
-        public static string SerializeDictionary(IDictionary<string, string> d)
-            => SerializeObject(d);
-
-        public static string SerializeDictionaryIndented(IDictionary<string, string> d)
-            => SerializeObjectIndented(d);
-
-        public static dynamic ParseJson(string s)
-            => (dynamic)JsonNode.Parse(s);
-
-        public static T ParseAndGetProperty<T>(string json, string property)
+        /// <summary>
+        /// Serialize an object to JSON. PII values are output unscrambled. Swallows serialization exceptions.
+        /// </summary>
+        /// <param name="input">Object or value to serialize</param>
+        /// <returns>String representation of <paramref name="input"/></returns>
+        public static string SerializeForLoggingPurposeIndented(object input)
         {
-            var obj = JsonNode.Parse(json);
-            return obj[property].GetValue<T>();
+            return SerializeForLoggingPurpose(input, SerializerOptionsForLoggingPurposeIndented);
         }
 
-        public static JsonSerializerOptions CreateSerializerOptions(bool indented = false, bool camelCaseContextResolver = true, bool caseInsensitive = false)
+        /// <summary>
+        /// Serialize an object to JSON. PII values are output unscrambled. Swallows serialization exceptions.
+        /// </summary>
+        /// <param name="input">Object or value to serialize</param>
+        /// <returns>String representation of <paramref name="input"/></returns>
+        public static string SerializeForLoggingPurpose(object input)
         {
-            var jsonSerializerOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = camelCaseContextResolver ? JsonNamingPolicy.CamelCase : null,
-                WriteIndented = indented,
-                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-                PropertyNameCaseInsensitive = caseInsensitive,
+            return SerializeForLoggingPurpose(input, SerializerOptionsForLoggingPurpose);
+        }
 
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-            };
-
-            foreach (var converter in DefaultConverters)
+        private static string SerializeForLoggingPurpose(object input, JsonSerializerOptions settings)
+        {
+            if (input is string inputString)
             {
-                jsonSerializerOptions.Converters.Add(converter);
+                return inputString;
             }
 
-            return jsonSerializerOptions;
+            if (input is PII pii)
+            {
+                return pii.Value;
+            }
+
+            if (input is Exception ex)
+            {
+                input = RemoveUnwantedExceptionProperties(input, ex);
+            }
+
+            try
+            {
+                return JsonSerializer.Serialize(input, settings);
+            }
+            catch (Exception)
+            {
+                return $"Serialization Error of type: {input.GetType()}";
+            }
         }
 
-        #region Private classes
+        private static object RemoveUnwantedExceptionProperties(object input, Exception ex)
+        {
+            try
+            {
+                // The Targetsite.Module property can make exception size blow up.
+                // To remove it we serialize the Exception with settings that ignore TargetSite.Module and we deserialize it as a JObject that will then be logged.
+                // When touching this method please note that Exceptions can have an InnerException and possibly InnerExceptions (AggreagateException), these need to be cleaned as well.
+
+                var serializedException = JsonSerializer.Serialize(ex, SerializerOptionsForLoggingPurpose);
+                return JsonSerializer.Deserialize<object>(serializedException);
+            }
+            catch { }
+            return input;
+        }
+
+        #region Json Converters
 
         private class IPAddressConverter : JsonConverter<IPAddress>
         {
-            public override IPAddress? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override IPAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 var data = reader.GetString();
                 if (data == null)
@@ -168,7 +209,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
                 // supply JsonSerializerOptions that contains this JsonConverter in it's Converters list.
                 // Don't do that, you will lose performance because of the cast needed below.
                 // Cast to avoid infinite loop: https://github.com/dotnet/docs/issues/19268
-                JsonSerializer.Serialize(writer, (IDictionary<string, object>)value);
+                JsonSerializer.Serialize(writer, value);
             }
 
             private object ExtractValue(ref Utf8JsonReader reader, JsonSerializerOptions options)
@@ -212,7 +253,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
         {
             public override bool CanConvert(Type objectType)
             {
-                return (objectType == typeof(PII));
+                return objectType == typeof(PII);
             }
 
             public override PII Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -274,7 +315,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
 
         private class IntOrStringJsonConverter : JsonConverter<k8s.Models.IntstrIntOrString>
         {
-            public override k8s.Models.IntstrIntOrString? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            public override k8s.Models.IntstrIntOrString Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 switch (reader.TokenType)
                 {
@@ -291,7 +332,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
                     throw new JsonException();
                 }
 
-                k8s.Models.IntstrIntOrString? intOrString = null;
+                k8s.Models.IntstrIntOrString intOrString = null;
 
                 while (reader.Read())
                 {
@@ -346,7 +387,51 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
             }
         }
 
-        public class JsonStringEnumConverterEx<TEnum> : JsonConverter<TEnum> where TEnum : struct, System.Enum
+        private class ExceptionConverter<TExceptionType> : JsonConverter<TExceptionType>
+        {
+            public override bool CanConvert(Type typeToConvert)
+            {
+                return typeof(Exception).IsAssignableFrom(typeToConvert);
+            }
+
+            public override TExceptionType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                throw new NotSupportedException("Deserializing exceptions is not allowed");
+            }
+
+            public override void Write(Utf8JsonWriter writer, TExceptionType value, JsonSerializerOptions options)
+            {
+                var serializableProperties = value!.GetType()
+                    .GetProperties()
+                    .Select(uu => new { uu.Name, Value = uu.GetValue(value) })
+                    .Where(uu => uu.Name != nameof(Exception.TargetSite));
+
+                if (options?.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull)
+                {
+                    serializableProperties = serializableProperties.Where(uu => uu.Value != null);
+                }
+
+                var propList = serializableProperties.ToList();
+
+                if (propList.Count == 0)
+                {
+                    // Nothing to write
+                    return;
+                }
+
+                writer.WriteStartObject();
+
+                foreach (var prop in propList)
+                {
+                    writer.WritePropertyName(prop.Name);
+                    JsonSerializer.Serialize(writer, prop.Value, options);
+                }
+
+                writer.WriteEndObject();
+            }
+        }
+
+        public class JsonStringEnumConverterEx<TEnum> : JsonConverter<TEnum> where TEnum : struct, Enum
         {
             private readonly Dictionary<TEnum, string> _enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> _stringToEnum = new Dictionary<string, TEnum>();
@@ -354,7 +439,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
             public JsonStringEnumConverterEx()
             {
                 var type = typeof(TEnum);
-                var values = System.Enum.GetValues<TEnum>();
+                var values = Enum.GetValues<TEnum>();
 
                 foreach (var value in values)
                 {
@@ -394,6 +479,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Json
                 writer.WriteStringValue(_enumToString[value]);
             }
         }
-        #endregion Private classes
+
+        #endregion Json Converters
     }
 }

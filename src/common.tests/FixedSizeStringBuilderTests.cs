@@ -31,7 +31,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
             sb.AppendLine("12345");
             sb.Append("678910");
 
-            Assert.Equal(sb.ToString(), "...678910");
+            Assert.Equal("...678910", sb.ToString());
             Assert.True(sb.MaxLengthReached);
         }
 
@@ -42,7 +42,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests
 
             sb.Append("12345678910");
 
-            Assert.Equal(sb.ToString(), "...2345678910");
+            Assert.Equal("...2345678910", sb.ToString());
             Assert.True(sb.MaxLengthReached);
         }
 
