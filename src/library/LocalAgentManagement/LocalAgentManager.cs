@@ -118,7 +118,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Localagent = new LocalAgentContainer
             {
                 ContainerName = _localAgentContainerName + "-localagent",
-                Image = "docker.io/hsubramanian/localagent:marinerv1",
+                Image = "docker.io/hsubramanian/localagent:marinerv4",
                 Volumes = new List<string>(),
                 Environment = new List<string>(),
                 CapAdd = new List<string>()
@@ -130,15 +130,9 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Localagent.ExtraHosts = frameExtraHosts(config);
             services.Localagent.Healthcheck = new HealthCheck
             {
-                Test = new List<string>
-            {
-                "CMD",
-                "curl",
-                "-f",
-                "http://localhost:7891/healthz"
-            },
+                Test = new string[4] { "CMD", "curl", "-f", "http://localhost:7891/health"},
                 Interval = "2s",
-                Timeout = "10s",
+                Timeout = "60s",
                 Retries = 3
             };
             // user workload container
@@ -153,9 +147,11 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             };
             services.Devcontainer.Environment.AddRange(appendUserServiceHost(config.EnvironmentVariables));
             services.Devcontainer.ContainerName = _localAgentContainerName;
+            // possible values always, on_failure
             services.Devcontainer.Restart = "always";
             services.Devcontainer.DependsOn = new DependsOn();
             services.Devcontainer.DependsOn.DependsOnName = new DependsOnName();
+            // possible values service_started, service_healthy, service_completed_successfully
             services.Devcontainer.DependsOn.DependsOnName.Condition = "service_healthy";
             services.Devcontainer.DependsOn.DependsOnName.Restart = true;
             services.Devcontainer.NetworkMode = "service:localagent"; // this will spin up user workload in same network as local agent      

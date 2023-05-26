@@ -94,7 +94,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Docker
     public partial class HealthCheck
     {
         [YamlMember(Alias = "test")]
-        public List<string> Test { get; set; }
+        public string[] Test { get; set; }
 
         [YamlMember(Alias = "interval")]
         public string Interval { get; set; }
