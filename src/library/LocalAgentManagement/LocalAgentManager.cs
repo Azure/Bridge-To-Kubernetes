@@ -118,7 +118,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Localagent = new LocalAgentContainer
             {
                 ContainerName = _localAgentContainerName + "-localagent",
-                Image = "docker.io/hsubramanian/localagent:nonmariner2",
+                Image = "docker.io/hsubramanian/localagent:marinerv1",
                 Volumes = new List<string>(),
                 Environment = new List<string>(),
                 CapAdd = new List<string>()
