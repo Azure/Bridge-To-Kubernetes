@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography.Xml;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.BridgeToKubernetes.Common.IO;
@@ -16,6 +17,7 @@ using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Models;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.BridgeToKubernetes.LocalAgent
@@ -25,6 +27,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         private readonly LocalAgentConfig _config;
         private readonly IIPManager _ipManager;
         private readonly ILog _log;
+        private static bool _connected = false;
         private IProgress<ProgressUpdate> _progress;
         private readonly IConsoleOutput _out;
         private readonly IConnectManagementClient _connectManagementClient;
@@ -38,6 +41,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             IFileSystem fileSystem,
             IPortMappingManager portMappingManager)
         {
+            _connected = false;
             _ipManager = ipManager;
             _log = log;
             _out = consoleOutput;
@@ -51,8 +55,8 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
 
             try
             {
-                _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
-                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\\Users\\hsubramanian\\AppData\\Local\\Temp\\tmp2A2B.tmp"));
+                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
+                _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\\Users\\hsubramanian\\AppData\\Local\\Temp\\tmp2A2B.tmp"));
             }
             catch (Exception ex)
             {
@@ -76,7 +80,22 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             // Start service port forward
             int remoteAgentLocalPort = await _connectManagementClient.ConnectToRemoteAgentAsync(_config.RemoteAgentInfo, cancellationToken);
             await _connectManagementClient.StartServicePortForwardingsAsync(remoteAgentLocalPort, _config.ReachableEndpoints, _config.ReversePortForwardInfo, cancellationToken);
+            _connected = true;
+
         }
+
+        public static HealthCheckResult IsConnected()
+        {
+            HealthCheckResult healthCheckResult;
+            if (_connected)
+            {
+                healthCheckResult = new HealthCheckResult(HealthStatus.Healthy, "Local Agent started successfully");
+            }
+
+            healthCheckResult = new HealthCheckResult(HealthStatus.Unhealthy, "Local Agent didn't start successfully"); 
+
+            return healthCheckResult;
+        }   
 
         public Task StopAsync(CancellationToken cancellationToken)
         {

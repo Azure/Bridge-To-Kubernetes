@@ -1,13 +1,34 @@
 var express = require('express');
 var redis = require('redis');
 var app = express();
+const dns = require('dns');
+const promisify = require('util').promisify;
 
+
+class Network
+{
+    async search(host)
+    {
+        let options = {
+            hints: dns.ADDRCONFIG | dns.VMAPPED,
+            all: true,
+            verbatim: true
+        }
+
+        let address = await promisify(dns.lookup)(host, options);       
+        return address.map( ({address, family}) => {
+            return { address, family };
+        });
+    }
+} 
+
+const network = new Network();
 var cache = redis.createClient({    
     socket:{
-        host:process.env.STATS_CACHE_SERVICE_HOST,
+        host:await network.search('stats-cache').address,
         port:process.env.STATS_CACHE_SERVICE_PORT,
         tls: process.env.REDIS_SSL == "true" ? {
-            host: process.env.STATS_CACHE_SERVICE_HOST,
+            host: await network.search('stats-cache').address,
             port: process.env.STATS_CACHE_SERVICE_PORT,
         } : undefined
     },
@@ -27,9 +48,9 @@ app.get('/stats', async function (req, res) {
     var completed = 0;
     var deleted =0;
     try{
-        // var created = await cache.get('todosCreated');
-        // var completed = await cache.get('todosCompleted');
-        // var deleted = await cache.get('todosDeleted');
+        var created = await cache.get('todosCreated');
+        var completed = await cache.get('todosCompleted');
+        var deleted = await cache.get('todosDeleted');
     } catch(err) {
         console.log(err);
     }

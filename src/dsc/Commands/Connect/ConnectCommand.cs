@@ -514,11 +514,12 @@ Additional Arguments
                     }
                 }
 
+                var envVars = await connectManagementClient.GetLocalEnvironment(_localPorts, cancellationToken);
+
                 // this.ReportProgress(EventLevel.Informational, Resources.Progress_ConnectionEstablished); this should be "remote agent deployed"
-                localAgentContainerName = await connectManagementClient.StartLocalAgentAsync(_localPorts, kubeConfigDetails, remoteAgentInfo, cancellationToken);
+                localAgentContainerName = await connectManagementClient.StartLocalAgentAsync(_localPorts, kubeConfigDetails, remoteAgentInfo, envVars,cancellationToken);
                 // TODO: report progress local agent started
 
-                var envVars = await connectManagementClient.GetLocalEnvironment(_localPorts, cancellationToken);
 
                 // This is the env file that should be used
                 if (!string.IsNullOrEmpty(_envJsonPath))

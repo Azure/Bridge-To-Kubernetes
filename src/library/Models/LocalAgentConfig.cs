@@ -26,5 +26,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Models
 
         [JsonPropertyName("remoteAgentInfo")]
         public RemoteAgentInfo RemoteAgentInfo { get; set; }
+
+        [JsonPropertyName("userWorkloadImageName")]
+        public string UserWorkloadImageName { get; set; }
+
+        [JsonPropertyName("localSourceCodePath")]
+        public string LocalSourceCodePath { get; set; }
+
+        [JsonPropertyName("environmentVariables")]
+        public IDictionary<string, string> EnvironmentVariables { get; set;}
+
     }
 }

@@ -76,6 +76,7 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                                 catch (WebSocketException ex)
                                 {
                                     exception = ex;
+                                    _log.Error(ex.StackTrace, ex);
                                     await Task.Delay(100);
                                 }
                             }

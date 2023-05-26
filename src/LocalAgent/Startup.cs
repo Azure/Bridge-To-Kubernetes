@@ -33,6 +33,7 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         {
             services.AddControllers();
             services.AddSingleton<LocalAgentApp>();
+            services.AddHealthChecks().AddCheck("local-agent-custom-check", () => LocalAgentApp.IsConnected());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +52,8 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
             {
                 endpoints.MapControllers();
             });
+
+            app.UseHealthChecks("/health");
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

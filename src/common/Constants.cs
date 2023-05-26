@@ -230,6 +230,7 @@ namespace Microsoft.BridgeToKubernetes.Common
         {
             public const string LocalAgentConfigPath = "/etc/localAgent/localAgentConfig.json";
             public const string KubeConfigPath = "/etc/localAgent/kubeconfig";
+            public const string LocalSourceCodePath = "/etc/localAgent/sourceCode";
             public const int Port = 7891;
         }
 

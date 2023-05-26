@@ -242,7 +242,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         public string StartLocalAgent(
             WorkloadInfo workloadInfo,
             KubeConfigDetails kubeConfigDetails,
-            RemoteAgentInfo remoteAgentInfo)
+            RemoteAgentInfo remoteAgentInfo,
+            IDictionary<string,string> envVars)
         {
             using (var perfLogger = _log.StartPerformanceLogger(Events.LocalEnvironmentManager.AreaName, Events.LocalEnvironmentManager.Operations.StartLocalAgent))
             {
@@ -257,20 +258,22 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     }
                 }
 
-                foreach (var pfinfo in workloadInfo.ReversePortForwardInfo)
+                /*foreach (var pfinfo in workloadInfo.ReversePortForwardInfo)
                 {
                     // Because we are running containerized we don't need to remap ports
                     // The user workload will call on the expected ports, and the traffic is going to be redirected to the localAgent port by iptables rules and then forwarded
                     pfinfo.LocalPort = pfinfo.Port;
-                }
+                }*/
 
                 var localAgentConfig = new LocalAgentConfig();
                 localAgentConfig.ReachableEndpoints = workloadInfo.ReachableEndpoints;
                 localAgentConfig.ReversePortForwardInfo = workloadInfo.ReversePortForwardInfo;
                 localAgentConfig.RemoteAgentInfo = remoteAgentInfo;
+                localAgentConfig.UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4"; //todo get this from cli input via workloadInfo
+                localAgentConfig.LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api"; //todo get this from cli input via workloadInfo
+                localAgentConfig.EnvironmentVariables = envVars;
                 var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}";
                 var localAgentManager = _localAgentManagerFactory(localAgentContainerName);
-
                 // remove containers with the same name possibly left behind by previous connections
                 localAgentManager.StopLocalAgent();
 

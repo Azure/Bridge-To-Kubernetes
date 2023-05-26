@@ -4,17 +4,24 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
+using Microsoft.BridgeToKubernetes.Common.Models.Docker;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Models;
+using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
+using System.Diagnostics;
 
 namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
 {
@@ -78,13 +85,100 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             commandLine.Append("hsubramanian/localagent:v15");
 
             this.RunDockerCommand(commandLine.ToString());*/
+            var yamlstring = createDockerComposeFile(config, kubeConfigDetails);
+            string dockerComposeFilePath = _fileSystem.Path.GetTempFilePath(Guid.NewGuid().ToString("N") + ".yml");
+            _fileSystem.WriteAllTextToFile(dockerComposeFilePath, yamlstring);
+            _log.Verbose("docker compose temp file path: "+ dockerComposeFilePath);
+            AssertHelper.True(_fileSystem.FileExists(dockerComposeFilePath), $"docker compose file is missing: '{dockerComposeFilePath}'");
             var commandLine = new StringBuilder();
-            string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
-            AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");
+            /*string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
+            AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");*/
             commandLine.Append("-p localagent ");
-            commandLine.Append($"-f \"{filePath}\" ");
+            commandLine.Append($"-f \"{dockerComposeFilePath}\" ");
             commandLine.Append("up -d");
             this.RunDockerComposeUpCommand(commandLine.ToString());
+        }
+
+        private string createDockerComposeFile(LocalAgentConfig config, KubeConfigDetails kubeConfigDetails)
+        {
+            string localAgentConfigFilePath = _fileSystem.Path.GetTempFilePath();
+            var content = JsonHelpers.SerializeObject(config);
+            _fileSystem.WriteAllTextToFile(localAgentConfigFilePath, content);
+            var configPathForVolume = localAgentConfigFilePath + ":" + LocalAgent.LocalAgentConfigPath;
+            var kubeconfigPathForVolume = kubeConfigDetails.Path + ":" + LocalAgent.KubeConfigPath;
+            var localSourceCodeMount = config.LocalSourceCodePath + ":" + LocalAgent.LocalSourceCodePath;
+
+            DockerCompose dockerCompose = new DockerCompose();
+            Services services = new Services
+            {
+                // user workload container
+                Devcontainer = new DevContainer(),
+            };
+            // local agent container
+            services.Localagent = new LocalAgentContainer
+            {
+                ContainerName = _localAgentContainerName + "-localagent",
+                Image = "docker.io/hsubramanian/localagent:nonmariner",
+                Volumes = new List<string>(),
+                Environment = new List<string>(),
+                CapAdd = new List<string>()
+            };
+            services.Localagent.Volumes.Add(configPathForVolume);
+            services.Localagent.Volumes.Add(kubeconfigPathForVolume);
+            services.Localagent.Environment.Add($"KUBECONFIG={LocalAgent.KubeConfigPath}");
+            services.Localagent.CapAdd.Add("NET_ADMIN");
+            services.Localagent.ExtraHosts = frameExtraHosts(config);
+            // user workload container
+            services.Devcontainer.Image = config.UserWorkloadImageName;
+            services.Devcontainer.Volumes = new List<string>
+            {
+                localSourceCodeMount
+            };
+            services.Devcontainer.Environment = new List<string>
+            {
+                $"PORT={config.ReversePortForwardInfo.First(a => a.LocalPort != null).LocalPort}"
+            };
+            services.Devcontainer.Environment.AddRange(appendUserServiceHost(config.EnvironmentVariables));
+            services.Devcontainer.ContainerName = _localAgentContainerName;
+            services.Devcontainer.Restart = "always";
+            services.Devcontainer.DependsOn = new DependsOn();
+            services.Devcontainer.DependsOn.DependsOnName = new DependsOnName();
+            services.Devcontainer.DependsOn.DependsOnName.Condition = "service_completed_successfully";
+            services.Devcontainer.DependsOn.DependsOnName.Restart = true;
+            services.Devcontainer.NetworkMode = "service:localagent"; // this will spin up user workload in same network as local agent      
+            dockerCompose.Services = services;
+            // serialize
+            var serializer = new SerializerBuilder()
+                .Build();
+            var yaml = serializer.Serialize(dockerCompose);
+            return yaml;
+        }
+
+        private IEnumerable<string> appendUserServiceHost(IDictionary<string, string> envVars)
+        {
+            IList<string> envVariables = new List<string>();
+            foreach (var key in envVars.Keys)
+            {
+
+                envVariables.Add($"{key}={envVars[key]}");
+            }
+            return envVariables;
+        }
+
+        private List<string> frameExtraHosts(LocalAgentConfig config)
+        {
+            var hosts = new List<string>();
+            foreach (var endpoint in config.ReachableEndpoints)
+            {
+                endpoint.ValidateDnsName();
+                var serviceAliases = endpoint.GetServiceAliases(config.RemoteAgentInfo.NamespaceName, this._log);
+                foreach (var serviceAlias in serviceAliases)
+                {
+                    hosts.Add($"{serviceAlias}:{endpoint.LocalIP}");
+                }
+            }
+
+            return hosts;
         }
 
         /*public void startLocalAgentUsingDockerCompose(LocalAgentConfig config, KubeConfigDetails kubeConfigDetails)

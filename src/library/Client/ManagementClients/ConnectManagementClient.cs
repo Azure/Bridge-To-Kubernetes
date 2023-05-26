@@ -278,7 +278,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
         /// <summary>
         /// <see cref="IConnectManagementClient.StartLocalAgentAsync"/>
         /// </summary>
-        public async Task<string> StartLocalAgentAsync(int[] localPorts, KubeConfigDetails kubeConfigDetails, RemoteAgentInfo remoteAgentInfo, CancellationToken cancellationToken)
+        public async Task<string> StartLocalAgentAsync(int[] localPorts, KubeConfigDetails kubeConfigDetails, RemoteAgentInfo remoteAgentInfo, IDictionary<string, string> envVars , CancellationToken cancellationToken)
         {
             return await this._managementClientExceptionStrategy.RunWithHandlingAsync(
                 async () =>
@@ -295,7 +295,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                             reversePortForwardInfo.ElementAt(i).LocalPort = localPorts[i];
                         }
 
-                        var localAgentContainerName = _localEnvironmentManager.StartLocalAgent(workloadInfo, kubeConfigDetails, remoteAgentInfo);
+                        var localAgentContainerName = _localEnvironmentManager.StartLocalAgent(workloadInfo, kubeConfigDetails, remoteAgentInfo, envVars);
 
                         perfLogger.SetSucceeded();
                         return localAgentContainerName;

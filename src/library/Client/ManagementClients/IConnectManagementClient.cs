@@ -79,7 +79,7 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
         /// Configure and starts the LocalAgent container that is going to serve as sidecar to the user's containerized workload.
         /// </summary>
         /// <remarks>This is used when the user's workload runs containerized</remarks>
-        Task<string> StartLocalAgentAsync(int[] localPorts, KubeConfigDetails kubeConfigDetails, RemoteAgentInfo remoteAgentInfo, CancellationToken cancellationToken);
+        Task<string> StartLocalAgentAsync(int[] localPorts, KubeConfigDetails kubeConfigDetails, RemoteAgentInfo remoteAgentInfo, IDictionary<string, string> envVars, CancellationToken cancellationToken);
 
         /// <summary>
         /// Starts the ServicePortForwards and the ReversePortForwards to and from the cluster

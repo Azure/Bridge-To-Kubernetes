@@ -64,7 +64,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         string StartLocalAgent(
             WorkloadInfo workloadInfo,
             KubeConfigDetails kubeConfigDetails,
-            RemoteAgentInfo remoteAgentInfo);
+            RemoteAgentInfo remoteAgentInfo,
+            IDictionary<string,string> envVars);
 
         /// <summary>
         /// Stops the LocalAgent used as sidecar to the user's containerized workload.
