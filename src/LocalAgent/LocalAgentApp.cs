@@ -55,8 +55,8 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
 
             try
             {
-                _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
-                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\\Users\\hsubramanian\\AppData\\Local\\Temp\\tmp2A2B.tmp"));
+                //_config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(Common.Constants.LocalAgent.LocalAgentConfigPath));
+                _config = JsonHelpers.DeserializeObject<LocalAgentConfig>(fileSystem.ReadAllTextFromFile(@"C:\\Users\\hsubramanian\\AppData\\Local\\Temp\\tmp6D09.tmp"));
             }
             catch (Exception ex)
             {
@@ -87,13 +87,13 @@ namespace Microsoft.BridgeToKubernetes.LocalAgent
         public static HealthCheckResult IsConnected()
         {
             HealthCheckResult healthCheckResult;
-            if (_connected)
-            {
-                healthCheckResult = new HealthCheckResult(HealthStatus.Healthy, "Local Agent started successfully");
+            if (!_connected)
+            {        
+                healthCheckResult = new HealthCheckResult(HealthStatus.Unhealthy, "Local Agent didn't start successfully");
+                return healthCheckResult;
             }
 
-            healthCheckResult = new HealthCheckResult(HealthStatus.Unhealthy, "Local Agent didn't start successfully"); 
-
+            healthCheckResult = new HealthCheckResult(HealthStatus.Healthy, "Local Agent started successfully");
             return healthCheckResult;
         }   
 
