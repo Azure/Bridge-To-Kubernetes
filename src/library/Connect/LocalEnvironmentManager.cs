@@ -265,13 +265,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     pfinfo.LocalPort = pfinfo.Port;
                 }*/
 
-                var localAgentConfig = new LocalAgentConfig();
-                localAgentConfig.ReachableEndpoints = workloadInfo.ReachableEndpoints;
-                localAgentConfig.ReversePortForwardInfo = workloadInfo.ReversePortForwardInfo;
-                localAgentConfig.RemoteAgentInfo = remoteAgentInfo;
-                localAgentConfig.UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4"; //todo get this from cli input via workloadInfo
-                localAgentConfig.LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api"; //todo get this from cli input via workloadInfo
-                localAgentConfig.EnvironmentVariables = envVars;
+                LocalAgentConfig localAgentConfig = new LocalAgentConfig
+                {
+                    ReachableEndpoints = workloadInfo.ReachableEndpoints,
+                    ReversePortForwardInfo = workloadInfo.ReversePortForwardInfo,
+                    RemoteAgentInfo = remoteAgentInfo,
+                    UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4", //todo get this from cli input via workloadInfo
+                    LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api", //todo get this from cli input via workloadInfo
+                    EnvironmentVariables = envVars
+                };
                 var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}";
                 var localAgentManager = _localAgentManagerFactory(localAgentContainerName);
                 // remove containers with the same name possibly left behind by previous connections

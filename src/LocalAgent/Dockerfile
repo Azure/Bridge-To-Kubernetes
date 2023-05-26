@@ -1,5 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS debug
+FROM mcr.microsoft.com/dotnet/sdk:6.0-cbl-mariner2.0 AS build
 
 RUN curl -L https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh  | sh
 
@@ -30,14 +30,15 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -o /src/publish
 
 # Final container
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
 
 # Setup common tools
-RUN apt update && \
-  apt upgrade -y
+RUN tdnf clean all && \
+  tdnf check-update && \
+  tdnf upgrade -y
 
-RUN apt install iptables -y
+RUN tdnf install iptables -y
 
 WORKDIR /src/LocalAgent
-COPY --from=debug /src/publish /src/LocalAgent
+COPY --from=build /src/publish /src/LocalAgent
 ENTRYPOINT ["dotnet", "/src/LocalAgent/Microsoft.BridgeToKubernetes.LocalAgent.dll"]

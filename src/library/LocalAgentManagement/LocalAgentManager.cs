@@ -118,7 +118,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Localagent = new LocalAgentContainer
             {
                 ContainerName = _localAgentContainerName + "-localagent",
-                Image = "docker.io/hsubramanian/localagent:nonmariner",
+                Image = "docker.io/hsubramanian/localagent:nonmariner2",
                 Volumes = new List<string>(),
                 Environment = new List<string>(),
                 CapAdd = new List<string>()
@@ -128,6 +128,19 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Localagent.Environment.Add($"KUBECONFIG={LocalAgent.KubeConfigPath}");
             services.Localagent.CapAdd.Add("NET_ADMIN");
             services.Localagent.ExtraHosts = frameExtraHosts(config);
+            services.Localagent.Healthcheck = new HealthCheck
+            {
+                Test = new List<string>
+            {
+                "CMD",
+                "curl",
+                "-f",
+                "http://localhost:7891/healthz"
+            },
+                Interval = "2s",
+                Timeout = "10s",
+                Retries = 3
+            };
             // user workload container
             services.Devcontainer.Image = config.UserWorkloadImageName;
             services.Devcontainer.Volumes = new List<string>
@@ -143,7 +156,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             services.Devcontainer.Restart = "always";
             services.Devcontainer.DependsOn = new DependsOn();
             services.Devcontainer.DependsOn.DependsOnName = new DependsOnName();
-            services.Devcontainer.DependsOn.DependsOnName.Condition = "service_completed_successfully";
+            services.Devcontainer.DependsOn.DependsOnName.Condition = "service_healthy";
             services.Devcontainer.DependsOn.DependsOnName.Restart = true;
             services.Devcontainer.NetworkMode = "service:localagent"; // this will spin up user workload in same network as local agent      
             dockerCompose.Services = services;

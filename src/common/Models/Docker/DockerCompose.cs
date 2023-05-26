@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -85,5 +86,23 @@ namespace Microsoft.BridgeToKubernetes.Common.Models.Docker
         [YamlMember(Alias = "extra_hosts")]
         public List<string> ExtraHosts { get; set; }
 
+        [YamlMember(Alias = "healthcheck")]
+        public HealthCheck Healthcheck { get; set; }
+
+    }
+
+    public partial class HealthCheck
+    {
+        [YamlMember(Alias = "test")]
+        public List<string> Test { get; set; }
+
+        [YamlMember(Alias = "interval")]
+        public string Interval { get; set; }
+
+        [YamlMember(Alias = "timeout")]
+        public string Timeout { get; set; }
+
+        [YamlMember(Alias = "retries")]
+        public long Retries { get; set; }
     }
 }
