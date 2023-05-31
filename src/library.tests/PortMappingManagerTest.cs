@@ -51,8 +51,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             var assignedPorts = new HashSet<int>();
             foreach (var endpoint in endpoints) {
                 foreach (var port in endpoint.Ports) {
-                    Assert.NotEqual(port.LocalPort, -1);
-                    Assert.False(assignedPorts.Contains(port.LocalPort));
+                    Assert.NotEqual(-1, port.LocalPort);
+                    Assert.DoesNotContain(port.LocalPort, assignedPorts);
                     assignedPorts.Add(port.LocalPort);
                 }
             }   
