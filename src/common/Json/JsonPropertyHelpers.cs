@@ -5,6 +5,7 @@
 
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace System
@@ -37,5 +38,19 @@ namespace System
         {
             return p.GetCustomAttribute<JsonPropertyNameAttribute>(false)?.Name;
         }
+
+        /// <summary>
+        /// Gets the value from a property in a Json string
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="json"></param>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static T ParseAndGetProperty<T>(string json, string property)
+        {
+            var obj = JsonNode.Parse(json);
+            return obj[property].GetValue<T>();
+        }
+
     }
 }

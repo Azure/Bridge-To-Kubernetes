@@ -44,7 +44,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
         protected string GetJsonLogMessage(string identifier, object obj)
         {
-            var json = JsonHelpers.SerializeObject(obj);
+            var json = JsonHelpers.SerializeForLoggingPurpose(obj);
             return GetJsonLogMessage(identifier, json);
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
         private string AppendOperationContextIfNeeded(string message)
         {
-            var operationContextJson = JsonHelpers.SerializeObject(OperationContext);
+            var operationContextJson = JsonHelpers.SerializeForLoggingPurpose(OperationContext);
             // Only appends the OperationContext if it has changed compared to the latest time it was logged.
             if (operationContextJson != this._previousOperationContextJson)
             {

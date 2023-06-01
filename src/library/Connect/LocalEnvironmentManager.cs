@@ -272,7 +272,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     RemoteAgentInfo = remoteAgentInfo,
                     UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4", //todo get this from cli input via workloadInfo
                     LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api", //todo get this from cli input via workloadInfo
-                    EnvironmentVariables = envVars
+                    EnvironmentVariables = envVars,
+                    NetworkName = "my-network" //TODO get from CLI input via workloadInfo
                 };
                 var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}";
                 var localAgentManager = _localAgentManagerFactory(localAgentContainerName);
@@ -444,12 +445,26 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
                 // because we are using dns name instead of service we have to retrieve it by splitting when needed
                 // If this ever cause issues we should consider larger refactor where we add serviceName member variable to EndpointInfo class.
-                var serviceName = endpoint.DnsName
+                var dnsNameArray = endpoint.DnsName
                     .ToUpperInvariant()
-                    .Split(".")
+                    .Split(".");
+
+                var serviceName = dnsNameArray
                     .First()
-                    .Replace("-", "_")
-                    .Replace(".", "_");
+                    .Replace("-", "_");
+
+                // when !endpoint.IsInWorkloadNamespace
+                var serviceNs = dnsNameArray.Length == 2
+                    ? dnsNameArray
+                        .Last()
+                        .Replace("-", "_")
+                    : null;
+
+                // sometimes cross talk is desired between namespaces, append those not matching workload
+                if (!string.IsNullOrWhiteSpace(serviceNs))
+                {
+                    serviceName = $"{serviceName}_{serviceNs}";
+                }
 
                 var host = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
                     ? endpoint.LocalIP.ToString()
