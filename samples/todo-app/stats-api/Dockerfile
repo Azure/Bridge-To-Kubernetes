@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM mcr.microsoft.com/devcontainers/typescript-node
 ENV PORT 80
 EXPOSE 80
 
