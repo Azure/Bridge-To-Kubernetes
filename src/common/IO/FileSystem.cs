@@ -14,7 +14,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using SystemPath = System.IO.Path;
 
@@ -118,12 +117,6 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
         /// </summary>
         public XDocument LoadDocument(string xdocPath)
             => XDocument.Load(xdocPath);
-
-        /// <summary>
-        /// <see cref="IFileSystem.ReadJsonFile"/>
-        /// </summary>
-        public dynamic ReadJsonFile(string jsonPath)
-            => JsonHelpers.ParseJson(File.ReadAllText(jsonPath));
 
         /// <summary>
         /// <see cref="IFileSystem.CopyFile"/>
