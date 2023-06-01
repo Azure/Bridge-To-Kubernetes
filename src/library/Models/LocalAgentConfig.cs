@@ -33,6 +33,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Models
         [JsonPropertyName("localSourceCodePath")]
         public string LocalSourceCodePath { get; set; }
 
+        [JsonPropertyName("networkName")]
+        public string NetworkName { get; set; }
+
         [JsonPropertyName("environmentVariables")]
         public IDictionary<string, string> EnvironmentVariables { get; set;}
 

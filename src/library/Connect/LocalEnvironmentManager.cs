@@ -272,7 +272,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     RemoteAgentInfo = remoteAgentInfo,
                     UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4", //todo get this from cli input via workloadInfo
                     LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api", //todo get this from cli input via workloadInfo
-                    EnvironmentVariables = envVars
+                    EnvironmentVariables = envVars,
+                    NetworkName = "my-network" //TODO get from CLI input via workloadInfo
                 };
                 var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}";
                 var localAgentManager = _localAgentManagerFactory(localAgentContainerName);

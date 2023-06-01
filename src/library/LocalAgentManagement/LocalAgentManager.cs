@@ -51,7 +51,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
         /// </summary>
         public void StartLocalAgent(LocalAgentConfig config, KubeConfigDetails kubeConfigDetails)
         {
-            /*// Serialize config to temp file
+            // Serialize config to temp file
             string localAgentConfigFilePath = _fileSystem.Path.GetTempFilePath();
             var content = JsonHelpers.SerializeObject(config);
             _fileSystem.WriteAllTextToFile(localAgentConfigFilePath, content);
@@ -70,7 +70,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             commandLine.Append($"--cap-add=NET_ADMIN ");
 
             // expose a PORT for the local agent to listen on
-            commandLine.Append($"-p 54411:7891 ");
+            commandLine.Append($"--network={config.NetworkName}");
 
             // Create --add-host arguments
             foreach (var endpoint in config.ReachableEndpoints)
@@ -82,21 +82,21 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
                     commandLine.Append($"--add-host \"{serviceAlias}:{endpoint.LocalIP}\" ");
                 }
             }
-            commandLine.Append("hsubramanian/localagent:v15");
+            commandLine.Append("hsubramanian/localagent:marinerv4");
 
-            this.RunDockerCommand(commandLine.ToString());*/
-            var yamlstring = createDockerComposeFile(config, kubeConfigDetails);
+            this.RunDockerCommand(commandLine.ToString());
+            /*var yamlstring = createDockerComposeFile(config, kubeConfigDetails);
             string dockerComposeFilePath = _fileSystem.Path.GetTempFilePath(Guid.NewGuid().ToString("N") + ".yml");
             _fileSystem.WriteAllTextToFile(dockerComposeFilePath, yamlstring);
             _log.Verbose("docker compose temp file path: "+ dockerComposeFilePath);
             AssertHelper.True(_fileSystem.FileExists(dockerComposeFilePath), $"docker compose file is missing: '{dockerComposeFilePath}'");
             var commandLine = new StringBuilder();
-            /*string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
-            AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");*/
+            *//*string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
+            AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");*//*
             commandLine.Append("-p localagent ");
             commandLine.Append($"-f \"{dockerComposeFilePath}\" ");
             commandLine.Append("up -d");
-            this.RunDockerComposeUpCommand(commandLine.ToString());
+            this.RunDockerComposeUpCommand(commandLine.ToString());*/
         }
 
         private string createDockerComposeFile(LocalAgentConfig config, KubeConfigDetails kubeConfigDetails)
@@ -209,13 +209,13 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
         public void StopLocalAgent()
         {
             //docker compose down
-            var commandLine = new StringBuilder();
+            /*var commandLine = new StringBuilder();
             string filePath = _fileSystem.Path.Combine("Files", "docker-compose.yml");
             AssertHelper.True(_fileSystem.FileExists(filePath), $"docker compose file is missing: '{filePath}'");
             commandLine.Append("-p localagent ");
             commandLine.Append($"-f \"{filePath}\" ");
             commandLine.Append("down");
-            this.RunDockerComposeUpCommand(commandLine.ToString());
+            this.RunDockerComposeUpCommand(commandLine.ToString());*/
             // remove the image
             if (!string.IsNullOrEmpty(_localAgentContainerName))
             {
