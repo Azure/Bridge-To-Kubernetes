@@ -738,14 +738,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 V1Pod result = null;
                 if (patch != null)
                 {
+                    var serializedPatch = "";
                     try
                     {
-                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        serializedPatch = JsonHelpers.SerializeObject(patch);
+                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        var serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(patch.Serialize());
-
+                        serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(serializedPatch);
                         _log.Error($"Patch deployment {namespaceName}/{remoteContainerConnectionDetails.DeploymentName} failed. Patch is {serializedPatch}, {ex.Message}");
                         throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.Deployment.ToString(), namespaceName, deploymentName, serializedPatch, ex.Message);
                     }
@@ -841,8 +842,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     }
                     catch (Exception ex)
                     {
-                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {patch.Serialize()}, {ex.Message}");
-                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, patch.Serialize(), ex.Message);
+                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {JsonHelpers.SerializeForLoggingPurposeIndented(patch)}, {ex.Message}");
+                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, JsonHelpers.SerializeForLoggingPurposeIndented(patch), ex.Message);
                     }
                     var statefulSetPatch = new StatefulSetPatch(remoteContainerConnectionDetails.StatefulSet, reversePatch);
                     try

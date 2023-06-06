@@ -13,8 +13,6 @@ using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.BridgeToKubernetes.Common.Logging
 {
@@ -36,7 +34,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
 
             try
             {
-                var serializedArgs = args.Select(arg => arg.Serialize()).ToArray();
+                var serializedArgs = args.Select(arg => JsonHelpers.SerializeForLoggingPurpose(arg)).ToArray();
                 return string.Format(CultureInfo.InvariantCulture, format, serializedArgs);
             }
             catch (Exception ex)
@@ -86,50 +84,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
             var scrubbedHeaders = headers.ScrambleAndAddPIIMarkersToHeaders();
             headers.Clear();
             scrubbedHeaders.ExecuteForEach(h => headers.Add(h));
-        }
-
-        /// <summary>
-        /// Serialize an object to JSON. PII values are output unscrambled. Swallows serialization exceptions.
-        /// </summary>
-        /// <param name="input">Object or value to serialize</param>
-        /// <returns>String representation of <paramref name="input"/></returns>
-        public static string Serialize(this object input)
-        {
-            if (input is string inputString)
-            {
-                return inputString;
-            }
-
-            if (input is PII pii)
-            {
-                return pii.Value;
-            }
-
-            var serializerSettings = new System.Text.Json.JsonSerializerOptions();
-            serializerSettings.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-
-            if (input is Exception ex)
-            {
-                input = RemoveUnwantedExceptionProperties(input, serializerSettings, ex);
-            }
-
-            try
-            {
-                return JsonHelpers.SerializeObject(input, serializerSettings);
-            }
-            catch (JsonException je)
-            {
-                return $"Serialization Error (JsonException): {je.Message}";
-            }
-            catch (NotSupportedException nse)
-            {
-                return $"Serialization Error (NotSupportedException): {nse.Message} for type {input.GetType()}";
-            }
-            catch (Exception exx)
-            {
-                var errorMessage = input is Exception ix ? $"Serialization Exception: {exx} | {ix}" : $"Serialization Exception: {exx}";
-                return errorMessage;
-            }
         }
 
         /// <summary>
@@ -231,79 +185,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging
         }
 
         #endregion headersFromHttpHeaders
-
-        /// <summary>
-        /// Removes properties from exceptions that we don't want to log.
-        /// </summary>
-        /// <remarks>
-        /// Exceptions might contain a lot of information, that is often cut off when logged and
-        /// might result in useful information not being logged, and an increase in the size of log
-        /// files unnecessarily.
-        /// </remarks>
-        private static object RemoveUnwantedExceptionProperties(object input, System.Text.Json.JsonSerializerOptions serializerSettings, Exception ex)
-        {
-            try
-            {
-                // The Targetsite.Module property can make exception size blow up.
-                // To remove it we serialize the Exception with settings that ignore TargetSite.Module and we deserialize it as a JObject that will then be logged.
-                // When touching this method please note that Exceptions can have an InnerException and possibly InnerExceptions (AggreagateException), these need to be cleaned as well.
-
-                // User a custom exception converter to ignore TargetSite that is not serializable in STJ
-                var exceptionConverter = new ExceptionConverter<Exception>();
-                serializerSettings.Converters.Add(exceptionConverter);
-
-                var serializedException = JsonHelpers.SerializeObject(ex, serializerSettings);
-                return JsonHelpers.DeserializeObject(serializedException);
-            }
-            catch { }
-            return input;
-        }
-
-        private class ExceptionConverter<TExceptionType> : JsonConverter<TExceptionType>
-        {
-            public override bool CanConvert(Type typeToConvert)
-            {
-                return typeof(Exception).IsAssignableFrom(typeToConvert);
-            }
-
-            public override TExceptionType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                throw new NotSupportedException("Deserializing exceptions is not allowed");
-            }
-
-            public override void Write(Utf8JsonWriter writer, TExceptionType value, JsonSerializerOptions options)
-            {
-                var serializableProperties = value!.GetType()
-                    .GetProperties()
-                    .Select(uu => new { uu.Name, Value = uu.GetValue(value) })
-                    .Where(uu => uu.Name != nameof(Exception.TargetSite));
-
-                if (options?.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull)
-                {
-                    serializableProperties = serializableProperties.Where(uu => uu.Value != null);
-                }
-
-                var propList = serializableProperties.ToList();
-
-                if (propList.Count == 0)
-                {
-                    // Nothing to write
-                    return;
-                }
-
-                writer.WriteStartObject();
-
-                foreach (var prop in propList)
-                {
-                    writer.WritePropertyName(prop.Name);
-                    JsonSerializer.Serialize(writer, prop.Value, options);
-                }
-
-                writer.WriteEndObject();
-            }
-        }
-
-
 
     }
 }

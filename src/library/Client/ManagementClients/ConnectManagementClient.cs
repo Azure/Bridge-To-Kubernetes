@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
@@ -249,8 +250,8 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                         // Pull the workloadInfo before deploying the remore agent. This way we don't have to worry about the agent specific environment.
                         var workloadInfo = await this.GetWorkloadInfo();
 
-                        perfLogger.SetProperty(nameof(connectionDetails.AgentHostingMode), connectionDetails.AgentHostingMode.Serialize());
-                        perfLogger.SetProperty(nameof(connectionDetails.SourceEntityType), connectionDetails.SourceEntityType.Serialize());
+                        perfLogger.SetProperty(nameof(connectionDetails.AgentHostingMode), JsonHelpers.SerializeForLoggingPurpose(connectionDetails.AgentHostingMode));
+                        perfLogger.SetProperty(nameof(connectionDetails.SourceEntityType), JsonHelpers.SerializeForLoggingPurpose(connectionDetails.SourceEntityType));
                         perfLogger.SetProperty(nameof(connectionDetails.NamespaceName), new PII(connectionDetails.NamespaceName));
                         perfLogger.SetProperty(nameof(connectionDetails.ContainerName), new PII(connectionDetails.ContainerName));
                         perfLogger.SetProperty(nameof(connectionDetails.ServiceName), new PII(connectionDetails.ServiceName));

@@ -125,7 +125,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
                                     Url = url,
                                     AuthenticationCode = authenticationCode
                                 };
-                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonHelpers.SerializeObject(authenticationTarget))));
+                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonHelpers.SerializeForLoggingPurpose(authenticationTarget))));
                             }
                         };
                         int exitCode = _kubernetesClient.InvokeLongRunningKubectlCommand(KubernetesCommandName.ListPods,

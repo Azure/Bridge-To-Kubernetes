@@ -221,7 +221,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         private PatchEntityBase _ParsePatchState()
         {
             string patchStateJson = _fileSystem.ReadAllTextFromFile(DevHostRestorationJob.PatchStateFullPath);
-            string type = JsonHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
+            string type = JsonPropertyHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
             return type switch
             {
                 nameof(DeploymentPatch) => JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson),
