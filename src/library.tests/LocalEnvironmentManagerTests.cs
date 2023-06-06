@@ -3,13 +3,13 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Autofac;
 using Microsoft.BridgeToKubernetes.Common.Models;
 using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.TestHelpers;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using static Microsoft.BridgeToKubernetes.Common.Constants;
@@ -28,7 +28,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
         public static IEnumerable<object[]> TestData()
         {
-            // single basic endpoint
+            /*// single basic endpoint
             yield return new object[]
             {
                 new[] {
@@ -229,6 +229,44 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     ["FOO_K8SNS_PORT_5051_TCP_PORT"] = "5051",
                     ["FOO_K8SNS_PORT_5051_TCP_ADDR"] = "127.0.0.1",
                     ["FOO_K8SNS_SERVICE_PORT_TLS"] = "5051",
+                }
+            };*/
+
+            // endpoints with multiple named ports for headless services
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = "podname.servicename", // for headless it is combination of hostname.service from get endpoints
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = new[]
+                        {
+                            new PortPair(localPort: 5050, remotePort: 80, name: "http"),
+                            new PortPair(localPort: 5051, remotePort:443, name: "client", protocol: "client")
+                        }
+                    }
+                },
+                new Dictionary<string, string>
+                {
+                    // backwards-compatible ports
+                    ["PODNAME_SERVICENAME_SERVICE_HOST"] = "127.0.0.1",
+                    ["PODNAME_SERVICENAME_SERVICE_PORT"] = "5050",
+                    ["PODNAME_SERVICENAME_PORT"] = "tcp://127.0.0.1:5050",
+                    // named ports for first port pair
+                    ["PODNAME_SERVICENAME_PORT_5050_TCP_PROTO"] = "tcp",
+                    ["PODNAME_SERVICENAME_PORT_5050_TCP"] = "tcp://127.0.0.1:5050",
+                    ["PODNAME_SERVICENAME_PORT_5050_TCP_PORT"] = "5050",
+                    ["PODNAME_SERVICENAME_PORT_5050_TCP_ADDR"] = "127.0.0.1",
+                    ["PODNAME_SERVICENAME_SERVICE_PORT_HTTP"] = "5050",
+                    // named ports for SECOND port pair
+                    ["PODNAME_SERVICENAME_PORT_5051_CLIENT_PROTO"] = "client",
+                    ["PODNAME_SERVICENAME_PORT_5051_CLIENT"] = "client://127.0.0.1:5051",
+                    ["PODNAME_SERVICENAME_PORT_5051_CLIENT_PORT"] = "5051",
+                    ["PODNAME_SERVICENAME_PORT_5051_CLIENT_ADDR"] = "127.0.0.1",
+                    ["PODNAME_SERVICENAME_SERVICE_PORT_CLIENT"] = "5051",
+                    
                 }
             };
         }

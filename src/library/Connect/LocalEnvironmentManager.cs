@@ -498,12 +498,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     result[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"] = port.ToString();
                     result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
 
-                    // named port env vars without port number in env variables
-                    result[$"{serviceName}_PORT_{protocolUpper}_PROTO"] = portPair.Protocol;
-                    result[$"{serviceName}_PORT_{protocolUpper}"] = $"{portPair.Protocol}://{host}:{port}";
-                    result[$"{serviceName}_PORT_{protocolUpper}_PORT"] = port.ToString();
-                    result[$"{serviceName}_PORT_{protocolUpper}_ADDR"] = host;
-
                     if (!string.IsNullOrWhiteSpace(portPair.Name))
                     {
                         result[$"{serviceName}_SERVICE_PORT_{portPair.Name.ToUpperInvariant()}"] = port.ToString();
