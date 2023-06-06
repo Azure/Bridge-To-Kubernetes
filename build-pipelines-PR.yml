@@ -95,6 +95,9 @@ jobs:
       solution: src/client.sln
       msbuildArgs: -p:Localize=true -p:ConsumeEndpointManager=false
       configuration: ${{ parameters.BuildConfiguration }}
+  - task: CredScan@3
+    inputs:
+      outputFormat: 'pre'
   - task: VSTest@2
     displayName: Run Unit Tests
     condition: and(succeeded(), eq(variables.RunTests, 'true'))
@@ -208,6 +211,9 @@ jobs:
       nugetConfigPath: src/nuget.config
       verbosityRestore: Normal
       searchPatternPush: $(Build.ArtifactStagingDirectory)/*.nupkg
+  - task: CredScan@3
+    inputs:
+      outputFormat: 'pre'
   - task: DotNetCoreCLI@2
     displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
