@@ -273,9 +273,9 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     UserWorkloadImageName = "docker.io/hsubramanian/stats-api:local4", //todo get this from cli input via workloadInfo
                     LocalSourceCodePath = @"C:\Users\hsubramanian\repos\forked\Bridge-To-Kubernetes\samples\todo-app\stats-api", //todo get this from cli input via workloadInfo
                     EnvironmentVariables = envVars,
-                    NetworkName = "my-network" //TODO get from CLI input via workloadInfo
+                    NetworkName = "host" //TODO get from CLI input via workloadInfo
                 };
-                var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}";
+                var localAgentContainerName = $"{kubeConfigDetails.CurrentContext.Name}-{workloadInfo.Namespace}-{workloadInfo.WorkloadName}-localAgent";
                 var localAgentManager = _localAgentManagerFactory(localAgentContainerName);
                 // remove containers with the same name possibly left behind by previous connections
                 localAgentManager.StopLocalAgent();

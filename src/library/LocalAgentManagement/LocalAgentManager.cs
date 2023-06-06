@@ -57,7 +57,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             _fileSystem.WriteAllTextToFile(localAgentConfigFilePath, content);
 
             var commandLine = new StringBuilder();
-            commandLine.Append($"run -dit --name {_localAgentContainerName} ");
+            commandLine.Append($"run --privileged -dit --name {_localAgentContainerName} ");
 
             // Add the file mount for the LocalAgent config
             commandLine.Append($"-v \"{localAgentConfigFilePath}:{Common.Constants.LocalAgent.LocalAgentConfigPath}\" ");
@@ -70,7 +70,7 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
             commandLine.Append($"--cap-add=NET_ADMIN ");
 
             // expose a PORT for the local agent to listen on
-            commandLine.Append($"--network={config.NetworkName}");
+            commandLine.Append($"--network={config.NetworkName} ");
 
             // Create --add-host arguments
             foreach (var endpoint in config.ReachableEndpoints)
@@ -82,6 +82,9 @@ namespace Microsoft.BridgeToKubernetes.Library.LocalAgentManagement
                     commandLine.Append($"--add-host \"{serviceAlias}:{endpoint.LocalIP}\" ");
                 }
             }
+            // add /etc/host as volume
+            // commandLine.Append("-v /etc/hosts:/etc/hosts ");
+            // local agent image
             commandLine.Append("hsubramanian/localagent:marinerv4");
 
             this.RunDockerCommand(commandLine.ToString());

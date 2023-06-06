@@ -536,8 +536,8 @@ Additional Arguments
                 else
                 {
                     _consoleLauncher.Value.LaunchTerminalWithEnv(envVars, _envScriptPath, performLaunch: false);
-                }
-                this.ReportProgress(EventLevel.LogAlways, string.Format(Resources.Progress_RunScriptToConnect, _envScriptPath));*/
+                }*/
+                this.ReportProgress(EventLevel.LogAlways, string.Format(Resources.Progress_RunScriptToConnect, _envScriptPath));
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     if (_waitProcesses.Any() && !_waitProcesses.Where(p => !p.HasExited).Any())

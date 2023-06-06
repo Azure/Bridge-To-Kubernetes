@@ -8,11 +8,13 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile"
 	},
-	"runArgs": ["--network=my-network"],
+	// "runArgs": ["--network=my-network"],
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/dotnet:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -33,8 +35,10 @@
 	},
 
 	"containerEnv": {
-		"PORT": "3001"
-	}
+		"PORT": "3001",
+		"BRIDGE_ENVIRONMENT": "dev",
+		"BRIDGE_BUILD_PATH": "/workspaces/Bridge-To-Kubernetes/src/dsc/bin/Debug/net6.0/linux-x64/publish/"
+	},
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
