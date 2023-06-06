@@ -28,7 +28,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
 
         public static IEnumerable<object[]> TestData()
         {
-            /*// single basic endpoint
+            // single basic endpoint
             yield return new object[]
             {
                 new[] {
@@ -230,7 +230,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     ["FOO_K8SNS_PORT_5051_TCP_ADDR"] = "127.0.0.1",
                     ["FOO_K8SNS_SERVICE_PORT_TLS"] = "5051",
                 }
-            };*/
+            };
 
             // endpoints with multiple named ports for headless services
             yield return new object[]
