@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Logs:**
- - Please attach logs for Bridge to Kubernetes to triage issues faster, here are the log locations ( Window C:\Users\Username\AppData\Local\Temp\Bridge To Kubernetes, Linux/Mac - $HOME/tmp/Bridge To Kubernetes or /tmp/Bridge To Kubernetes). Please attach logs relevant to your issue or bug. 
+ - Please attach logs for Bridge to Kubernetes to triage issues faster, here are the log locations ( Window like C:\Users\Username\AppData\Local\Temp\Bridge To Kubernetes, Linux/Mac like $HOME/tmp/Bridge To Kubernetes or /tmp/Bridge To Kubernetes). Please attach logs relevant to your issue or bug. 
 
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
