@@ -4,11 +4,14 @@ on:
     branches: [ "main" ]
     paths:
       - 'src/**'
+      - 'samples/**'
+      - 'scripts/**'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'src/**'
       - 'samples/**'
+      - 'scripts/**'
 jobs:
   liveTest:
     strategy:
