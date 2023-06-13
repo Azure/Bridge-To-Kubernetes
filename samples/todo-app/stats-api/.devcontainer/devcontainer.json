@@ -38,7 +38,7 @@
 		"PORT": "3001",
 		"BRIDGE_ENVIRONMENT": "dev",
 		"BRIDGE_BUILD_PATH": "/workspaces/Bridge-To-Kubernetes/src/dsc/bin/Debug/net6.0/linux-x64/publish/"
-	},
+	}
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
