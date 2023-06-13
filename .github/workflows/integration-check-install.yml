@@ -2,6 +2,9 @@ name: Install Script Integration Test
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
 
 jobs:
   install:
