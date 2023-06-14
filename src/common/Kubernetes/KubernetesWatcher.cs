@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
+using k8s.Authentication;
 using k8s.Autorest;
 using k8s.Exceptions;
 using k8s.Models;

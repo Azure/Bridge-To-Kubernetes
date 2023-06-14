@@ -94,11 +94,10 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
             string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
 
             var propertyName = typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type));
-            string type = JsonHelpers.ParseAndGetProperty<string>(patchStateJson, propertyName);
+            string type = JsonPropertyHelpers.ParseAndGetProperty<string>(patchStateJson, propertyName);
 
             Assert.Equal(nameof(DeploymentPatch), type);
         }
-
 
         [Fact]
         public void EnsureFailedPingsExit()

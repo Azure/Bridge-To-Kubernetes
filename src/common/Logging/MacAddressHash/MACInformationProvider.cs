@@ -4,7 +4,6 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -46,9 +45,9 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
 
         /// <summary></summary>
         /// <param name="clientConfig">The client config, it contains a cached value for the hashed mac</param>
-        /// <param name="vsCodeStorageReader"/>
-        /// <param name="platform"/>
-        /// <param name="vsRegistryPropertyReader"/>
+        /// <param name="vsCodeStorageReader"></param>
+        /// <param name="platform"></param>
+        /// <param name="vsRegistryPropertyReader"></param>
         public MacInformationProvider(
             IClientConfig clientConfig,
             VSCodeStorageReader vsCodeStorageReader,
@@ -69,7 +68,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
         /// Check if there is a persisted value otherwise calculates and persist a new one
         /// </summary>
         /// <returns>The hash of the mac address</returns>
-        private string GetMacAddressHash()
+        public string GetMacAddressHash()
         {
             string persistedValue = null;
             string result = null;
@@ -157,34 +156,19 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
         private static bool ValidateMacAddressHash(string macAddressHash)
             => !string.IsNullOrEmpty(macAddressHash) && Regex.IsMatch(macAddressHash, PersistRegex);
 
-        private static string RunCommandAndGetOutput(string commandName, string commandArgs = null)
+        private string RunCommandAndGetOutput(string commandName, string commandArgs = null)
         {
-            var processOutput = new StringBuilder();
-            var process = new Process();
             try
             {
-                process.EnableRaisingEvents = true;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.CreateNoWindow = true;
-                process.StartInfo.RedirectStandardOutput = true;
-
-                process.StartInfo.RedirectStandardError = true;
-                process.StartInfo.FileName = commandName;
-                process.StartInfo.Arguments = commandArgs ?? string.Empty;
-                process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
-                {
-                    processOutput.AppendLine(e.Data);
-                };
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-                process.Close();
-                return processOutput.ToString();
+                (var exitCode, var output) = this._platform.ExecuteAndReturnOutput(commandName, 
+                                                                              commandArgs, 
+                                                                              timeout: TimeSpan.FromSeconds(30), 
+                                                                              stdOutCallback: null,
+                                                                              stdErrCallback: null);
+                return output;
             }
             catch (Exception)
             {
-                process.Close();
                 return "";
             }
         }

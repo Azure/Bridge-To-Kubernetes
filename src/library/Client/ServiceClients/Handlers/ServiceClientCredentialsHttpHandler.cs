@@ -3,6 +3,7 @@
 // Licensed under the MIT license.
 // --------------------------------------------------------------------------------------------
 
+using k8s.Authentication;
 using k8s.Autorest;
 using System;
 using System.Net.Http;

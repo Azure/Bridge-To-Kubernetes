@@ -24,30 +24,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Logging
             };
 
         [Fact]
-        public void SerializeAggregateException()
-        {
-            Exception ex;
-            try
-            {
-                try
-                {
-                    throw new Exception("TestException");
-                }
-                catch (Exception e)
-                {
-                    throw new AggregateException(e);
-                }
-            }
-            catch (Exception e)
-            {
-                ex = e;
-            }
-            var ser = ex.Serialize();
-
-            Assert.DoesNotContain("module", ser);
-        }
-
-        [Fact]
         public void GetScrambledHeaders()
         {
             var newHeaders = _headersToScramble.ScrambleAndAddPIIMarkersToHeaders();

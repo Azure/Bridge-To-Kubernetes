@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.BridgeToKubernetes.Common.IO;
+using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using YamlDotNet.Core;
@@ -148,6 +149,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                         {
                             this.IsProbesEnabled = true;
                         }
+
+                        if (StringComparer.OrdinalIgnoreCase.Equals(feature, EnableFeature.LifecycleHooks.ToString()))
+                        {
+                            this.IsLifecycleHooksEnabled = true;
+                        }
                     }
                 }
 
@@ -165,7 +171,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
                                 foreach (var t in entry.Tokens)
                                 {
                                     // TODO: t.Serialize() returns "Serialization Error" when port is specified. Need to fix this at some point, but it doesn't affect the user experience at all.
-                                    log.Verbose("Loaded env var '{0}' of type {1}: {2} => {3}", new PII(t.Name), t.GetType().Name, new PII(t.Serialize()), new PII(t.Evaluate()));
+                                    log.Verbose("Loaded env var '{0}' of type {1}: {2} => {3}", new PII(t.Name), t.GetType().Name, new PII(JsonHelpers.SerializeForLoggingPurpose(t)), new PII(t.Evaluate()));
                                 }
                                 _envVarEntries.Add(entry);
                                 _serviceTokens.AddRange(entry.Tokens.OfType<IServiceToken>().Distinct().Except(_serviceTokens));
@@ -196,7 +202,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
             {
                 if (_issues != null && _issues.Any())
                 {
-                    log.Warning("{0} config parse issues encountered with file '{1}': {2}", Product.Name, new PII(filePath), new PII(_issues.Serialize()));
+                    log.Warning("{0} config parse issues encountered with file '{1}': {2}", Product.Name, new PII(filePath), new PII(JsonHelpers.SerializeForLoggingPurpose(_issues)));
                 }
             }
         }
@@ -245,6 +251,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         /// <see cref="ILocalProcessConfig.IsProbesEnabled"/>
         /// </summary>
         public bool IsProbesEnabled { get; } = false;
+
+        /// <summary>
+        /// <see cref="ILocalProcessConfig.IsLifecycleHooksEnabled"/>
+        /// </summary>
+        public bool IsLifecycleHooksEnabled { get; } = false;
 
         /// <summary>
         /// <see cref="ILocalProcessConfig.EvaluateEnvVars"/>
