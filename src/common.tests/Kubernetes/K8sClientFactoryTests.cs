@@ -4,12 +4,19 @@
 // --------------------------------------------------------------------------------------------
 
 using FakeItEasy;
+using k8s;
+using k8s.KubeConfigModels;
 using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.TestHelpers;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Xunit;
+using YamlDotNet.RepresentationModel;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
 {
@@ -50,5 +57,35 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
             Assert.Equal(2, config.SslCaCerts.Count);
         }
 
+        [Fact]
+        public void CreateFromKubeConfigTestWithProxy()
+        {
+            var fakeEnv = A.Fake<IEnvironmentVariables>();
+            var expectedProxyUri = "http://localhost:8080/";
+            A.CallTo(() => fakeEnv.KubectlProxy).Returns(expectedProxyUri);
+            _autoFake.Provide(fakeEnv);
+            var kClientFactory = _autoFake.Resolve<K8sClientFactory>();
+            var config = kClientFactory.CreateFromKubeConfig(null);
+            Assert.NotNull(config);
+            Assert.Equal(expectedProxyUri, config.BaseUri.ToString());
+
+        }
+
+        [Fact]
+        public void CreateFromKubeConfigTestWithOutProxy()
+        {
+            string expectedUri = "https://sample-demo.hcp.eastus.azmk8s.io/";
+            IEnvironmentVariables fakeEnv = A.Fake<IEnvironmentVariables>();
+            A.CallTo(() => fakeEnv.KubectlProxy).Returns(null);
+            _autoFake.Provide(fakeEnv);
+            K8sClientFactory kClientFactory = _autoFake.Resolve<K8sClientFactory>();
+            var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            K8SConfiguration fakeConfig = deserializer.Deserialize<K8SConfiguration>(File
+                .ReadAllText(Path.Combine("TestData", "simpleconfig.yml")));
+            IKubernetes config = kClientFactory.CreateFromKubeConfig(fakeConfig);
+            Assert.NotNull(config);
+            Assert.Equal(expectedUri, config.BaseUri.ToString());
+        }
     }
 }

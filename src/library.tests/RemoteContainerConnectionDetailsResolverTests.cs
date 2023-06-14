@@ -48,7 +48,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                 // We only care about this exception for this UT. ResolveConnectionDetails is large function and ot get to pass cleanly would require a lot longer set up,
                 // which is not needed for this UT
                 if (e.Message.StartsWith("Restoration pod is still present for the specified service")) {
-                    Assert.Equal(phase, "Running");
+                    Assert.Equal("Running", phase);
                     Assert.True(hasRestore);
                 }
             }

@@ -7,6 +7,19 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Visual Studio 2019 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro#whats-new)
 - [Visual Studio 2022 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro2022#whats-new)
 
+## [1.0.20230525.1]
+- [Added launchSettings.json to .gitignore](https://github.com/Azure/Bridge-To-Kubernetes/pull/245)
+- [Removes package references in favour of FrameworkReference](https://github.com/Azure/Bridge-To-Kubernetes/pull/191)
+- [Live test for PR validations](https://github.com/Azure/Bridge-To-Kubernetes/pull/242)
+- [Fixes invalid xml documentation tags](https://github.com/Azure/Bridge-To-Kubernetes/pull/257)
+- [Resolves Warning SYSLIB021 - Derived cryptographic types are obsolete](https://github.com/Azure/Bridge-To-Kubernetes/pull/210)
+- [Disable Lifecycle Hooks in remote agent](https://github.com/Azure/Bridge-To-Kubernetes/pull/214)
+- [Fixed exception rethrow](https://github.com/Azure/Bridge-To-Kubernetes/pull/261)
+- [Fixes warnings for nullable reference types being used](https://github.com/Azure/Bridge-To-Kubernetes/pull/253)
+- [Fixed swaped arguments](https://github.com/Azure/Bridge-To-Kubernetes/pull/255)
+- [Add namespace to environment variables for the services which are not in the workload's namespace](https://github.com/Azure/Bridge-To-Kubernetes/pull/227)
+- [Refactoring Json serialization](https://github.com/Azure/Bridge-To-Kubernetes/pull/209)
+
 ## [1.0.20230418.1]
 - [Enable auto review by chatgpt](https://github.com/Azure/Bridge-To-Kubernetes/pull/232)
 - [Update base images to microsoft mariner images](https://github.com/Azure/Bridge-To-Kubernetes/pull/175)

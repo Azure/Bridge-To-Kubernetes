@@ -16,7 +16,6 @@ using Microsoft.BridgeToKubernetes.Common.Json;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Models;
-using Microsoft.BridgeToKubernetes.Common.Models.Kubernetes;
 using Microsoft.BridgeToKubernetes.Library.Logging;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Models;
@@ -126,7 +125,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
                                     Url = url,
                                     AuthenticationCode = authenticationCode
                                 };
-                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonHelpers.SerializeObject(authenticationTarget))));
+                                _progress.Report(new ProgressUpdate(20, ProgressStatus.None, new ProgressMessage(System.Diagnostics.Tracing.EventLevel.Informational, JsonHelpers.SerializeForLoggingPurpose(authenticationTarget))));
                             }
                         };
                         int exitCode = _kubernetesClient.InvokeLongRunningKubectlCommand(KubernetesCommandName.ListPods,
@@ -344,7 +343,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
         }
 
         /// <summary>
-        /// Convert Kubernetes <see cref="V1Ingress"/> objects into <see cref="Ingress"/> instances with full URLs, optionally filtered to a single <paramref name="targetSpaceName"/>
+        /// Convert Kubernetes <see cref="V1Ingress"/> objects into <see cref="Uri"/> , optionally filtered to a single <paramref name="targetSpaceName"/>
         /// </summary>
         /// <param name="k8sIngresses">List of ingresses in v1.16 and higher.</param>
         /// <param name="routingHeaderValue">When specified, prefix ingress uris with this routing header.</param>

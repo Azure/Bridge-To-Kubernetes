@@ -37,13 +37,6 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
         string FindMatchingFile(string pattern, string directory);
 
         /// <summary>
-        /// Reads a JSon file into a dynamic object
-        /// </summary>
-        /// <param name="jsonPath">Path to the json file to read</param>
-        /// <returns></returns>
-        dynamic ReadJsonFile(string jsonPath);
-
-        /// <summary>
         /// Load an XDocument
         /// </summary>
         /// <param name="xdocPath">Path to the XDocument to load</param>
