@@ -25,6 +25,17 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/server.js"
+        },
+        {
+            "name": "Docker Node.js Launch",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "platform": "node",
+            "node": {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/app"
+            }
         }
     ]
 }
