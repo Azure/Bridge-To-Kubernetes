@@ -51,7 +51,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
                                                                             () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
-                                                                                            A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
+                                                                                            A<bool?>._, A<int?>._, A<bool?>._, A<bool?>._, 
+                                                                                            A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
                                                                                             A<CancellationToken>._);
             A.CallTo(listPodsInNamespaceExpression)
                 .Throws<IOException>()
@@ -77,7 +78,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
                                                                             () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
-                                                                                            A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
+                                                                                            A<bool?>._, A<int?>._, A<bool?>._, A<bool?>._, 
+                                                                                            A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
                                                                                             A<CancellationToken>._);
             var ex = new HttpOperationException();
             ex.Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty);
@@ -95,7 +97,8 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
                                                                             () => _fakeRestClient.CoreV1.ListNamespacedPodWithHttpMessagesAsync(
                                                                                             A<string>._, A<bool?>._, A<string>._, A<string>._,
                                                                                             A<string>._, A<int?>._, A<string>._, A<string>._,
-                                                                                            A<int?>._, A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
+                                                                                            A<bool?>._, A<int?>._, A<bool?>._, A<bool?>._, 
+                                                                                            A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._,
                                                                                             A<CancellationToken>._);
 
             A.CallTo(listAllPodsInNamespaceExpression)
@@ -122,13 +125,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listServiceForAllNamespacesExpression =
                                                                                 () => _fakeRestClient.CoreV1.ListServiceForAllNamespacesWithHttpMessagesAsync(
                                                                                                                         A<bool?>._, A<string>._, A<string>._, A<string>._,
-                                                                                                                        A<int?>._, A<bool?>._, A<string>._, A<string>._, A<int?>._, A<bool?>._,
+                                                                                                                        A<int?>._, A<bool?>._, A<string>._, A<string>._, A<bool?>._, A<int?>._, A<bool?>._,
                                                                                                                         A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listNamespacedServiceExpression =
                                                                                 () => _fakeRestClient.CoreV1.ListNamespacedServiceWithHttpMessagesAsync(
                                                                                                                         A<string>._, A<bool?>._, A<string>._, A<string>._,
-                                                                                                                        A<string>._, A<int?>._, A<string>._, A<string>._, A<int?>._,
+                                                                                                                        A<string>._, A<int?>._, A<string>._, A<string>._, A<bool?>._, A<int?>._,
                                                                                                                         A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             A.CallTo(listNamespacedServiceExpression)
@@ -156,13 +159,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listServiceForAllNamespacesExpression =
                                                                                 () => _fakeRestClient.CoreV1.ListServiceForAllNamespacesWithHttpMessagesAsync(
                                                                                                                         A<bool?>._, A<string>._, A<string>._, A<string>._,
-                                                                                                                        A<int?>._, A<bool?>._, A<string>._, A<string>._, A<int?>._, A<bool?>._,
+                                                                                                                        A<int?>._, A<bool?>._, A<string>._, A<string>._, A<bool?>._, A<int?>._, A<bool?>._,
                                                                                                                         A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             Expression<Func<Task<HttpOperationResponse<V1ServiceList>>>> listNamespacedServiceExpression =
                                                                                 () => _fakeRestClient.CoreV1.ListNamespacedServiceWithHttpMessagesAsync(
                                                                                                                         A<string>._, A<bool?>._, A<string>._, A<string>._,
-                                                                                                                        A<string>._, A<int?>._, A<string>._, A<string>._, A<int?>._,
+                                                                                                                        A<string>._, A<int?>._, A<string>._, A<string>._, A<bool?>._, A<int?>._,
                                                                                                                         A<bool?>._, A<bool?>._, A<IReadOnlyDictionary<string, IReadOnlyList<String>>>._, A<CancellationToken>._);
 
             A.CallTo(listServiceForAllNamespacesExpression)
@@ -195,7 +198,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Tests.Kubernetes
         private V1ContainerStatus GetV1ContainerStatus(string containerName, string containerState)
         {
             bool ready = string.Equals(containerState, "running");
-            return new V1ContainerStatus($"{containerName}-imagename", $"{containerName}-imageId", containerName, ready, 0, $"{containerName}-ContainerId", state: GetV1ContainerState(containerState));
+            return new V1ContainerStatus($"{containerName}-imagename", $"{containerName}-imageId", containerName, ready, 0, null, $"{containerName}-ContainerId", state: GetV1ContainerState(containerState));
         }
 
         private V1ContainerState GetV1ContainerState(string status)

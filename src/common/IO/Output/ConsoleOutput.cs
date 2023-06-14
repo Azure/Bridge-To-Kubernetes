@@ -122,7 +122,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO.Output
 
             if (this.OutputFormat == OutputFormat.Json)
             {
-                string formattedText = JsonHelpers.SerializeObjectIndented(data);
+                string formattedText = JsonHelpers.SerializeForLoggingPurposeIndented(data);
                 _console.Write(formattedText);
                 _log.WithoutTelemetry.Info($"Console output (JSON):{Environment.NewLine}{formattedText}");
             }

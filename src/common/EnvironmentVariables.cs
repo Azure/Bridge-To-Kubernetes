@@ -38,6 +38,7 @@ namespace Microsoft.BridgeToKubernetes.Common
             public static readonly string KubernetesServicePort = "KUBERNETES_SERVICE_PORT";
             public static readonly string DotNetRoot = "DOTNET_ROOT";
             public static readonly string IsCodespaces = $"{BRIDGE}_IS_CODESPACES";
+            public static readonly string KubectlProxy = "KUBECTL_PROXY";
         }
 
         private readonly Lazy<ReleaseEnvironment> _releaseEnvironment = new Lazy<ReleaseEnvironment>(() => GetReleaseEnvironment(Get(Names.BridgeEnvironment)));
@@ -61,6 +62,7 @@ namespace Microsoft.BridgeToKubernetes.Common
         private readonly Lazy<string> _kubernetesServicePort = new Lazy<string>(() => Get(Names.KubernetesServicePort));
         private readonly Lazy<string> _dotNetRoot = new Lazy<string>(() => Get(Names.DotNetRoot));
         private readonly Lazy<bool> _isCodespaces = new Lazy<bool>(() => GetBool(Names.IsCodespaces, defaultValue: false));
+        private readonly Lazy<string> _kubectlProxy = new Lazy<string>(() => Get(Names.KubectlProxy));
 
         public EnvironmentVariables(IPlatform platform)
         {
@@ -113,6 +115,8 @@ namespace Microsoft.BridgeToKubernetes.Common
         public string DotNetRoot => _dotNetRoot.Value;
 
         public bool IsCodespaces => _isCodespaces.Value;
+
+        public string KubectlProxy => _kubectlProxy.Value;
 
         #endregion IEnvironmentVariables
 

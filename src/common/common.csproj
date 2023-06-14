@@ -48,9 +48,9 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Autofac" Version="6.4.0" />
-    <PackageReference Include="KubernetesClient" Version="8.0.68" />
-    <PackageReference Include="KubernetesClient.Basic" Version="8.0.68" />
-    <PackageReference Include="KubernetesClient.Models" Version="8.0.68" />
+    <PackageReference Include="KubernetesClient" Version="11.0.9" />
+    <PackageReference Include="KubernetesClient.Basic" Version="11.0.9" />
+    <PackageReference Include="KubernetesClient.Models" Version="11.0.9" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.8" />
