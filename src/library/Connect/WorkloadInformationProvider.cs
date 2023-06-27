@@ -509,7 +509,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                             DnsName = dns,
                             Ports = subset.Ports?
                                 .Where(port => this._IsSupportedProtocol(port.Protocol, endpoint.Metadata.Name) && !(portToIgnoreForHeadlessServiceEndpoints.GetValueOrDefault(endpoint.Metadata.Name)?.Contains(port.Port) ?? false))
-                                .Select(p => new PortPair(remotePort: p.Port, p.Name))
+                                .Select(p => new PortPair(remotePort: p.Port,name : p.Name))
                                 .ToArray() ?? new PortPair[] { },
                             IsInWorkloadNamespace = isInWorkloadNamespace
                         });
