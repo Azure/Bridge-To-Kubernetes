@@ -485,6 +485,12 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                         c.ReadinessProbe = null;
                         c.StartupProbe = null;
                     }
+
+                    // If lifecycle hooks option is not enabled or not set, remove any lifecycle hooks in the new pod.
+                    if (localProcessConfig?.IsLifecycleHooksEnabled != true)
+                    {
+                        c.Lifecycle = null;
+                    }
                 }
                 else
                 {
@@ -732,14 +738,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 V1Pod result = null;
                 if (patch != null)
                 {
+                    var serializedPatch = "";
                     try
                     {
-                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(JsonHelpers.SerializeObject(patch), PatchType.JsonPatch), cancellationToken: cancellationToken);
+                        serializedPatch = JsonHelpers.SerializeObject(patch);
+                        await _kubernetesClient.PatchV1DeploymentAsync(namespaceName, deploymentName, new V1Patch(serializedPatch, PatchType.JsonPatch), cancellationToken: cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        var serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(patch.Serialize());
-                            
+                        serializedPatch = StringManipulation.RemovePrivateKeyIfNeeded(serializedPatch);
                         _log.Error($"Patch deployment {namespaceName}/{remoteContainerConnectionDetails.DeploymentName} failed. Patch is {serializedPatch}, {ex.Message}");
                         throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.Deployment.ToString(), namespaceName, deploymentName, serializedPatch, ex.Message);
                     }
@@ -835,8 +842,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     }
                     catch (Exception ex)
                     {
-                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {patch.Serialize()}, {ex.Message}");
-                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, patch.Serialize(), ex.Message);
+                        _log.Error($"Patch statefulSet {namespaceName}/{remoteContainerConnectionDetails.StatefulSet} failed. Patch is {JsonHelpers.SerializeForLoggingPurposeIndented(patch)}, {ex.Message}");
+                        throw new UserVisibleException(_operationContext, ex, Resources.PatchResourceFailedFormat, KubernetesResourceType.StatefulSet.ToString(), namespaceName, statefulSetName, JsonHelpers.SerializeForLoggingPurposeIndented(patch), ex.Message);
                     }
                     var statefulSetPatch = new StatefulSetPatch(remoteContainerConnectionDetails.StatefulSet, reversePatch);
                     try
@@ -1130,6 +1137,16 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 }
             }
 
+            // If lifecycle hooks option is not enabled or not set, remove any lifecycle hooks in the new pod.
+            if (localProcessConfig?.IsLifecycleHooksEnabled != true)
+            {
+                if (deployment.Spec.Template.Spec.Containers[containerIndex].Lifecycle != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].Lifecycle);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].Lifecycle, deployment.Spec.Template.Spec.Containers[containerIndex].Lifecycle);
+                }
+            }
+
             _log.Info($"Deployment patch created: {dirty}");
             return dirty ? (patch, reversePatch) : (null, null);
         }
@@ -1225,6 +1242,16 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                 {
                     patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
                     reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].StartupProbe, statefulSet.Spec.Template.Spec.Containers[containerIndex].StartupProbe);
+                }
+            }
+
+            // If lifecycle hooks option is not enabled or not set, remove any lifecycle hooks in the new pod.
+            if (localProcessConfig?.IsLifecycleHooksEnabled != true)
+            {
+                if (statefulSet.Spec.Template.Spec.Containers[containerIndex].Lifecycle != null)
+                {
+                    patch.Remove(d => d.Spec.Template.Spec.Containers[containerIndex].Lifecycle);
+                    reversePatch.Add(d => d.Spec.Template.Spec.Containers[containerIndex].Lifecycle, statefulSet.Spec.Template.Spec.Containers[containerIndex].Lifecycle);
                 }
             }
 

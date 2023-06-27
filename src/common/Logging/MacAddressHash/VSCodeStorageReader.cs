@@ -57,7 +57,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash
                 }
 
                 var serializedStorage = this._fileSystem.ReadAllTextFromFile(vsCodeStoragePath);
-                dynamic deserializedStorage = JsonHelpers.DeserializeObject(serializedStorage);
+                dynamic deserializedStorage = JsonHelpers.DeserializeObject<object>(serializedStorage);
                 return deserializedStorage[name].Value;
             }
             catch { }

@@ -55,6 +55,11 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect.Environment
         bool IsProbesEnabled { get; }
 
         /// <summary>
+        /// Is Container Lifecycle Hooks one of the enabled features
+        /// </summary>
+        bool IsLifecycleHooksEnabled { get; }
+
+        /// <summary>
         /// Returns a collection with the environment variables generated from the local env file
         /// </summary>
         /// <returns></returns>
