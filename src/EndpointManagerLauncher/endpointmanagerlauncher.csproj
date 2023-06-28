@@ -19,6 +19,10 @@
     <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\common\Logging\Writers\*.cs" />
     <Compile Include="..\common\Utilities\AsyncHelpers.cs" />

@@ -10,6 +10,10 @@
     <HighEntropyVA>True</HighEntropyVA>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac.Extras.FakeItEasy" Version="7.0.0" />
     <PackageReference Include="FakeItEasy" Version="7.3.1" />
