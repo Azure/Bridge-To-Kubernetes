@@ -32,6 +32,9 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);$(TelemetryType)</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
   
   <ItemGroup>
     <Compile Update="CommonResources.Designer.cs">
