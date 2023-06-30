@@ -81,6 +81,7 @@ app.prepare().then(() => {
     server.get("/api/stats", function (req, res) {
         var options = {
             host: process.env.STATS_API_SERVICE_HOST,
+            port: process.env.STATS_API_SERVICE_PORT,
             path: '/stats',
             method: 'GET'
         };
