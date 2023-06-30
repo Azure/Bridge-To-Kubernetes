@@ -11,6 +11,10 @@
       <HighEntropyVA>True</HighEntropyVA>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_LoadBalancerTriggerA_PodTriggerA.txt" />
     <None Remove="EnvoyConfigs\GetEnvoyConfig_IngressTriggerA_PodTriggerA.txt" />

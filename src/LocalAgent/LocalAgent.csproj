@@ -19,6 +19,10 @@
     <UserSecretsId>fd98643e-8a5f-4e08-a030-9bc36f0ddfc3</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />

@@ -20,6 +20,10 @@
     <HighEntropyVA>True</HighEntropyVA>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>

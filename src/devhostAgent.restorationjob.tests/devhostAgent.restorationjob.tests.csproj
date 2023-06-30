@@ -9,6 +9,9 @@
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
     <HighEntropyVA>True</HighEntropyVA>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
+  </PropertyGroup>
   
   <ItemGroup>
     <Content Include="TestData\*.json">
