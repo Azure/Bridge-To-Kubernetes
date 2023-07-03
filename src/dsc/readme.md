@@ -8,7 +8,7 @@
 Prerequisites
 -------------
 If you didn't install it already, don't forget to install the Artifact Credential Provider (more info in /src/nugetreadme.md).
-You'll also need to have .NET 6.0 SDK and Runtime installed on your machine.
+You'll also need to have .NET 7.0 SDK and Runtime installed on your machine.
 Finally, before trying to build dsc.exe specifically, you should try to build the whole solution to make sure everything builds as expected:
 - Open src/all.sln in Visual Studio 2019 or 2022
 - Run Build > Rebuild Solution
@@ -66,7 +66,7 @@ Running/Debugging
 dotnet publish src\dsc\dsc.csproj -r win-x64
 ```
  
-**TIP:** Add `src\dsc\bin\Debug\net6.0\win-x64\publish` to your system's PATH environment variable to run the `dsc` from any directory on the command prompt.  
+**TIP:** Add `src\dsc\bin\Debug\net7.0\win-x64\publish` to your system's PATH environment variable to run the `dsc` from any directory on the command prompt.  
 
 **Debugging:** 
 
@@ -112,7 +112,7 @@ GET /metadata/identity/oauth2/token?api-version=2017-09-01&resource=https%3A%2F%
     \nsecret: placeholder
     \nx-ms-client-request-id: e6aadc2a-bb98-4714-bc4c-719676e0d4cf
     \nx-ms-return-client-request-id: true
-    \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET 6.0.8; Microsoft Windows 10.0.19042)
+    \nUser-Agent: azsdk-net-Identity/1.4.0-alpha.20210223.1 (.NET 7.0.1; Microsoft Windows 10.0.19042)
     
 We modify it to something like below:
 GET /metadata/identity/oauth2/token?api-version=**2018-02-01**&resource=https%3A%2F%2Fstorage.azure.com&**client_id**=<guid> HTTP/1.1
@@ -121,7 +121,7 @@ GET /metadata/identity/oauth2/token?api-version=**2018-02-01**&resource=https%3A
     **\nMetadata: true**
     \nx-ms-client-request-id: 8569c7c4-2411-400f-9d92-5b2e78ec7ec6
     \nx-ms-return-client-request-id: true
-    \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET 6.0.8; Microsoft Windows 10.0.19042)
+    \nUser-Agent: azsdk-net-Identity/1.3.0 (.NET 7.0.1; Microsoft Windows 10.0.19042)
 
 7. Requests are sent to 169.254.169.254
 

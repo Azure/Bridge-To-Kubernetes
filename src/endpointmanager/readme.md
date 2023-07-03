@@ -41,7 +41,7 @@ Running/Debugging
 dotnet publish src\EndpointManager\endpointmanager.csproj -r win-x64
 ```
 
-**Debugging:** In Visual Studio, right click the `endpointmanager.csproj` and choose "Set as Startup Project". In the project's `properties` > `Debug` tab change the "Launch" dropdown to "Executable" and enter the path to your local built copy of EndpointManager.exe like `C:\Mindaro\src\EndpointManager\bin\Debug\net6.0\win-x64\EndpointManager.exe`.
+**Debugging:** In Visual Studio, right click the `endpointmanager.csproj` and choose "Set as Startup Project". In the project's `properties` > `Debug` tab change the "Launch" dropdown to "Executable" and enter the path to your local built copy of EndpointManager.exe like `C:\Mindaro\src\EndpointManager\bin\Debug\net7.0\win-x64\EndpointManager.exe`.
 
 Testing
 -------

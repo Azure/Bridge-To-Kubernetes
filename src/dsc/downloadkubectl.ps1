@@ -5,12 +5,12 @@ $destinationFile = ""
 
 if ( ($architecture -eq "osx-x64") -or ($architecture -eq "osx-arm64") -or ($architecture -eq "linux-x64") -or ($architecture -eq "linux-arm64"))
 {
-    $destinationFolder = "./bin/" + $configuration + "/net6.0/" + $architecture + "/kubectl/" + $Args[2]
+    $destinationFolder = "./bin/" + $configuration + "/net7.0/" + $architecture + "/kubectl/" + $Args[2]
     $destinationFile = $destinationFolder + "/kubectl"
 }
 else
 {
-    $destinationFolder = ".\\bin\\" + $configuration + "\\net6.0\\" + $architecture + "\\kubectl\\" + $Args[2]
+    $destinationFolder = ".\\bin\\" + $configuration + "\\net7.0\\" + $architecture + "\\kubectl\\" + $Args[2]
     $destinationFile = $destinationFolder + "\\kubectl.exe"
 }
 
