@@ -1,5 +1,5 @@
 # Build container
-FROM mcr.microsoft.com/dotnet/sdk:6.0-cbl-mariner2.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0 AS build
 
 ARG Configuration=Release
 ARG TelemetryType=TELEMETRY_DEVELOPMENT
@@ -18,7 +18,7 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -o /src/publish
 
 # Final container
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-cbl-mariner2.0 as final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0 as final
 
 # Setup common tools
 RUN tdnf clean all && \

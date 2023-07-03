@@ -65,7 +65,7 @@ ensure_b2k_is_disconnected() {
 start_b2k() {
     echo 'Starting Bridge'
     ## & for parallel execution , && for sequential execution
-    ../../../src/dsc/bin/Debug/net6.0/$OS/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
+    ../../../src/dsc/bin/Debug/net7.0/$OS/dsc connect --service stats-api --namespace todo-app --local-port 3001 --control-port 51424 --use-kubernetes-service-environment-variables -- npm run start & b2kPID=$!
     sleep 30
     echo "b2k process ID is $b2kPID"
 }

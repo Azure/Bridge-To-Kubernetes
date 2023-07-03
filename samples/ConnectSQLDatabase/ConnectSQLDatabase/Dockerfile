@@ -1,5 +1,5 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 
-COPY bin/Release/net6.0/publish/ App/
+COPY bin/Release/net7.0/publish/ App/
 WORKDIR /App
 ENTRYPOINT ["dotnet", "ConnectSQLDatabase.dll"]
