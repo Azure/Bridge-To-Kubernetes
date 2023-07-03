@@ -21,7 +21,9 @@ parameters:
     - Debug
 variables:
 - name: BuildParameters.dotnetversion
-  value: 6.0.x
+  value: 7.0.x
+- name: BuildParameters.dotnetversionforbuild
+  value: net7.0
 - name: BuildParameters.nugetversion
   value: 5.9.x
 - name: RunTests
@@ -55,7 +57,7 @@ jobs:
     fetchTags: false
     persistCredentials: True
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6.0.x
+    displayName: Use .NET Core SDK 7.0.x
     enabled: True
     inputs:
       version: $(BuildParameters.dotnetversion)
@@ -69,6 +71,7 @@ jobs:
       restoreArguments: -r win-x64
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x
@@ -162,7 +165,7 @@ jobs:
       packagesToPack: src/dsc/dsc.csproj
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
-      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
+      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-x64\publish\dsc.nuspec'
 
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
@@ -180,7 +183,7 @@ jobs:
     fetchTags: false
     persistCredentials: True
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6.0.x
+    displayName: Use .NET Core SDK 7.0.x
     enabled: True
     inputs:
       version: $(BuildParameters.dotnetversion)
@@ -194,6 +197,7 @@ jobs:
       restoreArguments: -r win-x64
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x

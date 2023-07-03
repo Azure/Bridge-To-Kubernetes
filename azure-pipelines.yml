@@ -29,7 +29,9 @@ parameters:
     - Debug
 variables:
 - name: BuildParameters.dotnetversion
-  value: 6.0.x
+  value: 7.0.x
+- name: BuildParameters.dotnetversionforbuild
+  value: net7.0
 - name: BuildParameters.nugetversion
   value: 5.9.x
 - name: TeamName
@@ -95,7 +97,7 @@ jobs:
     displayName: 'Install Localization Plugin'
     enabled: True
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6.0.x
+    displayName: Use .NET Core SDK 7.0.x
     enabled: True
     inputs:
       version: $(BuildParameters.dotnetversion)
@@ -202,12 +204,12 @@ jobs:
     displayName: Copy EndpointManager Launcher to dsc folder
     enabled: True
     inputs:
-      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/
       Contents: >-
         **/*
 
         !**/*.pdb
-      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/EndpointManagerLauncher
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/EndpointManagerLauncher
       OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
@@ -238,25 +240,25 @@ jobs:
     inputs:
       targetType: inline
       script: >
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win/kubectl.exe
-
-
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl' -ItemType Directory
-
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
-
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
 
 
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     name: ''
     displayName: Sign Files
@@ -269,7 +271,7 @@ jobs:
     displayName: Collect files for .zip (Windows)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish
       Contents: >-
         **/*
 
@@ -309,7 +311,7 @@ jobs:
     displayName: Collect files for .zip (OSX)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish
       Contents: >-
         **/*
 
@@ -353,7 +355,7 @@ jobs:
     displayName: Collect files for .zip (Linux)
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish
       Contents: >-
         **/*
 
@@ -464,7 +466,7 @@ jobs:
       packagesToPack: src/dsc/dsc.csproj
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
-      buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\net6.0\win-x64\publish\dsc.nuspec'
+      buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-x64\publish\dsc.nuspec'
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Manifest Generator for nuget'
     inputs:
@@ -482,7 +484,7 @@ jobs:
     displayName: Collect Build Symbols - dsc
     enabled: True
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)
       Contents: >-
         */publish/dsc.?(pdb|exe|dll|)
 
@@ -578,9 +580,9 @@ jobs:
   - task: MicroBuildLocalizationPlugin@3
     displayName: Install Localization Plugin
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6.0.X
+    displayName: Use .NET Core SDK 7.0.X
     inputs:
-      version: 6.0.306
+      version: $(BuildParameters.dotnetversion)
       installationPath: $(Agent.TempDirectory)/dotnet
   - task: DotNetCoreCLI@2
     displayName: restore EndpointManager (Windows) (to download runtime pack)
@@ -626,12 +628,12 @@ jobs:
     displayName: Copy EndpointManager Launcher to dsc folder
     enabled: True
     inputs:
-      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/
       Contents: >-
         **/*
 
         !**/*.pdb
-      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/EndpointManagerLauncher
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/EndpointManagerLauncher
       OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
@@ -657,25 +659,25 @@ jobs:
     inputs:
       targetType: inline
       script: >
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish/kubectl/win/kubectl.exe
-
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl' -ItemType Directory
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx' -ItemType Directory
-
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
 
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl' -ItemType Directory
 
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux' -ItemType Directory
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     displayName: Sign Files
     enabled: True
@@ -686,7 +688,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect files for .zip (Windows)
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/win-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish
       Contents: >-
         **/*
 
@@ -729,7 +731,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/osx-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish
       Contents: >-
         **/*
 
@@ -776,7 +778,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/net6.0/linux-x64/publish
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish
       Contents: >-
         **/*
 
