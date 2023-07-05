@@ -6,6 +6,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -127,8 +128,12 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                     Task.Run(() => this.StartReceivingAsync(t, streamId, _cancellationToken)).Forget();
                     return t;
                 });
-                await tcpClient.GetStream().WriteAsync(data, 0, data.Length);
-                _log.Verbose($"Sent {data.Length} bytes to workload on id {streamId}.");
+
+                if (tcpClient.Connected)
+                {
+                    await tcpClient.GetStream().WriteAsync(data, 0, data.Length);
+                    _log.Verbose($"Sent {data.Length} bytes to workload on id {streamId}.");
+                }
             }
 
             private void OnClosed(int streamId)
@@ -149,15 +154,38 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
                 {
                     while (!cancellation.IsCancellationRequested)
                     {
-                        int cRead = await tcpClient.GetStream().ReadAsync(buffer, 0, buffer.Length, cancellation);
+                        int cRead = 0;
+                        try
+                        {
+                            cRead = await tcpClient.GetStream().ReadAsync(buffer, cancellation);
+                        }
+                        catch (IOException ex)
+                        {
+                            if (ex.InnerException is OperationCanceledException)
+                            {
+                                // Cancellation requested
+                                break;
+                            }
+                            if (ex.InnerException is SocketException se && (se.SocketErrorCode == SocketError.ConnectionReset || se.SocketErrorCode == SocketError.OperationAborted))
+                            {
+                                _log.Verbose($"Connection is already closed by DevHostAgent on socket {streamId} (StartReceivingAsync)");
+                                break;
+                            }
+
+                            throw;
+                        }
+
                         _log.Verbose($"ReversePortForwarder receive {cRead} bytes from port {_port.Port} on id {streamId}");
+
                         if (cRead == 0)
                         {
                             await _agentClient.ReversePortForwardStopAsync(_port.Port, streamId, cancellation);
                             break;
                         }
+
                         byte[] content = new byte[cRead];
                         Array.Copy(buffer, content, cRead);
+
                         try
                         {
                             await _agentClient.ReversePortForwardSendAsync(_port.Port, streamId, content, cancellation);
