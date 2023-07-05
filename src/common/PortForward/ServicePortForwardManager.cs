@@ -171,7 +171,28 @@ namespace Microsoft.BridgeToKubernetes.Common.PortForward
 
                         while (!requestProcessingCancellationTokenSource.Token.IsCancellationRequested)
                         {
-                            int cRead = await stream.ReadAsync(buffer, 0, buffer.Length, requestProcessingCancellationTokenSource.Token);
+                            int cRead = 0;
+                            try
+                            {
+                                cRead = await stream.ReadAsync(buffer, requestProcessingCancellationTokenSource.Token);
+                            }
+                            catch (IOException ex)
+                            {
+                                if (ex.InnerException is OperationCanceledException)
+                                {
+                                    // Cancellation requested
+                                    break;
+                                }
+                                if (ex.InnerException is SocketException se && (se.SocketErrorCode == SocketError.ConnectionReset || se.SocketErrorCode == SocketError.OperationAborted))
+                                {
+                                    _log.Verbose($"Connection is already closed by DevHostAgent on socket {streamId} (RunLoopAsync)");
+                                    requestProcessingCancellationTokenSource.Cancel();
+                                    break;
+                                }
+
+                                throw;
+                            }
+
                             if (cRead == 0)
                             {
                                 _log.Verbose($"ServicePortForward: stream {streamId}: StopLocal");
