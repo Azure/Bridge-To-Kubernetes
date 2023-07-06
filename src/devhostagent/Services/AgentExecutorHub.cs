@@ -111,7 +111,8 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.Services
             Task.Run(async () =>
             {
                 connector = _reversePortForwardConnectors.GetOrAdd(startInfo.Port, (p) => new ReversePortForwardConnector(p, _log, _platform));
-                await connector.ConnectAsync(async (id) =>
+                await connector.ConnectAsync(
+                async (id) =>
                 {
                     _log.Verbose($"AgentHub connnected for {startInfo.Port}, id {id}");
                     await channel.Writer.WriteAsync(PortForwardStreamBlock.Connected(id));

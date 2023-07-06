@@ -88,7 +88,18 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
             var channelReader = await connection.StreamAsChannelAsync<PortForwardStreamBlock>("RunReversePortForward", port, cancellationToken);
             while (!cancellationToken.IsCancellationRequested)
             {
-                PortForwardStreamBlock b = await channelReader.ReadAsync(cancellationToken);
+                PortForwardStreamBlock b = null;
+
+                try
+                {
+                    b = await channelReader.ReadAsync(cancellationToken);
+                }
+                catch (Exception ex) when (ex is OperationCanceledException)
+                {
+                    // Cancellation requested
+                    break;
+                }
+
                 switch (b.Flag)
                 {
                     case PortForwardStreamFlag.Connected:
@@ -97,6 +108,10 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
                             try
                             {
                                 await connection.InvokeAsync("StopReversePortForward", port.Port, b.StreamId);
+                            }
+                            catch (TaskCanceledException)
+                            {
+                                // Task Canceled
                             }
                             catch (Exception ex)
                             {
@@ -112,7 +127,7 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
                         {
                             await dataHandler(b.StreamId, b.Content);
                         }
-                        catch (Exception)
+                        catch (Exception dex)
                         {
                             // closes this connection
                             try
@@ -123,6 +138,8 @@ namespace Microsoft.BridgeToKubernetes.Common.DevHostAgent
                             {
                                 _log.Exception(ex);
                             }
+
+                            _log.Exception(dex);
 
                             closedHandler(b.StreamId);
                         }
