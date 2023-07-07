@@ -298,7 +298,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IP
                 command: args,
                 logCallback: (line) => _log.Info(line),
                 envVariables: null,
-                timeout: TimeSpan.FromSeconds(60),
+                timeout: TimeSpan.FromSeconds(60), // increasing the timeout to match with iptables --wait time.
                 cancellationToken: cancellationToken,
                 out string output);
 
