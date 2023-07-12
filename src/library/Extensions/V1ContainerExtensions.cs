@@ -13,7 +13,8 @@ namespace k8s.Models
         {
             return StringComparer.OrdinalIgnoreCase.Equals(container.Name, "devspaces-proxy")
                     || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "istio-proxy")
-                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "daprd");
+                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "daprd")
+                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "jaeger-agent");
         }
     }
 }
