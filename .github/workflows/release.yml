@@ -91,6 +91,7 @@ jobs:
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v2
       with:
+        validation_level: error
         path: ./CHANGELOG.md
     - name: Create Release
       id: create_release
