@@ -20,7 +20,8 @@ jobs:
     - name: dotnet Publish for ${{ matrix.mode }}
       run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
     - name: Build endpointmanagerlauncher
-      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
+      if: ${{ matrix.mode == 'win-x64' || matrix.mode == 'win-arm64'}}
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r ${{ matrix.mode }} -c Release --no-restore
     - name: Copy endpointmanagerlauncher
       uses: Azure/powershell@v1
       if: ${{ matrix.mode == 'win-x64' || matrix.mode == 'win-arm64'}}
