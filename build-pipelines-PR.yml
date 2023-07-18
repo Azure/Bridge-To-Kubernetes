@@ -72,6 +72,16 @@ jobs:
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
       externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager for arm64 (Windows) (to download runtime pack)
+    enabled: True
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-arm64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x
@@ -125,6 +135,17 @@ jobs:
       modifyOutputPath: false
       selectOrConfig: config
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for self contained for arm64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
     displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
     inputs:
@@ -132,6 +153,17 @@ jobs:
       publishWebProjects: false
       projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher for arm64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -147,6 +179,17 @@ jobs:
       modifyOutputPath: false
       selectOrConfig: config
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for self contained for arm64 (OSX)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
     displayName: publish DSC for self contained (Linux)
     enabled: True
     inputs:
@@ -154,6 +197,17 @@ jobs:
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r linux-x64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for self contained for arm64 (Linux)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-arm64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -166,6 +220,15 @@ jobs:
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
       buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-x64\publish\dsc.nuspec'
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack CLI NuGet for arm64 (Windows)'
+    inputs:
+      command: pack
+      feedsToUse: config
+      packagesToPack: src/dsc/dsc.csproj
+      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
+      nobuild: true
+      buildProperties: 'NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-arm64\publish\dsc.nuspec'
 
 - job: Phase_2
   displayName: Run NON self-contained build (binaries V2, where the binaries are downloaded in parallel)
@@ -195,6 +258,16 @@ jobs:
       command: restore
       projects: src\endpointmanager\endpointmanager.csproj
       restoreArguments: -r win-x64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager for arm64 (Windows) (to download runtime pack)
+    enabled: True
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-arm64
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
       externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
@@ -230,12 +303,32 @@ jobs:
       modifyOutputPath: false
       selectOrConfig: config
   - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher for arm64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
     displayName: publish DSC for non self contained (Windows)
     inputs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --self-contained false --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for non self contained for arm64 (Windows)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --self-contained false --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
@@ -248,12 +341,30 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for non self contained for arm64 (Linux)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-arm64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
     displayName: publish DSC for non self contained (OSX)
     inputs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for non self contained for arm64 (OSX)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
 ...

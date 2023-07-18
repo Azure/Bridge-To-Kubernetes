@@ -6,7 +6,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        mode: [osx-x64,linux-x64,win-x64]
+        mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
