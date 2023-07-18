@@ -3,6 +3,8 @@
 
 [![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/Azure.Bridge-To-Kubernetes?branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build/latest?definitionId=17861&branchName=main)
 
+[![CodeQL](https://github.com/Azure/Bridge-To-Kubernetes/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/Azure/Bridge-To-Kubernetes/actions/workflows/codeql-analysis.yml)
+
 Welcome to Bridge-To-Kubernetes! Bridge to Kubernetes extends the Kubernetes perimeter to your development computer allowing you to write, test, and debug microservice code while connected to your Kubernetes cluster with the rest of your application or services. You can simply run your code natively on your development workstation while connected to the Kubernetes cluster, allowing you to test your code changes in the context of the larger application.
 
 ## Introduction Video
