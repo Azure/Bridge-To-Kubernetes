@@ -23,25 +23,37 @@ jobs:
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Copy endpointmanagerlauncher
       uses: Azure/powershell@v1
-      if: ${{ matrix.mode == 'win-x64' }}
+      if: ${{ matrix.mode == 'win-x64' || matrix.mode == 'win-arm64'}}
       with:
         inlineScript: |
-          Copy-Item -Path ${{ github.workspace }}\src\EndpointManagerLauncher\bin\Release\net7.0\win-x64\publish\ -Destination ${{ github.workspace }}\src\dsc\bin\Release\net7.0\win-x64\publish\EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
+          Copy-Item -Path ${{ github.workspace }}\src\EndpointManagerLauncher\bin\Release\net7.0\${{ matrix.mode }}\publish\ -Destination ${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\EndpointManagerLauncher -Recurse -Exclude **/*.pdb   
         azPSVersion: '3.1.0'
     - name: Download Kubectl
       uses: Azure/powershell@v1
       with:
         inlineScript: |
           if ('${{ matrix.mode }}' -eq 'win-x64') {
-            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/windows/amd64/kubectl.exe'
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/windows/amd64/kubectl.exe'
+            $dir = 'win'
+            $file = 'kubectl.exe'
+          } elseif ('${{ matrix.mode }}' -eq 'win-arm64') {
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe'
             $dir = 'win'
             $file = 'kubectl.exe'
           } elseif ('${{ matrix.mode }}' -eq 'osx-x64') {
-            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/darwin/amd64/kubectl'
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/darwin/amd64/kubectl'
             $dir = 'osx'
             $file = 'kubectl'
+          } elseif ('${{ matrix.mode }}' -eq 'osx-arm64') {
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl'
+            $dir = 'osx'
+            $file = 'kubectl'
+          } elseif ('${{ matrix.mode }}' -eq 'linux-arm64') {
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/linux/arm64/kubectl'
+            $dir = 'linux'
+            $file = 'kubectl'
           } else {
-            $url = 'https://storage.googleapis.com/kubernetes-release/release/v1.21.2/bin/linux/amd64/kubectl'
+            $url = 'https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl'
             $dir = 'linux'
             $file = 'kubectl'
           }
@@ -99,6 +111,15 @@ jobs:
         asset_path: ${{ github.workspace }}/lpk-win-x64/lpk-win-x64.zip
         asset_name: lpk-win.zip
         asset_content_type: application/zip
+    - name: Upload Window ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-win-arm64/lpk-win-arm64.zip
+        asset_name: lpk-win-arm64.zip
+        asset_content_type: application/zip
     - name: Upload Linux Release Assets
       uses: actions/upload-release-asset@v1 
       env:
@@ -108,6 +129,15 @@ jobs:
         asset_path: ${{ github.workspace }}/lpk-linux-x64/lpk-linux-x64.zip
         asset_name: lpk-linux.zip
         asset_content_type: application/zip
+    - name: Upload Linux ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-linux-arm64/lpk-linux-arm64.zip
+        asset_name: lpk-linux-arm64.zip
+        asset_content_type: application/zip
     - name: Upload OSX Release Assets
       uses: actions/upload-release-asset@v1 
       env:
@@ -116,4 +146,13 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}/lpk-osx-x64/lpk-osx-x64.zip
         asset_name: lpk-osx.zip
+        asset_content_type: application/zip
+    - name: Upload OSX ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-osx-arm64/lpk-osx-arm64.zip
+        asset_name: lpk-osx-arm64.zip
         asset_content_type: application/zip
