@@ -110,7 +110,7 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'* ]]; then
+    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '7.0'* ]]; then
         install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
@@ -132,12 +132,12 @@ install_tool() {
                     install_dotnet_x64_for_arm
                 else 
                     $PACKAGER tap isen-ng/dotnet-sdk-versions
-                    install_with_sudo dotnet-sdk6-0-400 --cask
+                    install_with_sudo dotnet-sdk7-0-300 --cask
                 fi 
             elif [[ $OSTYPE == "linux"* ]]; then
-                install_with_sudo dotnet-sdk-6.0
+                install_with_sudo dotnet-sdk-7.0
             else 
-                install_with_sudo dotnet-6.0-sdk -y
+                install_with_sudo dotnet-7.0-sdk -y
             fi
             ;;
         jq)
@@ -152,7 +152,7 @@ install_tool() {
 
 install_dotnet_x64_for_arm() {
     log INFO "downloading and installing dotnet x64 binaries in arm machines"
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 7.0.306 --arch x64
     if [[ ! -d /usr/local/share/dotnet ]] || [[ ! -d /usr/local/share/dotnet/x64 ]]; then
         sudo mkdir -p /usr/local/share/dotnet/x64
     fi
