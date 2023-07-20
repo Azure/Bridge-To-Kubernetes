@@ -1,5 +1,6 @@
 # Build container
-FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0 AS build
+ARG ARCH=amd64
+FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0-${ARCH} AS build
 
 RUN tdnf clean all && \
  tdnf check-update && \
@@ -22,7 +23,7 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -o /src/publish devhostAgent.csproj
 
 # Final container
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0 as final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0-${ARCH} as final
 
 RUN tdnf clean all && \
  tdnf check-update && \
