@@ -123,6 +123,7 @@ install_tool() {
     case $1 in 
 
         kubectl)
+            install_pre_requirements_kubectl
             install_with_sudo kubectl
             ;;
         dotnet)
@@ -148,6 +149,18 @@ install_tool() {
             exit 1
             ;;
     esac
+}
+
+install_pre_requirements_kubectl() {
+    if [[ $OSTYPE == "linux"* ]]; then
+        #add google packages to install kubectl
+        sudo $PACKAGER update
+        sudo $PACKAGER install -y ca-certificates curl
+        sudo $PACKAGER install -y apt-transport-https
+        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo $PACKAGER update
+    fi
 }
 
 install_dotnet_x64_for_arm() {
