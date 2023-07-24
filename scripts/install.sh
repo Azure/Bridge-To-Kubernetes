@@ -153,7 +153,7 @@ install_tool() {
 
 install_pre_requirements_kubectl() {
     if [[ $OSTYPE == "linux"* ]]; then
-        #add google packages to install kubectl
+        #add google packages to install kubectl or else apt install kubectl will give error kubectl not found.
         sudo $PACKAGER update
         sudo $PACKAGER install -y ca-certificates curl
         sudo $PACKAGER install -y apt-transport-https
