@@ -1,4 +1,5 @@
 #!/bin/bash
+export LANG=C.UTF-8
 set -ef
 
 stop_b2k() {
@@ -7,8 +8,18 @@ stop_b2k() {
     echo "killing npm & node"
     sudo kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
     sleep 5
-    echo "killing minikube tunnel"
-    kill $tunnelPID
+    if [ "$RUNNER_OS" == "Linux" ]; then
+        echo "killing minikube tunnel"
+        kill $tunnelPID
+        sleep 5
+    fi
+}
+
+stop_b2k_windows() {
+    echo "stopping b2k debugging via control port"
+    curl -X POST http://localhost:51424/api/remoting/stop/
+    echo "killing npm & node"
+    taskkill -im "node.exe" -f
     sleep 5
 }
 
@@ -16,7 +27,11 @@ validate_b2k_is_running() {
     echo "evaluating curl response after b2k debugging"
     check_if_restore_pod_exists
     validate_restore_pod_status
-    CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
+    if [ "$RUNNER_OS" == "Linux" ]; then
+        CURL_OUTPUT=$(curl -s -w "%{http_code}" $(minikube service frontend -n todo-app --url)/api/stats)
+    else
+        CURL_OUTPUT=$(curl -s -w "%{http_code}" $(kubectl get service frontend -n todo-app -o jsonpath="{.status.loadBalancer.ingress[0].ip}")/api/stats)
+    fi
     echo "curl response is:$CURL_OUTPUT"
     if [[ "$CURL_OUTPUT" =~ "200" ]]; then
         echo "B2K Debugging was successful"
@@ -30,7 +45,7 @@ validate_b2k_is_running() {
 
 check_if_restore_pod_exists() {
     ## see if b2k pods are present
-    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -P "restore")
+    RESTORE_POD_NAME=$(kubectl get pods -n todo-app -o custom-columns=NAME:.metadata.name | grep -w "restore")
     echo "Restore Pod name is:$RESTORE_POD_NAME"
     if [ -z $RESTORE_POD_NAME ]; then
         echo "B2K restore pod is not found"
@@ -133,14 +148,20 @@ start_live_test() {
 
     dotnet_publish_for_b2k
     set_up_stats_api
-    start_minikube_tunnel
+    if [ "$RUNNER_OS" == "Linux" ]; then
+        start_minikube_tunnel
+    fi
     #set bridge as dev environment to run live test because some of image tags might noe be available in production
     export BRIDGE_ENVIRONMENT='dev'
     start_b2k
 
     validate_b2k_is_running
 
-    stop_b2k
+    if [ "$RUNNER_OS" == "Windows" ]; then
+        stop_b2k_windows
+    else
+        stop_b2k
+    fi
 
     #ensure_b2k_is_disconnected
 

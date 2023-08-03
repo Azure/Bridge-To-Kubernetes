@@ -1,24 +1,56 @@
 name: Live tests for B2K
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+  repository_dispatch:
+    types: [ok-to-test-command]
 jobs:
   liveTest:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     name: live test for b2k
     steps:
     - uses: actions/checkout@v2
+    - name: Login Azure Context
+      if: ${{ matrix.os != 'ubuntu-latest' }}
+      uses: Azure/login@v1
+      with:
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+    # todo: actually create an AKS
+    - name: Create AKS for Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: |
+          az resource list -g ${{ secrets.AZURE_RESOURCE_GROUP }}
+        azPSVersion: '3.1.0'
+    - name: Set AKS Context for Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: azure/aks-set-context@v3
+      with:
+        # todo: set to the actually created AKS
+        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        cluster-name: testworkflow-aks
+    # todo: step:Create AKS for MacOS
+    - name: Set AKS Context for MacOS
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: azure/aks-set-context@v3
+      with:
+        # todo: set to the actually created AKS
+        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        cluster-name: workflowtest-mac-aks
     - name: Setup kubectl for macos-latest
       if: ${{ matrix.os == 'macos-latest' }}
       uses: azure/setup-kubectl@v3
       with:
-       version: latest
-    - name: Start minikube
+        version: latest
+    - name: Start minikube for ubuntu 
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       uses: medyagh/setup-minikube@c8adc427cd854219da7bdea2f5fce5d23c89512a
       with:
        driver: docker
@@ -32,7 +64,7 @@ jobs:
         kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
         kubectl get pods -n todo-app
     - name: Publish and test
-      timeout-minutes: 10
+      timeout-minutes: 30
       shell: bash
       run: |
        echo "RUNNER OS IS: $RUNNER_OS"
