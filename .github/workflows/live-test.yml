@@ -8,8 +8,7 @@ jobs:
       PR_NUMBER: ${{ github.event.client_payload.slash_command.args.named.PR_NUMBER }}
     strategy:
       matrix:
-        # os: [ubuntu-latest, windows-latest, macos-latest]
-         os: [macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     name: live test for b2k
     steps:
@@ -24,34 +23,28 @@ jobs:
       run: |
         echo "mac_cluster=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
         echo "windows_cluster=b2k-livetest-windows-pr-$PR_NUMBER" >> $GITHUB_ENV
-    # todo: actually create an AKS
+    # create cluster for Windows
     - name: Create AKS for Windows
       if: ${{ matrix.os == 'windows-latest' }}
-      uses: Azure/powershell@v1
-      with:
-        inlineScript: |
-          az resource list -g ${{ secrets.AZURE_RESOURCE_GROUP }}
-        azPSVersion: '3.1.0'
+      run: |
+        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.windows_cluster }} --no-ssh-key
     - name: Set AKS Context for Windows
       if: ${{ matrix.os == 'windows-latest' }}
       uses: azure/aks-set-context@v3
       with:
-        # todo: set to the actually created AKS
         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        cluster-name: testworkflow-aks
-    - name: Create AKS Mac
+        cluster-name: ${{ env.windows_cluster }}
+    # create cluster for Mac
+    - name: Create AKS mac
       if: ${{ matrix.os == 'macos-latest' }}
-      uses: Azure/powershell@v1
-      with:
-        inlineScript: |
-          az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n $mac_cluster
-        azPSVersion: '3.1.0'
+      run: |
+        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.mac_cluster }} --no-ssh-key
     - name: Set AKS Context for MacOS
       if: ${{ matrix.os == 'macos-latest' }}
       uses: azure/aks-set-context@v3
       with:
         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        cluster-name: $mac_cluster
+        cluster-name: ${{ env.mac_cluster }}
     - name: Setup kubectl for macos-latest
       if: ${{ matrix.os == 'macos-latest' }}
       uses: azure/setup-kubectl@v3
