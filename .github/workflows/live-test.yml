@@ -18,11 +18,10 @@ jobs:
       uses: Azure/login@v1
       with:
         creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
-    - name: Prepare AKS Cluster name
-      if: ${{ matrix.os != 'ubuntu-latest' }}
+    - name: Prepare Cluster name Windows
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        echo "mac_cluster=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
-        echo "windows_cluster=b2k-livetest-windows-pr-$PR_NUMBER" >> $GITHUB_ENV
+        echo "windows_cluster=b2k-livetest-win-pr-$env:PR_NUMBER" >> $env:GITHUB_ENV
     # create cluster for Windows
     - name: Create AKS for Windows
       if: ${{ matrix.os == 'windows-latest' }}
@@ -34,6 +33,10 @@ jobs:
       with:
         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
         cluster-name: ${{ env.windows_cluster }}
+    - name: Prepare Cluster name Mac
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        echo "mac_cluster=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
     # create cluster for Mac
     - name: Create AKS mac
       if: ${{ matrix.os == 'macos-latest' }}
