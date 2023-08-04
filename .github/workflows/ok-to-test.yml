@@ -23,5 +23,7 @@ jobs:
           reaction-token: ${{ secrets.GITHUB_TOKEN }}
           issue-type: pull-request
           commands: ok-to-test
+          static-args: |
+            PR_NUMBER=${{ github.event.issue.number }}
           permission: write
           
