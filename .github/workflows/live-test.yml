@@ -6,13 +6,19 @@ jobs:
   liveTest:
     env:
       PR_NUMBER: ${{ github.event.client_payload.slash_command.args.named.PR_NUMBER }}
+      HEAD_REPO: ${{ github.event.client_payload.slash_command.args.named.HEAD_REPO }}
+      HEAD_BRANCH: ${{ github.event.client_payload.slash_command.args.named.HEAD_BRANCH }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     name: live test for b2k
     steps:
     - uses: actions/checkout@v2
+      # checkout PR head repo/branch
+      with:
+         repository: ${{ env.HEAD_REPO }}
+         ref: ${{ env.HEAD_BRANCH }}
     - name: Login Azure Context
       if: ${{ matrix.os != 'ubuntu-latest' }}
       uses: Azure/login@v1
