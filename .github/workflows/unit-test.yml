@@ -1,0 +1,25 @@
+name: "Unit Tests"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+
+jobs:
+  unit-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: dotnet restore ./src/unittest.sln
+      - name: Run tests
+        run: dotnet test .\src\unittest.sln /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=../CoverageResults/ /p:MergeWith=../CoverageResults/coverage.json -m:1
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@def81595a67c83cbb0a42ba9b624b97f4c7deb3d #v3.1.4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
