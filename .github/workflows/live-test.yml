@@ -95,6 +95,6 @@ jobs:
       if: always()
       shell: bash
       run: |
-        if [ az aks list -g ConnectTesting --query "[?name=='${{ env.cluster_name }}'] | length(@)" > 0 ]; then
+        if [ $(az aks list -g ${{ secrets.AZURE_RESOURCE_GROUP }} --query "[?name=='${{ env.cluster_name }}'] | length(@)") > 0 ]; then
           az aks delete -n ${{ env.cluster_name }} -g ${{ secrets.AZURE_RESOURCE_GROUP }} -y --no-wait
         fi
