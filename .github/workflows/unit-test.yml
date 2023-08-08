@@ -19,6 +19,8 @@ jobs:
           dotnet test .\src\dsc.tests\dsc.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
           dotnet test .\src\routingmanager.tests\routingmanager.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
           dotnet test .\src\devhostAgent.restorationjob.tests\devhostAgent.restorationjob.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
+          dotnet test .\src\library.tests\library.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
+          dotnet test .\src\common.tests\common.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json"
           dotnet test .\src\endpointmanager.tests\endpointmanager.tests.csproj /p:CollectCoverage=true /p:CoverletOutput=../CoverageResults/ /p:MergeWith="../CoverageResults/coverage.json" /p:CoverletOutputFormat=lcov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@def81595a67c83cbb0a42ba9b624b97f4c7deb3d #v3.1.4
