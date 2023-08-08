@@ -7,9 +7,11 @@ permissions:
 jobs:
   liveTest:
     env:
-      PR_NUMBER: ${{ github.event.client_payload.slash_command.args.named.PR_NUMBER }}
-      HEAD_REPO: ${{ github.event.client_payload.slash_command.args.named.HEAD_REPO }}
-      HEAD_BRANCH: ${{ github.event.client_payload.slash_command.args.named.HEAD_BRANCH }}
+      PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
+    if:
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      contains(github.event.client_payload.pull_request.head.sha, github.event.client_payload.slash_command.args.named.sha)
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -17,10 +19,8 @@ jobs:
     name: live test for b2k
     steps:
     - uses: actions/checkout@v2
-      # checkout PR head repo/branch
       with:
-         repository: ${{ env.HEAD_REPO }}
-         ref: ${{ env.HEAD_BRANCH }}
+        ref: refs/pull/${{ github.event.client_payload.pull_request.number }}/merge
     - name: Login Azure Context
       if: ${{ matrix.os != 'ubuntu-latest' }}
       uses: Azure/login@v1

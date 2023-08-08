@@ -16,29 +16,6 @@ jobs:
     # Only run for PRs, not issue comments
     if: ${{ github.event.issue.pull_request }}
     steps:
-      - name: Resolve PR
-        id: resolve-pr
-        uses: actions/github-script@v3
-        with:
-          script: |
-              const request = {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: context.issue.number
-              }
-              core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
-              try {
-                  const result = await github.pulls.get(request)
-                  return result.data
-              } catch (err) {
-                  core.setFailed(`Request failed with error ${err}`)
-              }
-      - name: Print pr data
-        run: |
-            echo head repository is ${{ fromJSON(steps.resolve-pr.outputs.result).head.repo.full_name }}
-            echo head branch is ${{ fromJSON(steps.resolve-pr.outputs.result).head.ref }}
-            echo head sha is ${{ fromJSON(steps.resolve-pr.outputs.result).head.sha }}
-
       - name: slash command dispatch
         uses: peter-evans/slash-command-dispatch@a28ee6cd74d5200f99e247ebc7b365c03ae0ef3c # v3.0.1
         with:
@@ -46,10 +23,5 @@ jobs:
           reaction-token: ${{ secrets.GITHUB_TOKEN }}
           issue-type: pull-request
           commands: ok-to-test
-          static-args: |
-            PR_NUMBER=${{ github.event.issue.number }}
-            HEAD_REPO=${{ fromJSON(steps.resolve-pr.outputs.result).head.repo.full_name }}
-            HEAD_BRANCH=${{ fromJSON(steps.resolve-pr.outputs.result).head.ref }}
-            LAST_SHA=${{ fromJSON(steps.resolve-pr.outputs.result).head.sha }}
           permission: write
           
