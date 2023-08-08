@@ -28,36 +28,27 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
-    - name: Prepare Cluster name Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+    - name: Prepare Cluster name Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
+      shell: bash
       run: |
-        echo "windows_cluster=b2k-livetest-win-pr-$env:PR_NUMBER" >> $env:GITHUB_ENV
-    # create cluster for Windows
-    - name: Create AKS for Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          echo "cluster_name=b2k-livetest-win-pr-$PR_NUMBER" >> $GITHUB_ENV
+        else
+          echo "cluster_name=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
+        fi
+    - name: Create AKS Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
+      shell: bash
       run: |
-        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.windows_cluster }} --no-ssh-key
-    - name: Set AKS Context for Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.cluster_name }} --no-ssh-key
+        echo "create_cluster=success" >> $GITHUB_ENV
+    - name: Set AKS Context Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
       uses: azure/aks-set-context@v3
       with:
         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        cluster-name: ${{ env.windows_cluster }}
-    - name: Prepare Cluster name Mac
-      if: ${{ matrix.os == 'macos-latest' }}
-      run: |
-        echo "mac_cluster=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
-    # create cluster for Mac
-    - name: Create AKS mac
-      if: ${{ matrix.os == 'macos-latest' }}
-      run: |
-        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.mac_cluster }} --no-ssh-key
-    - name: Set AKS Context for MacOS
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: azure/aks-set-context@v3
-      with:
-        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        cluster-name: ${{ env.mac_cluster }}
+        cluster-name: ${{ env.cluster_name }}
     - name: Setup kubectl for macos-latest
       if: ${{ matrix.os == 'macos-latest' }}
       uses: azure/setup-kubectl@v3
@@ -99,3 +90,11 @@ jobs:
           chmod +x scripts/verify.sh
         fi
         ./scripts/verify.sh
+
+    - name: cleanup AKS cluster
+      if: always()
+      shell: bash
+      run: |
+        if [ az aks list -g ConnectTesting --query "[?name=='${{ env.cluster_name }}'] | length(@)" > 0 ]; then
+          az aks delete -n ${{ env.cluster_name }} -g ${{ secrets.AZURE_RESOURCE_GROUP }} -y --no-wait
+        fi
