@@ -30,7 +30,7 @@ verify_if_multiple_pods_exists() {
     echo "Verifying if multiple pods exists"
     count=0
     MULTIPLE_POD_EXISTS=false
-    while [ "$count" -le 3 ]; do
+    while [ "$count" -le 10 ]; do
         STATS_API=$(kubectl get pods -n todo-app | grep "stats-api")
         echo "stats api pods: $STATS_API"
         echo "stats api length: ${#STATS_API}"
