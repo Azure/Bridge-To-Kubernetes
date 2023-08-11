@@ -1,24 +1,61 @@
 name: Live tests for B2K
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  repository_dispatch:
+    types: [ok-to-test-command]
+permissions:
+  id-token: write
 jobs:
   liveTest:
+    env:
+      PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
+    if:
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      contains(github.event.client_payload.pull_request.head.sha, github.event.client_payload.slash_command.args.named.sha)
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     name: live test for b2k
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: refs/pull/${{ github.event.client_payload.pull_request.number }}/merge
+    - name: Login Azure Context
+      if: ${{ matrix.os != 'ubuntu-latest' }}
+      uses: Azure/login@v1
+      with:
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    - name: Prepare Cluster name Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          echo "cluster_name=b2k-livetest-win-pr-$PR_NUMBER" >> $GITHUB_ENV
+        else
+          echo "cluster_name=b2k-livetest-mac-pr-$PR_NUMBER" >> $GITHUB_ENV
+        fi
+    - name: Create AKS Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        az aks create -g ${{ secrets.AZURE_RESOURCE_GROUP }} -n ${{ env.cluster_name }} --no-ssh-key
+        echo "create_cluster=success" >> $GITHUB_ENV
+    - name: Set AKS Context Mac and Windows
+      if: ${{ matrix.os == 'macos-latest' ||  matrix.os == 'windows-latest' }}
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        cluster-name: ${{ env.cluster_name }}
     - name: Setup kubectl for macos-latest
       if: ${{ matrix.os == 'macos-latest' }}
       uses: azure/setup-kubectl@v3
       with:
-       version: latest
-    - name: Start minikube
+        version: latest
+    - name: Start minikube for ubuntu 
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       uses: medyagh/setup-minikube@c8adc427cd854219da7bdea2f5fce5d23c89512a
       with:
        driver: docker
@@ -32,7 +69,7 @@ jobs:
         kubectl wait --for=condition=ready pod --all -n todo-app --timeout=300s
         kubectl get pods -n todo-app
     - name: Publish and test
-      timeout-minutes: 10
+      timeout-minutes: 30
       shell: bash
       run: |
        echo "RUNNER OS IS: $RUNNER_OS"
@@ -53,3 +90,11 @@ jobs:
           chmod +x scripts/verify.sh
         fi
         ./scripts/verify.sh
+
+    - name: cleanup AKS cluster
+      if: always()
+      shell: bash
+      run: |
+        if [ $(az aks list -g ${{ secrets.AZURE_RESOURCE_GROUP }} --query "[?name=='${{ env.cluster_name }}'] | length(@)") > 0 ]; then
+          az aks delete -n ${{ env.cluster_name }} -g ${{ secrets.AZURE_RESOURCE_GROUP }} -y --no-wait
+        fi

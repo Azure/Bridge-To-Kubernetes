@@ -110,7 +110,7 @@ check_dotnet_runtime_present() {
     fi
     #if dotnet exists, check the version required for b2k and install it.
     dotnetruntimes=$(dotnet --list-runtimes)
-    if [[ -z "${dotnetruntimes}" || ! "${dotnetruntimes}" =~ '6.0'* ]]; then
+    if [[ -z "${dotnetruntimes}" ]] || ! ([[ "${dotnetruntimes}" =~ '7.0'* ]] && [[ "${dotnetruntimes}" =~ 'AspNetCore'* ]]); then
         install_tool dotnet
     else 
         log INFO "dotnet version is $(dotnet --version)"
@@ -123,6 +123,7 @@ install_tool() {
     case $1 in 
 
         kubectl)
+            install_pre_requirements_kubectl
             install_with_sudo kubectl
             ;;
         dotnet)
@@ -132,12 +133,12 @@ install_tool() {
                     install_dotnet_x64_for_arm
                 else 
                     $PACKAGER tap isen-ng/dotnet-sdk-versions
-                    install_with_sudo dotnet-sdk6-0-400 --cask
+                    install_with_sudo dotnet-sdk7-0-300 --cask
                 fi 
             elif [[ $OSTYPE == "linux"* ]]; then
-                install_with_sudo dotnet-sdk-6.0
+                install_with_sudo dotnet-sdk-7.0
             else 
-                install_with_sudo dotnet-6.0-sdk -y
+                install_with_sudo dotnet-7.0-sdk -y
             fi
             ;;
         jq)
@@ -150,9 +151,21 @@ install_tool() {
     esac
 }
 
+install_pre_requirements_kubectl() {
+    if [[ $OSTYPE == "linux"* ]]; then
+        #add google packages to install kubectl or else apt install kubectl will give error kubectl not found.
+        sudo $PACKAGER update
+        sudo $PACKAGER install -y ca-certificates curl
+        sudo $PACKAGER install -y apt-transport-https
+        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo $PACKAGER update
+    fi
+}
+
 install_dotnet_x64_for_arm() {
     log INFO "downloading and installing dotnet x64 binaries in arm machines"
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 6.0.406 --arch x64
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 7.0.306 --arch x64
     if [[ ! -d /usr/local/share/dotnet ]] || [[ ! -d /usr/local/share/dotnet/x64 ]]; then
         sudo mkdir -p /usr/local/share/dotnet/x64
     fi
