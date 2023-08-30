@@ -34,9 +34,8 @@ ex: Run the roleassigment bash script
 ```
 ./samples/managed-identity/roleAssignment.sh
 ```
-3. Note: If you are using an AKS cluster with version > 1.17 (Kubenet enabled by default) - an additional step is required https://azure.github.io/aad-pod-identity/docs/configure/aad_pod_identity_on_kubenet/
 
-4. Deploy the mi web app to AKS cluster by running 
+3. Deploy the mi web app to AKS cluster by running 
 ```
 kubectl create ns mi-webapp
 kubectl apply -f deploy.yaml -n mi-webapp
