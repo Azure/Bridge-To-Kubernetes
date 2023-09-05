@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;osx-x64;osx-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyName>Microsoft.BridgeToKubernetes.Library</AssemblyName>
@@ -16,6 +16,9 @@
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
     <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <CodeAnalysisRuleSet />
@@ -41,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.0" />
     <PackageReference Include="Microsoft.VisualStudioEng.MicroBuild.Core" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -54,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\EndpointManager\bin\$(Configuration)\net6.0\**" Condition="'$(BUILDING_CLIENT_NUGET)' == 'true'">
+    <Content Include="..\EndpointManager\bin\$(Configuration)\net7.0\**" Condition="'$(BUILDING_CLIENT_NUGET)' == 'true'">
       <Pack>true</Pack>
       <PackagePath>contentFiles\any\any;content</PackagePath>
     </Content>

@@ -205,8 +205,9 @@ namespace Microsoft.BridgeToKubernetes.Common.IP
                     {
                         foreach (var portPair in endpoint.Ports)
                         {
-                            rules.Add($"--table nat --append PREROUTING -p tcp --dst {endpoint.LocalIP} --dport {portPair.RemotePort} --jump DNAT --to-destination {endpoint.LocalIP}:{portPair.LocalPort}");
-                            rules.Add($"--table nat --append OUTPUT -p tcp --dst {endpoint.LocalIP} --dport {portPair.RemotePort} --jump DNAT --to-destination {endpoint.LocalIP}:{portPair.LocalPort}");
+                            // --wait        -w [seconds]    maximum wait to acquire xtables lock before give up
+                            rules.Add($"--table nat --append PREROUTING -p tcp --dst {endpoint.LocalIP} --dport {portPair.RemotePort} --jump DNAT --to-destination {endpoint.LocalIP}:{portPair.LocalPort} --wait 30");
+                            rules.Add($"--table nat --append OUTPUT -p tcp --dst {endpoint.LocalIP} --dport {portPair.RemotePort} --jump DNAT --to-destination {endpoint.LocalIP}:{portPair.LocalPort} --wait 30");
                         }
                     }
 
@@ -297,7 +298,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IP
                 command: args,
                 logCallback: (line) => _log.Info(line),
                 envVariables: null,
-                timeout: TimeSpan.FromSeconds(10),
+                timeout: TimeSpan.FromSeconds(60), // increasing the timeout to match with iptables --wait time.
                 cancellationToken: cancellationToken,
                 out string output);
 

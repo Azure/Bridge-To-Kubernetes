@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <DebugType>portable</DebugType>
@@ -17,6 +17,10 @@
     <AssemblyVersion>1.0</AssemblyVersion>
     <HighEntropyVA>True</HighEntropyVA>
     <ApplicationIcon>..\resources\icons\BridgeToKubernetes_VS_NoHalo.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

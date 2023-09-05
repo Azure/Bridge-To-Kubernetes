@@ -70,7 +70,7 @@ Steps to debug routing manager custom image using vscode:
             // "preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
             // If you have changed target frameworks, make sure to update the program path.
             // Replace osx-x64 with win-x64 if you are running in windows
-            "program": "${workspaceFolder}/dsc/bin/Debug/net6.0/linux-x64/dsc.dll",
+            "program": "${workspaceFolder}/dsc/bin/Debug/net7.0/linux-x64/dsc.dll",
             "args": ["connect", "--service", "stats-api", "--local-port", "3001", "--use-kubernetes-service-environment-variables", "--routing", "custom-routing-name", "--namespace", "todo-app"],
             "env": {
                 "BRIDGE_ENVIRONMENT":"dev",

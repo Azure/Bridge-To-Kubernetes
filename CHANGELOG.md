@@ -7,6 +7,27 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Visual Studio 2019 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro#whats-new)
 - [Visual Studio 2022 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro2022#whats-new)
 
+## [1.0.20230811.2]
+- [Add more wait time for iptables operations to avoid timeouts](https://github.com/Azure/Bridge-To-Kubernetes/pull/289)
+- [Include codeQL badge status](https://github.com/Azure/Bridge-To-Kubernetes/pull/295)
+- [Jeager side car support by bridge](https://github.com/Azure/Bridge-To-Kubernetes/pull/294)
+- [Fixed obsolete warnings and removed invalid assert](https://github.com/Azure/Bridge-To-Kubernetes/pull/262)
+- [Install script - update to dotnet 7.0](https://github.com/Azure/Bridge-To-Kubernetes/pull/298)
+- [Add live tests workflow dispatch for windows and mac](https://github.com/Azure/Bridge-To-Kubernetes/pull/302)
+- [Update image tags to remediate security vulnerabilities with CBL mariner](https://github.com/Azure/Bridge-To-Kubernetes/pull/304)
+
+## [1.0.20230706.1]
+- [Remove inaccurate statement from README](https://github.com/Azure/Bridge-To-Kubernetes/pull/277)
+- [Support different auth providers with kubectl proxy](https://github.com/Azure/Bridge-To-Kubernetes/pull/258)
+- [Update issue template](https://github.com/Azure/Bridge-To-Kubernetes/pull/281)
+- [Remove stale code](https://github.com/Azure/Bridge-To-Kubernetes/pull/248)
+- [Add video link to README](https://github.com/Azure/Bridge-To-Kubernetes/pull/282)
+- [Support environments variables for named ports headless services](https://github.com/Azure/Bridge-To-Kubernetes/pull/278)
+- [Ignore warning CS8002 when building in debug mode](https://github.com/Azure/Bridge-To-Kubernetes/pull/251)
+- [Remove deprecated dependencies from sameples](https://github.com/Azure/Bridge-To-Kubernetes/pull/286)
+- [Dotnet 7 upgrade](https://github.com/Azure/Bridge-To-Kubernetes/pull/284)
+- [Gracefull handling of exceptions that occurs when DevHostAgent closes sockets](https://github.com/Azure/Bridge-To-Kubernetes/pull/265)
+
 ## [1.0.20230525.1]
 - [Added launchSettings.json to .gitignore](https://github.com/Azure/Bridge-To-Kubernetes/pull/245)
 - [Removes package references in favour of FrameworkReference](https://github.com/Azure/Bridge-To-Kubernetes/pull/191)

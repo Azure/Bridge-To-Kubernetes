@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>devhostAgent</AssemblyTitle>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <TieredCompilation>true</TieredCompilation>
     <RuntimeIdentifiers>linux-x64;linux-arm64;linux-musl-arm64;linux-musl-x64;win-x64</RuntimeIdentifiers>
@@ -15,6 +15,10 @@
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
     <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

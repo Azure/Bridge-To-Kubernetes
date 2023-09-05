@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFramework>net6.0</TargetFramework>
+      <TargetFramework>net7.0</TargetFramework>
       <AssemblyName>Microsoft.BridgeToKubernetes.RoutingManager.Tests</AssemblyName>
       <RootNamespace>Microsoft.BridgeToKubernetes.RoutingManager.Tests</RootNamespace>
       <IsPackable>false</IsPackable>
@@ -9,6 +9,10 @@
       <DelaySign>true</DelaySign>
       <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
       <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

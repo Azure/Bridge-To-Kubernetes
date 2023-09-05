@@ -51,6 +51,9 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent
                     // To handle the below error in dotnet3
                     // InvalidDataException: The maximum message size of 32768B was exceeded. The message size can be configured in AddHubOptions.
                     options.MaximumReceiveMessageSize = null;
+
+                    // We want to explicit set out arguments
+                    options.DisableImplicitFromServicesParameters = true;
                 });
 
             services.AddLogging(builder =>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>restorationjob.tests</AssemblyName>
     <RootNamespace>Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests</RootNamespace>
     <SignAssembly>true</SignAssembly>
@@ -8,6 +8,9 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
     <HighEntropyVA>True</HighEntropyVA>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>

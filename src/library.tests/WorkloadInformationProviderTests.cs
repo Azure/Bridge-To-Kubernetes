@@ -42,7 +42,8 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
             Assert.Equal((numServices-1) * (numAddresses), resultRechableEndpoints.Count());
             foreach (var endpoint in resultRechableEndpoints) {
                 if (endpoint.Ports.Any()) {
-                    Assert.Equal(endpoint.Ports.ElementAt(0).LocalPort, -1);
+                    Assert.Equal(-1, endpoint.Ports.ElementAt(0).LocalPort);
+                    Assert.Equal("http", endpoint.Ports.ElementAt(0).Name);
                     bool found = false;
                     foreach (var dns in expectedDnsList) {
                         if (string.Equals(endpoint.DnsName, dns))
@@ -342,7 +343,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     {
                         Type = "ClusterIP",
                         ClusterIP = "None",
-                        Ports = new List<V1ServicePort> { new V1ServicePort(port: 80, protocol: "TCP") },
+                        Ports = new List<V1ServicePort> { new V1ServicePort(port: 80, protocol: "TCP", name: "http") },
                         Selector = new Dictionary<string, string> { { "app", "myapp" } }
                     },
                     Metadata = new V1ObjectMeta()
@@ -355,7 +356,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                         {
                             new V1EndpointSubset()
                             {
-                                Ports = new List<Corev1EndpointPort> { new Corev1EndpointPort(port: 80, protocol: "TCP") },
+                                Ports = new List<Corev1EndpointPort> { new Corev1EndpointPort(port: 80, protocol: "TCP", name: "http") },
                                 Addresses =  new List<V1EndpointAddress>()
                             }
                         };

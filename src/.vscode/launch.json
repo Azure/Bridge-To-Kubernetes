@@ -18,7 +18,7 @@
             "preLaunchTask": "BuildAndPublishMac", // Replace by BuildAndPublishWindows as needed
             // If you have changed target frameworks, make sure to update the program path.
             // Replace osx-x64 with win-x64 if you are running in windows
-            "program": "${workspaceFolder}/dsc/bin/Debug/net6.0/osx-x64/dsc.dll",
+            "program": "${workspaceFolder}/dsc/bin/Debug/net7.0/osx-x64/dsc.dll",
             "args": ["connect", "--service", "bikesharingweb", "--local-port", "3000", "--namespace", "bikes"],
             //"args": ["prep-connect", "--service", "stats-api"],// "--local-port", "3001", "--use-kubernetes-service-environment-variables"],
             "env": {
