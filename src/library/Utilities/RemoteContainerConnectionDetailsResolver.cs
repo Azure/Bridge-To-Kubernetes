@@ -297,6 +297,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                         _log.Warning("{0} pods found, but they are all running RemoteAgent", pods.Count);
                         throw new UserVisibleException(_operationContext, Resources.SpecifiedServiceBackedByMultipleRemoteAgents, service.Metadata?.Name, pods.Count);
                     }
+
+                    // filter pods which are not replicaset or statefulset
+                    podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.Metadata?.OwnerReferences?.Any(r => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "ReplicaSet") || StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "StatefulSet")) ?? false);
+                    if (podsNotRunningDevHostAgent.Count() == 0)
+                    {
+                        _log.Warning("{0} pods found, after filtering pods which are of kind replicaset or statefulset", pods.Count);
+                        throw new UserVisibleException(_operationContext, Resources.SpecifiedServiceNotBackedByRunningPodFormat, service.Metadata?.Name, $"kubectl get pods --namespace {namespaceName}");
+                    }
+
                     pods = podsNotRunningDevHostAgent.ToList();
                 }
 
