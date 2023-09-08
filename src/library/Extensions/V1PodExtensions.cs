@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Exceptions;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
@@ -25,5 +26,8 @@ namespace k8s.Models
                 throw new UserVisibleException(context, Resources.WindowsContainersNotSupportedFormat, Product.Name);
             }
         }
+
+        public static bool IsOwnerOfKind(this V1Pod pod, params string[] kinds) =>
+           pod.Metadata?.OwnerReferences?.Any(r => kinds.Any(k => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, k))) ?? false;
     }
 }

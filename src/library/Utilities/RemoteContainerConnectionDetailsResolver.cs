@@ -210,7 +210,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
             CancellationToken cancellationToken)
         {
             (var owningSetName, var owningObjectType) = GetOwningSetFromPods(pods, remoteContainerConnectionDetails.ServiceName);
-            _log.Info($"Owning object type: {owningObjectType}");
+            _log.Verbose($"Owning object type: {owningObjectType}");
             if (string.Equals(owningObjectType, "ReplicaSet"))
             {
                 _log.Info("Inside if condition for replicaset");
@@ -299,7 +299,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                     }
 
                     // filter pods which are not replicaset or statefulset
-                    podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.Metadata?.OwnerReferences?.Any(r => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "ReplicaSet") || StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "StatefulSet")) ?? false);
+                    podsNotRunningDevHostAgent = podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.IsOwnerOfKind("ReplicaSet", "StatefulSet"));
                     if (podsNotRunningDevHostAgent.Count() == 0)
                     {
                         _log.Warning("{0} pods found, after filtering pods which are of kind replicaset or statefulset", pods.Count);
