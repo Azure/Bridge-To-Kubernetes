@@ -213,26 +213,22 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
             _log.Verbose($"Owning object type: {owningObjectType}");
             if (string.Equals(owningObjectType, "ReplicaSet"))
             {
-                _log.Info("Inside if condition for replicaset");
                 // There is a single common replicaSet owning all the pods. Time to make sure there is a deployment owning it
                 var replicaSet = await _kubernetesClient.GetV1ReplicaSetAsync(remoteContainerConnectionDetails.NamespaceName, owningSetName, cancellationToken: cancellationToken);
                 if (replicaSet == null || replicaSet.Metadata?.OwnerReferences == null)
                 {
                     // replicaSet not found or no deployment owning it
-                    _log.Info("replicaset is null:"+ replicaSet);
                     throw new InvalidOperationException(string.Format(Resources.FailedToResolveResourceBackingServiceFormat, "ReplicaSet", remoteContainerConnectionDetails.ServiceName));
                 }
 
                 var deployments = replicaSet.Metadata.OwnerReferences.Where(r => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "Deployment")).Select(d => d.Name);
                 if (deployments.Count() != 1)
                 {
-                    _log.Info("deployments is not one:" + deployments.Count());
                     throw new InvalidOperationException(string.Format(Resources.FailedToResolveResourceBackingServiceFormat, "Deployment", remoteContainerConnectionDetails.ServiceName));
                 }
                 var deployment = await _kubernetesClient.GetV1DeploymentAsync(remoteContainerConnectionDetails.NamespaceName, deployments.First(), cancellationToken);
                 if (deployment == null)
                 {
-                    _log.Info("deployment is not found:" + deployment);
                     throw new InvalidOperationException(string.Format(Resources.FailedToResolveResourceBackingServiceFormat, "Deployment", remoteContainerConnectionDetails.ServiceName));
                 }
                 _log.Verbose($"Resolved backing deployment: {new PII(deployment.Name())}");
@@ -299,7 +295,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                     }
 
                     // filter pods which are not replicaset or statefulset
-                    podsNotRunningDevHostAgent = podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.IsOwnerOfKind("ReplicaSet", "StatefulSet"));
+                    podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.IsOwnerOfKind("ReplicaSet", "StatefulSet"));
                     if (podsNotRunningDevHostAgent.Count() == 0)
                     {
                         _log.Warning("{0} pods found, after filtering pods which are of kind replicaset or statefulset", pods.Count);
@@ -320,7 +316,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
 
         private (string owningSetName, string owningSetType) GetOwningSetFromPods(IEnumerable<V1Pod> pods, string serviceName)
         {
-            _log.Info("Inside GetOwningSetFromPods");
             if (pods == null || !pods.Any())
             {
                 throw new InvalidOperationException("Failed to determine the resource backing the service");
@@ -332,7 +327,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
             var owningSets = pods.First().Metadata?.OwnerReferences?.Where(r => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, "ReplicaSet")).Select(r => r.Name);
             if (owningSets != null && owningSets.Any())
             {
-                _log.Info("OwningSets name:" + owningSets);
                 resourceType = "ReplicaSet";
             }
             else
@@ -343,34 +337,27 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                 {
                     throw new UserVisibleException(_operationContext, Resources.ResourceNotSupportedFormat, Product.Name);
                 }
-                _log.Info("OwningSets name:" + owningSets);
                 resourceType = "StatefulSet";
             }
 
             foreach (var pod in pods)
             {
-                _log.Info("Inside pod for loop and resourceType is:"+resourceType);
                 // For each pod, intersect the initial result with the set owning the current pod
                 var podReplicaSets = pod.Metadata?.OwnerReferences?.Where(r => StringComparer.OrdinalIgnoreCase.Equals(r.Kind, resourceType)).Select(r => r.Name);
-                _log.Info("podReplicaSets:" + podReplicaSets);
                 if (podReplicaSets == null || !podReplicaSets.Any())
                 {
-                    _log.Info("podReplicaSets is null/empty:" + podReplicaSets);
                     throw new InvalidOperationException(string.Format(Resources.FailedToResolveResourceBackingServiceFormat, resourceType, serviceName));
                 }
                 owningSets = owningSets.Intersect(podReplicaSets, StringComparer.OrdinalIgnoreCase);
-                _log.Info("owningSets after intersection:" + owningSets);
 
                 // If at any time the intersection is 0, it means that there is no single resource is owning all the pods
                 if (owningSets.Count() == 0)
                 {
-                    _log.Info("OwningSets count is zero" + owningSets.Count());
                     throw new UserVisibleException(_operationContext, Resources.SpecifiedServiceBackedByManyPodsInDifferentResourcesFormat, serviceName, pods.Count(), $"{resourceType}s");
                 }
             }
             if (owningSets.Count() != 1)
             {
-                _log.Info("OwningSets count is not one" + owningSets.Count());
                 throw new InvalidOperationException(string.Format(Resources.FailedToResolveResourceBackingServiceFormat, resourceType, serviceName));
             }
 

@@ -24,20 +24,41 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
     {
         private RemoteContainerConnectionDetailsResolver _remoteContainerConnectionDetailsResolver;
 
+        public class TestData
+        {
+            public int numOfPods;
+            public bool hasRestore;
+            public string phase;
+            public string kind;
+            public string os;
+            public Func<int, string> namingFunction;
+            public Func<int, string> phaseFunction;
+        }
+
         public RemoteContainerConnectionDetailsResolverTests()
         {
             _remoteContainerConnectionDetailsResolver = _autoFake.Resolve<RemoteContainerConnectionDetailsResolver>();
         }
 
         [Theory]
-        [InlineData(1, true, "Running")]
-        [InlineData(5, true, "Terminating")]
-        [InlineData(10, true, "Running")]
-        [InlineData(1, false, "Running")]
-        public async void ResolveConnectionDetails_RestoreCheck(int numServices, bool hasRestore, string phase)
+        [InlineData(1, true, "Running", "Job", "linux")]
+        [InlineData(5, true, "Terminating", "ReplicaSet", "linux")]
+        [InlineData(10, true, "Running", "ReplicaSet", "linux")]
+        [InlineData(1, false, "Running", "ReplicaSet", "linux")]
+        public async void ResolveConnectionDetails_RestoreCheck(int numServices, bool hasRestore, string phase, string kind, string os)
         {
             // Set up
-            ConfigurePods(numPods: numServices, namingFunction: (i) => hasRestore && i == 0 ? $"myapp-restore-{i}" : $"myapp-{i}", phaseFunction: (i) => i == 0 ? phase : "Running", "Job", "linux");
+            TestData testData = new()
+            {
+                numOfPods = numServices,
+                hasRestore = hasRestore,
+                phase = phase,
+                kind = kind,
+                os = os,
+                namingFunction = (i) => hasRestore && i == 0 ? $"myapp-restore-{i}" : $"myapp-{i}",
+                phaseFunction = (i) => i == 0 ? phase : "Running"
+            };
+            ConfigurePods(testData);
 
             try {
                 await _remoteContainerConnectionDetailsResolver.ResolveConnectionDetails(RemoteContainerConnectionDetails.ReplacingExistingContainerInService("todo-app", "myapp"), CancellationToken.None);
@@ -58,7 +79,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         public async void ResolveConnectionDetails_ThrowErrorIfPodFilterConditionFails()
         {
             //set up
-            ConfigurePods(numPods: 2, namingFunction: (i) => $"myapp-{i}", phaseFunction: (i) => "Running", "CronJob", "linux");
+            TestData testData = new()
+            {
+                numOfPods = 2,
+                kind = "CronJob",
+                os = "linux",
+                namingFunction = (i) => $"myapp-{i}",
+                phaseFunction = (i) => "Running"
+            };
+            ConfigurePods(testData);
             try
             {
                 await _remoteContainerConnectionDetailsResolver.ResolveConnectionDetails(RemoteContainerConnectionDetails.ReplacingExistingContainerInService("todo-app", "myapp"), CancellationToken.None);
@@ -73,7 +102,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         public async void ResolveConnectionDetails_ShouldSucceedIfPodFilterConditionPasses()
         {
             //set up
-            ConfigurePods(numPods: 2, namingFunction: (i) => $"myapp-{i}", phaseFunction: (i) => "Running", "ReplicaSet", "linux");
+            TestData testData = new()
+            {
+                numOfPods = 2,
+                kind = "ReplicaSet",
+                os = "linux",
+                namingFunction = (i) => $"myapp-{i}",
+                phaseFunction = (i) => "Running"
+            };
+            ConfigurePods(testData);
             var result = await _remoteContainerConnectionDetailsResolver.ResolveConnectionDetails(RemoteContainerConnectionDetails.ReplacingExistingContainerInService("todo-app", "myapp"), CancellationToken.None);
             Assert.Equal("myapp-0", result.PodName);
 
@@ -83,7 +120,15 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         public async void ResolveConnectionDetails_ShouldFailForWindowsContainers()
         {
             //set up
-            ConfigurePods(numPods: 2, namingFunction: (i) => $"myapp-{i}", phaseFunction: (i) => "Running", "ReplicaSet", "Windows");
+            TestData testData = new()
+            {
+                numOfPods = 2,
+                kind = "ReplicaSet",
+                os = "Windows",
+                namingFunction = (i) => $"myapp-{i}",
+                phaseFunction = (i) => "Running"
+            };
+            ConfigurePods(testData);
             try
             {
                 await _remoteContainerConnectionDetailsResolver.ResolveConnectionDetails(RemoteContainerConnectionDetails.ReplacingExistingContainerInService("todo-app", "myapp"), CancellationToken.None);
@@ -97,7 +142,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
         }
 
 
-        private void ConfigurePods(int numPods, Func<int, string> namingFunction, Func<int, string>phaseFunction, string? kind, string? nodeSelector)
+        private void ConfigurePods(TestData testData)
         {
             var cs = new List<V1ContainerStatus>();
             cs.Add(new V1ContainerStatus() 
@@ -105,31 +150,31 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                 Image = ImageProvider.DevHostRestorationJob.Name
             });
             var podList = new List<V1Pod>();
-            for (int i = 0; i < numPods; i++)
+            for (int i = 0; i < testData.numOfPods; i++)
             {
                 podList.Add(new V1Pod()
                 {
                     Metadata = new V1ObjectMeta()
                     {
-                        Name = namingFunction(i),
+                        Name = testData.namingFunction(i),
                         OwnerReferences = new List<V1OwnerReference>()
                         {
                             new V1OwnerReference()
                             {
-                                Kind = i ==0 ? kind : "Job"
+                                Kind = i ==0 ? testData.kind : "Job"
                             }
                         }
                     },
                     Status = new V1PodStatus()
                     {
                         ContainerStatuses = cs,
-                        Phase = phaseFunction(i)
+                        Phase = testData.phaseFunction(i)
                     },
                     Spec = new V1PodSpec()
                     {
                         NodeSelector = new Dictionary<string, string>()
                         {
-                            { "kubernetes.io/os", nodeSelector }
+                            { "kubernetes.io/os", testData.os }
                         },
                         Containers = new List<V1Container>()
                         {
