@@ -298,7 +298,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Utilities
                     podsNotRunningDevHostAgent = podsNotRunningDevHostAgent.Where(p => p.IsOwnerOfKind("ReplicaSet", "StatefulSet"));
                     if (podsNotRunningDevHostAgent.Count() == 0)
                     {
-                        _log.Warning("{0} pods found, after filtering pods which are of kind replicaset or statefulset", pods.Count);
+                        _log.Warning("{0} pods found of kind replicaset or statefulset", pods.Count);
                         throw new UserVisibleException(_operationContext, Resources.SpecifiedServiceNotBackedByRunningPodFormat, service.Metadata?.Name, $"kubectl get pods --namespace {namespaceName}");
                     }
 
