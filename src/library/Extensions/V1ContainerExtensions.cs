@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace k8s.Models
 {
@@ -11,10 +12,15 @@ namespace k8s.Models
     {
         public static bool IsKnownSidecarContainer(this V1Container container)
         {
-            return StringComparer.OrdinalIgnoreCase.Equals(container.Name, "devspaces-proxy")
-                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "istio-proxy")
-                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "daprd")
-                    || StringComparer.OrdinalIgnoreCase.Equals(container.Name, "jaeger-agent");
+            var excludedContainerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+                "istio-proxy",
+                "linkerd-proxy",
+                "devspaces-proxy",
+                "nginx-proxy",
+                "jaeger-agent",
+                "daprd"
+            };
+            return excludedContainerNames.Contains(container.Name);
         }
     }
 }
