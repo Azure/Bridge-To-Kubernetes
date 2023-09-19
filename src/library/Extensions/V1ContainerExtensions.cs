@@ -15,10 +15,10 @@ namespace k8s.Models
             var excludedContainerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                 "istio-proxy",
                 "linkerd-proxy",
-                "envoy",
-                "istio-init",
-                "linkerd-init",
-                "istio-egressgateway",
+                "devspaces-proxy",
+                "nginx-proxy",
+                "jaeger-agent",
+                "daprd"
             };
             return excludedContainerNames.Contains(container.Name);
         }
