@@ -20,9 +20,26 @@
 If you want to test with pod identity as well, please follow this link to setup pod identity on your cluster:
 https://azure.github.io/aad-pod-identity/docs/demo/standard_walkthrough/
 
-1. Deploy the pod identity components from Step 1 in the link.
+1. Deploy the pod identity components from Step 1 in the link. 
+ex: this deploys CRD's to the cluster
+```
+kubectl apply -f https://raw.githubusercontent.com/Azure/aad-pod-identity/master/deploy/infra/deployment-rbac.yaml
+
+# For AKS clusters, deploy the MIC and AKS add-on exception by running -
+kubectl apply -f https://raw.githubusercontent.com/Azure/aad-pod-identity/master/deploy/infra/mic-exception.yaml 
+
+```
 2. Assign the appropriate permissions to the AKS Managed Identity: https://azure.github.io/aad-pod-identity/docs/getting-started/role-assignment/
-3. Note: If you are using an AKS cluster with version > 1.17 (Kubenet enabled by default) - an additional step is required https://azure.github.io/aad-pod-identity/docs/configure/aad_pod_identity_on_kubenet/
+ex: Run the roleassigment bash script
+```
+./samples/managed-identity/roleAssignment.sh
+```
+
+3. Deploy the mi web app to AKS cluster by running 
+```
+kubectl create ns mi-webapp
+kubectl apply -f deploy.yaml -n mi-webapp
+```
 
  Pre-requisites
  --------------
@@ -44,7 +61,5 @@ https://azure.github.io/aad-pod-identity/docs/demo/standard_walkthrough/
  --------------------
 
  Once the above pre-requisites are setup and you have the right values in deploy.yaml and KubernetesLocalProcessConfig.yaml,
- 1. kubectl create ns mi-webapp
- 2. kubectl -n mi-webapp apply -f deploy.yaml
- 3. Test using Bridge To Kubernetes in both Isolated and non-isolated modes.
+ 1. Test using Bridge To Kubernetes in both Isolated and non-isolated modes.
  NOTE: Since this is a managed identity sample, please note that testing this locally will not work.

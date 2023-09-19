@@ -30,7 +30,7 @@ spec:
           - name: STORAGE_CONTAINER_NAME
             value: "mitestsa-container"
           - name: MI_CLIENT_ID
-            value: "bb502719-354c-4ca3-8991-0bff00ffc7a5"
+            value: "b24d4637-3453-4f6f-8187-228a5442a675"
           ports:
           - containerPort: 80
 
@@ -58,8 +58,8 @@ metadata:
   name: mi-test
 spec:
   type: 0
-  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/testing-scenario/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
-  clientID: "bb502719-354c-4ca3-8991-0bff00ffc7a5"
+  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/MC_testing-scenario_testing-scenarios_westeurope/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
+  clientID: "b24d4637-3453-4f6f-8187-228a5442a675"
 
 ---
 # AzureIdentityBinding resource for pod identity 
