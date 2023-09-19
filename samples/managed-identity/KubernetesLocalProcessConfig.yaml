@@ -5,6 +5,6 @@ env:
   - name: STORAGE_CONTAINER_NAME
     value: "mitestsa-container"
   - name: MI_CLIENT_ID
-    value: "bb502719-354c-4ca3-8991-0bff00ffc7a5"
+    value: "b24d4637-3453-4f6f-8187-228a5442a675"
 enableFeatures:
   - ManagedIdentity
