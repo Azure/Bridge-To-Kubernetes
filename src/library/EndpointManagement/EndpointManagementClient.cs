@@ -400,6 +400,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 
                     //  exit code 127 occurs when pkexec doesn't have root access and have to retry with sudo
                     if (launchExitCode == 127 && _platform.IsLinux) {
+                         _log.Info($"pkexec failed with exitCode {launchExitCode}, retrying with sudo");
                         (fileName, command) = await GetEndpointManagerLaunchArguments(currentUserName, logFileDirectory, cancellationToken);
                         fileName = "sudo"; // replace pkexec with sudo
                         launchExitCode = _platform.Execute(executable: fileName,
