@@ -398,8 +398,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                                                 cancellationToken: cancellationToken,
                                                 out string outPut);
 
-                    //  exit code 127 occurs when pkexec doesn't have root access and have to retry with sudo
-                    if (launchExitCode == 127 && _platform.IsLinux) {
+                    //  exit code not equal to zero occurs when pkexec doesn't have root access and have to retry with sudo
+                    if (launchExitCode != 0 && _platform.IsLinux && !_environmentVariables.IsCodespaces) {
                          _log.Info($"pkexec failed with exitCode {launchExitCode}, retrying with sudo");
                         (fileName, command) = await GetEndpointManagerLaunchArguments(currentUserName, logFileDirectory, cancellationToken);
                         fileName = "sudo"; // replace pkexec with sudo
