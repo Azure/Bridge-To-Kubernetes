@@ -403,7 +403,6 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     // But this might fail for users who don't have sudo access. This is specifically for Linux.
                     if (launchExitCode != 0 && _platform.IsLinux && !_environmentVariables.IsCodespaces) {
                          _log.Info($"pkexec failed with exitCode {launchExitCode}, retrying with sudo");
-                        (fileName, command) = await GetEndpointManagerLaunchArguments(currentUserName, logFileDirectory, cancellationToken);
                         fileName = "sudo"; // replace pkexec with sudo
                         launchExitCode = _platform.Execute(executable: fileName,
                                                 command: command,
