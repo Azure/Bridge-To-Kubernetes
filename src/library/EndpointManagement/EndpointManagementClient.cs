@@ -398,7 +398,9 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                                                 cancellationToken: cancellationToken,
                                                 out string outPut);
 
-                    //  exit code not equal to zero occurs when pkexec doesn't have root access and have to retry with sudo
+                    // pkexec allows an authorized user to execute PROGRAM as another user. Refer - https://linux.die.net/man/1/pkexec
+                    // if pkexec failed then launchExitCode will not be zero, so giving user another chance to try with sudo. 
+                    // But this might fail for users who don't have sudo access. This is specifically for Linux.
                     if (launchExitCode != 0 && _platform.IsLinux && !_environmentVariables.IsCodespaces) {
                          _log.Info($"pkexec failed with exitCode {launchExitCode}, retrying with sudo");
                         (fileName, command) = await GetEndpointManagerLaunchArguments(currentUserName, logFileDirectory, cancellationToken);
