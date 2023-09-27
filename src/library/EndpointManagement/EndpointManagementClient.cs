@@ -465,7 +465,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             return null;
         }
 
-        public async Task<(string fileName, string command)> GetEndpointManagerLaunchArguments(string currentUserName, string logFileDirectory, CancellationToken cancellationToken)
+        private async Task<(string fileName, string command)> GetEndpointManagerLaunchArguments(string currentUserName, string logFileDirectory, CancellationToken cancellationToken)
         {
             var fileName = string.Empty;
             var command = string.Empty;
@@ -498,7 +498,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
 
                     await CheckEndpointManagerAliveAsync(cancellationToken);
 
-                    break;
+                    return (string.Empty, string.Empty);
+
 
                 case var platform when platform.IsOSX:
 
@@ -516,7 +517,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     command = commandBuilder.ToString();
 
                     _log.Info($"Launch {EndpointManager.ProcessName}: {fileName} {command}");
-                    break;
+                    return (fileName, command);
 
                 default:
                     quotedLaunchPathAndArguments = $"\\\"{launcherPath}\\\" \\\"{currentUserName}\\\" \\\"{_socketFilePath}\\\" \\\"{logFileDirectory}\\\" \\\"{_operationContext.CorrelationId}\\\"";
@@ -527,9 +528,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     fileName = _environmentVariables.IsCodespaces ? "sudo" : "pkexec";
                     command = $"env HOME=\"{_fileSystem.HomeDirectoryPath}\" bash -c \"{quotedLaunchPathAndArguments} &> /dev/null &\"";
                     _log.Info($"Launch {EndpointManager.ProcessName}: {fileName} {command}");
-                    break;
+                    return (fileName, command);
             }
-            return (fileName, command);
         }
 
         private async Task CheckEndpointManagerAliveAsync(CancellationToken cancellationToken)
