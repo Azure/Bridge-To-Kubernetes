@@ -25,7 +25,6 @@ using Microsoft.BridgeToKubernetes.Library.LocalAgentManagement;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.ServiceClients;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
-using static Microsoft.BridgeToKubernetes.Common.Constants;
 using static Microsoft.BridgeToKubernetes.Common.Logging.LoggingConstants;
 
 namespace Microsoft.BridgeToKubernetes.Library
