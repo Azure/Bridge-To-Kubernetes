@@ -13,7 +13,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Core;
-using Autofac.Features.Indexed;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
