@@ -8,6 +8,7 @@ using System.Net.Http;
 using Autofac;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
+using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash;
@@ -24,6 +25,7 @@ using Microsoft.BridgeToKubernetes.Library.LocalAgentManagement;
 using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.ServiceClients;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
+using static Microsoft.BridgeToKubernetes.Common.Constants;
 using static Microsoft.BridgeToKubernetes.Common.Logging.LoggingConstants;
 
 namespace Microsoft.BridgeToKubernetes.Library
@@ -69,6 +71,18 @@ namespace Microsoft.BridgeToKubernetes.Library
                    .AsSelf()
                    .As<IEndpointManagementClient>()
                    .SingleInstance();
+
+            builder.RegisterType<WindowsEndpointManagerLauncher>()
+                     .Keyed<IEndpointManagerLauncher>(OperatingSystemNames.Windows)
+                     .SingleInstance();
+
+             builder.RegisterType<LinuxEndpointManagerLauncher>()
+                     .Keyed<IEndpointManagerLauncher>(OperatingSystemNames.Linux)
+                     .SingleInstance();
+
+            builder.RegisterType<OsxEndpointManagerLauncher>()
+                     .Keyed<IEndpointManagerLauncher>(OperatingSystemNames.OSX)
+                     .SingleInstance();
 
             builder.RegisterType<ImageProvider>()
                    .As<IImageProvider>()

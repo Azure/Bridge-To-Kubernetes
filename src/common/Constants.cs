@@ -234,5 +234,12 @@ namespace Microsoft.BridgeToKubernetes.Common
         }
 
         internal const string DAPR = "DAPR";
+
+        internal enum OperatingSystemNames
+        {
+            Windows,
+            Linux,
+            OSX
+        }
     }
 }

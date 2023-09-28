@@ -13,6 +13,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Core;
+using Autofac.Features.Indexed;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager;
 using Microsoft.BridgeToKubernetes.Common.EndpointManager.RequestArguments;
@@ -40,7 +41,6 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
         private readonly string _socketFilePath;
         private readonly TimeSpan _epmLaunchWaitTime = TimeSpan.FromSeconds(30);
         private readonly IEndpointManagerLauncher _endpointManagerLauncher;
-
         public delegate EndpointManagementClient Factory(string userAgent, string correlationId);
 
         public EndpointManagementClient(
@@ -53,7 +53,8 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             ILog log,
             IPlatform platform,
             IAssemblyMetadataProvider assemblyMetadataProvider,
-            IEnvironmentVariables environmentVariables)
+            IEnvironmentVariables environmentVariables,
+            IIndex<OperatingSystemNames, IEndpointManagerLauncher> endpointManagerLaunchers)
             : base(log, operationContext)
         {
             _progress = progress;
@@ -64,12 +65,11 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             _socketFilePath = _fileSystem.Path.Combine(fileSystem.GetPersistedFilesDirectory(DirectoryName.PersistedFiles), EndpointManager.ProcessName, EndpointManager.SocketName);
             _socketFactory = socketFactory;
 
-            // TODO: Dependency injection, if possible?
             _endpointManagerLauncher = true switch
             {
-                true when platform.IsWindows => new WindowsEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
-                true when platform.IsOSX => new OsxEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
-                true when platform.IsLinux => new LinuxEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
+                true when platform.IsWindows => endpointManagerLaunchers[OperatingSystemNames.Windows],
+                true when platform.IsOSX => endpointManagerLaunchers[OperatingSystemNames.OSX],
+                true when platform.IsLinux => endpointManagerLaunchers[OperatingSystemNames.Linux],
                 _ => throw new NotSupportedException("Unsupported platform")
             };
 
