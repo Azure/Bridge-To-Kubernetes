@@ -5,13 +5,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Core;
@@ -41,6 +39,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
         private readonly IEnvironmentVariables _environmentVariables;
         private readonly string _socketFilePath;
         private readonly TimeSpan _epmLaunchWaitTime = TimeSpan.FromSeconds(30);
+        private readonly IEndpointManagerLauncher _endpointManagerLauncher;
 
         public delegate EndpointManagementClient Factory(string userAgent, string correlationId);
 
@@ -64,6 +63,16 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             _environmentVariables = environmentVariables;
             _socketFilePath = _fileSystem.Path.Combine(fileSystem.GetPersistedFilesDirectory(DirectoryName.PersistedFiles), EndpointManager.ProcessName, EndpointManager.SocketName);
             _socketFactory = socketFactory;
+
+            // TODO: Dependency injection, if possible?
+            _endpointManagerLauncher = true switch
+            {
+                true when platform.IsWindows => new WindowsEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
+                true when platform.IsOSX => new OsxEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
+                true when platform.IsLinux => new LinuxEndpointManagerLauncher(environmentVariables, fileSystem, log, operationContext, platform),
+                _ => throw new NotSupportedException("Unsupported platform")
+            };
+
             operationContext.UserAgent = userAgent;
             operationContext.CorrelationId = correlationId + LoggingConstants.CorrelationIdSeparator + LoggingUtils.NewId();
         }
@@ -378,67 +387,13 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     }
                     _log.Verbose(resultMessage);
 
-                    // get launch arguments for endpoint manager
-                    (var fileName, var command) = await GetEndpointManagerLaunchArguments(currentUserName, logFileDirectory, cancellationToken);
-
-                    // get environment variables for endpoint manager
-                    var envVars = GetEnvironmentVariables();
-
-                    // file name and command would be empty for windows, because windows use endpoint manager launcher to launch EPM 
-                    if (string.IsNullOrEmpty(fileName) && string.IsNullOrEmpty(command))
-                    {
-                        return;
-                    }
-
-                    var launchExitCode = _platform.Execute(executable: fileName,
-                                                command: command,
-                                                logCallback: (line) => _log.Info($"Launch output: {line}"),
-                                                envVariables: envVars,
-                                                timeout: TimeSpan.FromSeconds(120),
-                                                cancellationToken: cancellationToken,
-                                                out string outPut);
-
-                    // pkexec allows an authorized user to execute PROGRAM as another user. Refer - https://linux.die.net/man/1/pkexec
-                    // if pkexec failed then launchExitCode will not be zero, so giving user another chance to try with sudo. 
-                    // But this might fail for users who don't have sudo access. This is specifically for Linux.
-                    if (launchExitCode != 0 && _platform.IsLinux && !_environmentVariables.IsCodespaces) {
-                         _log.Info($"pkexec failed with exitCode {launchExitCode}, retrying with sudo");
-                        fileName = "sudo"; // replace pkexec with sudo
-                        launchExitCode = _platform.Execute(executable: fileName,
-                                                command: command,
-                                                logCallback: (line) => _log.Info($"Launch output: {line}"),
-                                                envVariables: envVars,
-                                                timeout: TimeSpan.FromSeconds(120),
-                                                cancellationToken: cancellationToken,
-                                                out outPut);
-                    }
-
-                    // Wait until user has entered their credentials to start pinging
-                    if (launchExitCode == 0)
-                    {
-                        await CheckEndpointManagerAliveAsync(cancellationToken);
-                        return;
-                    }
-                    if ((_platform.IsOSX && launchExitCode == 1) || (_platform.IsLinux && launchExitCode == 126))
-                    {
-                        // User cancellation
-                        throw new InvalidUsageException(_log.OperationContext, Resources.LaunchProcessCancelled, EndpointManager.ProcessName);
-                    }
-
-                    // Something went wrong.
-                    throw new InvalidOperationException($"{EndpointManager.ProcessName} exited with exit code {launchExitCode}");
+                    _endpointManagerLauncher.LaunchEndpointManager(currentUserName, _socketFilePath, logFileDirectory, cancellationToken);
+                    await CheckEndpointManagerAliveAsync(cancellationToken);
                 }
                 catch (Exception ex) when (ex is IUserVisibleExceptionReporter)
                 {
                     // Always bubble up UserVisible exceptions
                     throw;
-                }
-                catch (Exception ex) when (ex is Win32Exception)
-                {
-                    // This catch block will be hit if the user declines the UAC prompt on Windows.
-                    // However, since potential other Win32Exceptions could arise, we log the exception as a warning.
-                    _log.ExceptionAsWarning(ex);
-                    throw new InvalidUsageException(_log.OperationContext, ex, Resources.LaunchProcessCancelled, EndpointManager.ProcessName);
                 }
                 catch (Exception ex)
                 {
@@ -450,84 +405,6 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                     _log.Info("Releasing mutex if owned...");
                     try { mutex.ReleaseMutex(); } catch { }
                 }
-            }
-        }
-
-        public Dictionary<string, string> GetEnvironmentVariables()
-        {
-            if (!string.IsNullOrEmpty(_environmentVariables.DotNetRoot))
-            {
-                _log.Info("Setting the '{0}' environment variable with '{1}' while launching '{2}'.", EnvironmentVariables.Names.DotNetRoot, _environmentVariables.DotNetRoot, EndpointManager.ProcessName);
-                return new Dictionary<string, string>() { { EnvironmentVariables.Names.DotNetRoot, _environmentVariables.DotNetRoot } };
-            }
-
-            return null;
-        }
-
-        private async Task<(string fileName, string command)> GetEndpointManagerLaunchArguments(string currentUserName, string logFileDirectory, CancellationToken cancellationToken)
-        {
-            var fileName = string.Empty;
-            var command = string.Empty;
-            var executableName = $"{EndpointManager.ProcessName}{(_platform.IsWindows ? ".exe" : string.Empty)}";
-            var launcherPath = _fileSystem.Path.Combine(_fileSystem.Path.GetExecutingAssemblyDirectoryPath(), EndpointManager.DirectoryName, executableName);
-            if (!_fileSystem.FileExists(launcherPath))
-            {
-                throw new InvalidOperationException($"Failed to find '{launcherPath}'.");
-            }
-
-            switch (_platform)
-            {
-                case var platform when platform.IsWindows:
-                    // Since EndpointManager is started as an elevated process and when a DOTNET_ROOT env variable is set,
-                    // on windows it is not possible to pass the DOTNET_ROOT value, so using EndpointManagerLauncher to start EndpointManager.
-                    // When VSCode uses BinariesV2 strategy to download clients, DOTNET_ROOT env var is set.
-                    if (!string.IsNullOrEmpty(this._environmentVariables.DotNetRoot))
-                    {
-                        var epmLauncherPath = _fileSystem.Path.Combine(_fileSystem.Path.GetExecutingAssemblyDirectoryPath(), EndpointManager.LauncherDirectoryName, executableName);
-                        var quotedArguments = $"\"{this._environmentVariables.DotNetRoot.Trim('"')}\" \"{launcherPath}\" \"{currentUserName}\" \"{_socketFilePath}\" \"{logFileDirectory}\" \"{_operationContext.CorrelationId}\"";
-                        // Note: If the UAC prompt is declined, the process will throw a Win32Exception.
-                        Process.Start(this.GetEndpointManagerLaunchInfoWindows($"\"{epmLauncherPath}\"", quotedArguments));
-                    }
-                    else
-                    {
-                        var quotedArguments = $"\"{currentUserName}\" \"{_socketFilePath}\" \"{logFileDirectory}\" \"{_operationContext.CorrelationId}\"";
-                        // Note: If the UAC prompt is declined, the process will throw a Win32Exception.
-                        Process.Start(this.GetEndpointManagerLaunchInfoWindows($"\"{launcherPath}\"", quotedArguments));
-                    }
-
-                    await CheckEndpointManagerAliveAsync(cancellationToken);
-
-                    return (string.Empty, string.Empty);
-
-
-                case var platform when platform.IsOSX:
-
-                    var quotedLaunchPathAndArguments = $"\\\\\\\"{launcherPath}\\\\\\\" \\\\\\\"{currentUserName}\\\\\\\" \\\\\\\"{_socketFilePath}\\\\\\\" \\\\\\\"{logFileDirectory}\\\\\\\" \\\\\\\"{_operationContext.CorrelationId}\\\\\\\"";
-
-                    // We launch the EPM using AppleScript when on OSX.
-                    fileName = "/usr/bin/osascript";
-
-                    // Tell the shell to redirect output so that this process exits and the EPM continues to run in the background
-                    // For more info: https://developer.apple.com/library/archive/technotes/tn2065/_index.html#//apple_ref/doc/uid/DTS10003093-CH1-TNTAG5-I_WANT_TO_START_A_BACKGROUND_SERVER_PROCESS__HOW_DO_I_MAKE_DO_SHELL_SCRIPT_NOT_WAIT_UNTIL_THE_COMMAND_COMPLETES_
-                    StringBuilder commandBuilder = new StringBuilder();
-                    commandBuilder.Append("-e \"do shell script ");
-                    commandBuilder.Append($"\\\"{quotedLaunchPathAndArguments} &> /dev/null &\\\"");
-                    commandBuilder.Append($" with prompt \\\"{Product.Name} wants to launch {EndpointManager.ProcessName}.\\\" with administrator privileges\"");
-                    command = commandBuilder.ToString();
-
-                    _log.Info($"Launch {EndpointManager.ProcessName}: {fileName} {command}");
-                    return (fileName, command);
-
-                default:
-                    quotedLaunchPathAndArguments = $"\\\"{launcherPath}\\\" \\\"{currentUserName}\\\" \\\"{_socketFilePath}\\\" \\\"{logFileDirectory}\\\" \\\"{_operationContext.CorrelationId}\\\"";
-
-                    // Try to use pkexec to show a GUI prompt for the user's password so we can run EndpointManager as root.
-                    // If we are already running as root, then pkexec will not show a prompt.
-                    // When running in Codespaces the user is setup to run sudo without needing to enter password.
-                    fileName = _environmentVariables.IsCodespaces ? "sudo" : "pkexec";
-                    command = $"env HOME=\"{_fileSystem.HomeDirectoryPath}\" bash -c \"{quotedLaunchPathAndArguments} &> /dev/null &\"";
-                    _log.Info($"Launch {EndpointManager.ProcessName}: {fileName} {command}");
-                    return (fileName, command);
             }
         }
 
@@ -546,22 +423,6 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             }
 
             throw new InvalidOperationException(string.Format(Resources.FailedToLaunchEndpointManagerFormat, EndpointManager.ProcessName));
-        }
-
-        private ProcessStartInfo GetEndpointManagerLaunchInfoWindows(string launcherPath, string quotedArguments)
-        {
-            this._log.Trace(EventLevel.Informational, $"Launcher path: {launcherPath} quotedArguments: {quotedArguments}");
-            // Start launcher as admin
-            ProcessStartInfo psi = new ProcessStartInfo()
-            {
-                FileName = launcherPath,
-                Arguments = quotedArguments,
-                UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                Verb = "runas"
-            };
-
-            return psi;
         }
 
         /// <summary>
