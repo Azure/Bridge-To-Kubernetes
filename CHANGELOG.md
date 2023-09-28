@@ -8,7 +8,7 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Visual Studio 2022 extension release notes](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.mindaro2022#whats-new)
 
 ## [1.0.20230927.2]
-- [Update sameples/managed-identity app's client id](https://github.com/Azure/Bridge-To-Kubernetes/pull/307)
+- [Update samples/managed-identity app's client id](https://github.com/Azure/Bridge-To-Kubernetes/pull/307)
 - [Filter pods which are not replicaset or statefulset](https://github.com/Azure/Bridge-To-Kubernetes/pull/312)
 - [Add linkerd to supported side cars list](https://github.com/Azure/Bridge-To-Kubernetes/pull/310)
 - [Update image tags to pull latest mariner images](https://github.com/Azure/Bridge-To-Kubernetes/pull/321)
