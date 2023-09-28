@@ -54,7 +54,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             IPlatform platform,
             IAssemblyMetadataProvider assemblyMetadataProvider,
             IEnvironmentVariables environmentVariables,
-            IIndex<OperatingSystemNames, IEndpointManagerLauncher> endpointManagerLaunchers)
+            IEndpointManagerLauncher endpointManagerLauncher)
             : base(log, operationContext)
         {
             _progress = progress;
@@ -64,14 +64,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
             _environmentVariables = environmentVariables;
             _socketFilePath = _fileSystem.Path.Combine(fileSystem.GetPersistedFilesDirectory(DirectoryName.PersistedFiles), EndpointManager.ProcessName, EndpointManager.SocketName);
             _socketFactory = socketFactory;
-
-            _endpointManagerLauncher = true switch
-            {
-                true when platform.IsWindows => endpointManagerLaunchers[OperatingSystemNames.Windows],
-                true when platform.IsOSX => endpointManagerLaunchers[OperatingSystemNames.OSX],
-                true when platform.IsLinux => endpointManagerLaunchers[OperatingSystemNames.Linux],
-                _ => throw new NotSupportedException("Unsupported platform")
-            };
+            _endpointManagerLauncher = endpointManagerLauncher;
 
             operationContext.UserAgent = userAgent;
             operationContext.CorrelationId = correlationId + LoggingConstants.CorrelationIdSeparator + LoggingUtils.NewId();
