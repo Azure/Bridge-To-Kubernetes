@@ -8,6 +8,7 @@ using System.Net.Http;
 using Autofac;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.DevHostAgent;
+using Microsoft.BridgeToKubernetes.Common.IO;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Common.Logging.MacAddressHash;
@@ -73,6 +74,21 @@ namespace Microsoft.BridgeToKubernetes.Library
             builder.RegisterType<ImageProvider>()
                    .As<IImageProvider>()
                    .SingleInstance();
+
+            builder.RegisterType<LinuxEndpointManagerLauncher>().AsSelf();
+            builder.RegisterType<WindowsEndpointManagerLauncher>().AsSelf();
+            builder.RegisterType<OsxEndpointManagerLauncher>().AsSelf();
+
+            builder.Register<IEndpointManagerLauncher>(c =>
+            {
+                return c.Resolve<IPlatform>() switch
+                {
+                     var v when v.IsWindows => c.Resolve<WindowsEndpointManagerLauncher>(),
+                     var v when v.IsLinux => c.Resolve<LinuxEndpointManagerLauncher>(),
+                     var v when v.IsOSX => c.Resolve<OsxEndpointManagerLauncher>(),
+                     _ => throw new InvalidOperationException($"Unsupported operating system: {c.Resolve<IPlatform>()}"),
+                 };
+             }).As<IEndpointManagerLauncher>().SingleInstance();
 
             // Versioning
             builder.RegisterType<AssemblyMetadataProvider>()
