@@ -12,6 +12,7 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Filter pods which are not replicaset or statefulset](https://github.com/Azure/Bridge-To-Kubernetes/pull/312)
 - [Add linkerd to supported side cars list](https://github.com/Azure/Bridge-To-Kubernetes/pull/310)
 - [Update image tags to pull latest mariner images](https://github.com/Azure/Bridge-To-Kubernetes/pull/321)
+- [Fix for failed to launch endpointmanager - retry with sudo](https://github.com/Azure/Bridge-To-Kubernetes/pull/319)
 
 ## [1.0.20230811.2]
 - [Add more wait time for iptables operations to avoid timeouts](https://github.com/Azure/Bridge-To-Kubernetes/pull/289)
