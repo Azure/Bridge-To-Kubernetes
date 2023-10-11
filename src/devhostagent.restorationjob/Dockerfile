@@ -30,12 +30,7 @@ RUN tdnf install -y \
   procps \
   bind-utils
 
-COPY /build/setup-kubectl.sh .
-RUN chmod +x ./setup-kubectl.sh \
-    && ./setup-kubectl.sh \
-    && rm -f ./setup-kubectl.sh
-
 WORKDIR /app
+COPY --from=build /output /app
 ENTRYPOINT ["/app/restorationjob"]
 
-COPY --from=build /output /app
