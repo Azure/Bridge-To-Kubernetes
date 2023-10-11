@@ -105,7 +105,7 @@ namespace Microsoft.BridgeToKubernetes.Library
             if (!string.IsNullOrWhiteSpace(overrideImage))
             {
                 _log.Warning($"Overriding default image '{defaultImage}' with '{overrideImage}'");
-                return isAllNodesArmArch ? overrideImage + "-arm64" : overrideImage;
+                return overrideImage;
             }
 
             if (isAllNodesArmArch)
