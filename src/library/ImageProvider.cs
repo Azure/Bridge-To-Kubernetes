@@ -5,7 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
+using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
 
@@ -15,6 +19,8 @@ namespace Microsoft.BridgeToKubernetes.Library
     {
         private readonly ILog _log;
         private readonly IEnvironmentVariables _environmentVariables;
+
+        private readonly IKubernetesClient _kubernetesClient;
 
         private Lazy<string> _devHostImage;
         private Lazy<string> _devHostRestorationJobImage;
@@ -33,13 +39,11 @@ namespace Microsoft.BridgeToKubernetes.Library
         {
             // To change DevHostImageName tag, please update deployment\settings\services\imagetag.setting accordingly
             // During development, use environment variable LPK_DEVHOSTIMAGENAME to override the default devhostAgent image name
-            private static Lazy<string> _name = new Lazy<string>(() =>
-            {
-                string tag = EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_TAG");
-                return $"{Common.Constants.ImageName.RemoteAgentImageName}:{tag}";
-            });
 
-            public static string Name => _name.Value;
+            private static Lazy<string> _tag = new(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_TAG"));
+            public static string Version => _tag.Value;
+
+            public static string Name => Common.Constants.ImageName.RemoteAgentImageName;
 
             /// <summary>
             /// These entrypoints are supported by the devhostAgent image - they all point to the same start entrypoint.
@@ -62,41 +66,54 @@ namespace Microsoft.BridgeToKubernetes.Library
         {
             // To change RestorationJobImageName tag, please update deployment\settings\services\imagetag.setting accordingly
             // During development, use environment variable LPK_RESTORATIONJOBIMAGENAME to override the default restorationjob image name
-            private static Lazy<string> _tag = new Lazy<string>(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG"));
+            private static Lazy<string> _tag = new(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG"));
 
             public static string Version => _tag.Value;
 
-            internal static string Name => $"lpkrestorationjob:{_tag.Value}";
+            internal static string Name => Common.Constants.ImageName.RestorationJobImageName;
         }
 
         private static class RoutingManager
         {
-            internal static string Name => $"{Common.Constants.Routing.RoutingManagerNameLower}:stable";
+            public static string Version => Common.Constants.ImageTag.RoutingManagerImageTag;
+            internal static string Name => Common.Constants.Routing.RoutingManagerNameLower;
         }
 
-        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables)
+        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables, IKubernetesClient kubernetesClient)
         {
             _log = log;
             _environmentVariables = environmentVariables;
+            _kubernetesClient = kubernetesClient;
 
-            _devHostImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostImageName, DevHost.Name));
-            _devHostRestorationJobImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name));
-            _routingManagerImage = new Lazy<string>(() => GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name));
+            // determine if nodes are running arm architecture
+            Task<V1NodeList> nodes = _kubernetesClient.ListNodes();
+            nodes.Wait();
+            bool isAllNodesArmArch = nodes.Result.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
+
+
+            _devHostImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostImageName, DevHost.Name, DevHost.Version, isAllNodesArmArch));
+            _devHostRestorationJobImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name, DevHostRestorationJob.Version, isAllNodesArmArch));
+            _routingManagerImage = new Lazy<string>(() => GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name, RoutingManager.Version ,isAllNodesArmArch));
         }
 
         public string DevHostImage => _devHostImage.Value;
         public string DevHostRestorationJobImage => _devHostRestorationJobImage.Value;
         public string RoutingManagerImage => _routingManagerImage.Value;
 
-        private string GetImage(string overrideImage, string defaultImage)
+        private string GetImage(string overrideImage, string defaultImage, string tag, bool isAllNodesArmArch)
         {
             if (!string.IsNullOrWhiteSpace(overrideImage))
             {
                 _log.Warning($"Overriding default image '{defaultImage}' with '{overrideImage}'");
-                return overrideImage;
+                return isAllNodesArmArch ? overrideImage + "-arm64" : overrideImage;
             }
 
-            return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}";
+            if (isAllNodesArmArch)
+            {
+                return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}-arm64:{tag}";
+            }
+
+            return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}:{tag}";
         }
     }
 }

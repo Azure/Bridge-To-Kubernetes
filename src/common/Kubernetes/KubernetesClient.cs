@@ -107,6 +107,25 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 
         #endregion List namespaces
 
+        #region List nodes
+
+        /// <summary>
+        ///  <see cref="IKubernetesClient.ListNodes(CancellationToken)"/>
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<V1NodeList> ListNodes(CancellationToken cancellationToken = default)
+        {
+            var result = await ClientInvokeWrapperAsync(async () =>
+            {
+                return await RestClient.CoreV1.ListNodeAsync(cancellationToken: cancellationToken);
+            }, nameof(ListNodes), cancellationToken);
+
+            return result?.Items == null ? new V1NodeList(new List<V1Node>()) : result;
+        }
+
+        #endregion List nodes
+
         #region Deployments
 
         /// <summary>
@@ -399,7 +418,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                 }
                 catch (HttpOperationException e) when (e.Response.StatusCode == HttpStatusCode.Conflict)
                 {
-                    try 
+                    try
                     {
                         _log.Warning("Initial CreateNamespacedServiceAsync failed, deleting namespace");
                         await RestClient.CoreV1.DeleteNamespacedServiceAsync(service.Metadata.Name, namespaceName);
@@ -1015,7 +1034,7 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
                     $"exec {podName} -c {containerName} -n {namespaceName} -- env",
                     onStdOut: outputHandler,
                     onStdErr: (string error) => errorSb.Append(error),
-                    cancellationToken:cancellationToken);
+                    cancellationToken: cancellationToken);
                 if (exitCode == 0)
                 {
                     return true;

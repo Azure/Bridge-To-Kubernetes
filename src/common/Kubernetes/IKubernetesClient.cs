@@ -133,6 +133,13 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
         /// <returns></returns>
         Task<V1NamespaceList> ListNamespacesAsync(IEnumerable<KeyValuePair<string, string>> labels = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        ///  Retrieve the list of k8s nodes.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<V1NodeList> ListNodes(CancellationToken cancellationToken = default);
+
         #region Pods
 
         /// <summary>
