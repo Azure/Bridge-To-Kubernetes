@@ -207,6 +207,29 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
                     new PII(namespaceName)));
         }
 
+        public async Task<OperationResponse<V1NodeList>> ListNodes(CancellationToken cancellationToken)
+        {
+            return await this._managementClientExceptionStrategy.RunWithHandlingAsync(
+               async () =>
+               {
+                   using (var perfLogger = _log.StartPerformanceLogger(
+                   Events.KubernetesManagementClient.AreaName,
+                   Events.KubernetesManagementClient.Operations.ListNodes))
+                   {
+                       V1NodeList result = await _kubernetesRestClientExceptionStrategy.RunWithHandlingAsync(
+                           async () =>
+                           {
+                               return await _kubernetesClient.ListNodes(cancellationToken: cancellationToken);
+                           },
+                           new KubernetesRestClientExceptionStrategy.FailureConfig("Failed to list nodes."));
+
+                       perfLogger.SetSucceeded();
+                       return new OperationResponse<V1NodeList>(result, _operationContext);
+                   }
+               },
+               new ManagementClientExceptionStrategy.FailureConfig("Failed to list nodes."));
+        }
+
         public async Task<OperationResponse<IEnumerable<Uri>>> ListPublicUrlsInNamespaceAsync(string namespaceName, CancellationToken cancellationToken, string routingHeaderValue = null)
         {
             return await this._managementClientExceptionStrategy.RunWithHandlingAsync(

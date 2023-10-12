@@ -6,11 +6,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
+using Microsoft.BridgeToKubernetes.Library.Client.ManagementClients;
+using Microsoft.BridgeToKubernetes.Library.ClientFactory;
+using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
 
 namespace Microsoft.BridgeToKubernetes.Library
@@ -20,11 +24,11 @@ namespace Microsoft.BridgeToKubernetes.Library
         private readonly ILog _log;
         private readonly IEnvironmentVariables _environmentVariables;
 
-        private readonly IKubernetesClient _kubernetesClient;
+        private readonly IKubernetesManagementClient _kubernetesManagementClient;
 
-        private Lazy<string> _devHostImage;
-        private Lazy<string> _devHostRestorationJobImage;
-        private Lazy<string> _routingManagerImage;
+        private AsyncLazy<string> _devHostImage;
+        private AsyncLazy<string> _devHostRestorationJobImage;
+        private AsyncLazy<string> _routingManagerImage;
 
         private static readonly IReadOnlyDictionary<ReleaseEnvironment, string> ContainerRegistries = new Dictionary<ReleaseEnvironment, string>()
             {
@@ -79,29 +83,28 @@ namespace Microsoft.BridgeToKubernetes.Library
             internal static string Name => Common.Constants.Routing.RoutingManagerNameLower;
         }
 
-        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables, IKubernetesClient kubernetesClient)
+        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables, IManagementClientFactory managementClientFactory)
         {
             _log = log;
             _environmentVariables = environmentVariables;
-            _kubernetesClient = kubernetesClient;
-
-            // determine if nodes are running arm architecture
-            Task<V1NodeList> nodes = _kubernetesClient.ListNodes();
-            nodes.Wait();
-            bool isAllNodesArmArch = nodes.Result.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
-
-
-            _devHostImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostImageName, DevHost.Name, DevHost.Version, isAllNodesArmArch));
-            _devHostRestorationJobImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name, DevHostRestorationJob.Version, isAllNodesArmArch));
-            _routingManagerImage = new Lazy<string>(() => GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name, RoutingManager.Version ,isAllNodesArmArch));
+            var kubeConfigManagementClient = managementClientFactory.CreateKubeConfigClient();
+            var kubeConfigDetails = kubeConfigManagementClient.GetKubeConfigDetails();
+            _kubernetesManagementClient = managementClientFactory.CreateKubernetesManagementClient(kubeConfigDetails);
+            _devHostImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.DevHostImageName, DevHost.Name, DevHost.Version));
+            _devHostRestorationJobImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name, DevHostRestorationJob.Version));
+            _routingManagerImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name, RoutingManager.Version));
         }
 
-        public string DevHostImage => _devHostImage.Value;
-        public string DevHostRestorationJobImage => _devHostRestorationJobImage.Value;
-        public string RoutingManagerImage => _routingManagerImage.Value;
+        public string DevHostImage => _devHostImage.GetAwaiter().GetResult();
+        public string DevHostRestorationJobImage => _devHostRestorationJobImage.GetAwaiter().GetResult();
+        public string RoutingManagerImage => _routingManagerImage.GetAwaiter().GetResult();
 
-        private string GetImage(string overrideImage, string defaultImage, string tag, bool isAllNodesArmArch)
+        public async Task<string> GetImage(string overrideImage, string defaultImage, string tag)
         {
+            // determine if nodes are running arm architecture
+            V1NodeList nodes = (await _kubernetesManagementClient.ListNodes(new CancellationToken())).Value;
+            bool isAllNodesArmArch = nodes.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
+
             if (!string.IsNullOrWhiteSpace(overrideImage))
             {
                 _log.Warning($"Overriding default image '{defaultImage}' with '{overrideImage}'");

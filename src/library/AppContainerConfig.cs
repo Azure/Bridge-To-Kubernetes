@@ -17,6 +17,7 @@ using Microsoft.BridgeToKubernetes.Common.Restore;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Client.ManagementClients;
+using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.EndpointManagement;
@@ -223,6 +224,15 @@ namespace Microsoft.BridgeToKubernetes.Library
                 ApplicationInsightsInstrumentationKey = (c) => Common.Constants.ApplicationInsights.InstrumentationKey,
                 MacAddressHash = (c) => c.Resolve<MacInformationProvider>().MacAddressHash
             });
+
+            builder.Register(c =>
+            {
+                ManagementClientFactory.IsTelemetryEnabledCallback = c.Resolve<IApplicationInsightsLoggerConfig>().IsTelemetryEnabledCallback; // Set the IsTelemetryEnabled callback, in order to instantiate the SDK with the same telemetry collection settings as the CLI
+                ManagementClientFactory.IsLogFileEnabled = c.Resolve<IFileLoggerConfig>().LogFileEnabled;
+                return new ManagementClientFactory(c.Resolve<SourceUserAgentProvider>().UserAgent, c.Resolve<IOperationContext>().CorrelationId);
+            })
+                   .As<IManagementClientFactory>()
+                   .SingleInstance();
 
             // Common Module
             builder.RegisterModule<CommonModule>();
