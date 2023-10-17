@@ -10,11 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
-using Microsoft.BridgeToKubernetes.Common.Kubernetes;
 using Microsoft.BridgeToKubernetes.Common.Logging;
 using Microsoft.BridgeToKubernetes.Library.Client.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.ClientFactory;
-using Microsoft.BridgeToKubernetes.Library.ManagementClients;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
 
 namespace Microsoft.BridgeToKubernetes.Library
@@ -101,16 +99,22 @@ namespace Microsoft.BridgeToKubernetes.Library
 
         public async Task<string> GetImage(string overrideImage, string defaultImage, string tag)
         {
-            // determine if nodes are running arm architecture
-            V1NodeList nodes = (await _kubernetesManagementClient.ListNodes(new CancellationToken())).Value;
-            bool isAllNodesArmArch = nodes.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
-
             if (!string.IsNullOrWhiteSpace(overrideImage))
             {
                 _log.Warning($"Overriding default image '{defaultImage}' with '{overrideImage}'");
                 return overrideImage;
             }
 
+            // determine if nodes are running arm architecture
+            V1NodeList nodes = (await _kubernetesManagementClient.ListNodes(new CancellationToken())).Value;
+            // this can never happen or timed out while getting nodes
+            if (nodes?.Items == null || !nodes.Items.Any())
+            {
+                _log.Warning($"No nodes found in cluster. Using default image '{defaultImage}' with '{tag}'");
+                return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}:{tag}";
+            }
+            bool isAllNodesArmArch = nodes.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
+            
             if (isAllNodesArmArch)
             {
                 return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}-arm64:{tag}";
