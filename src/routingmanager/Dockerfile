@@ -1,10 +1,10 @@
 # Build container
 ARG ARCH=amd64
 FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0-${ARCH} AS build
-
 ARG Configuration=Release
 ARG TelemetryType=TELEMETRY_DEVELOPMENT
 ARG MindaroBuildNumber=0.0
+ARG ARCH
 
 WORKDIR /src/routingmanager
 COPY /src/routingmanager/routingmanager.csproj .
@@ -21,6 +21,10 @@ RUN dotnet publish -c ${Configuration} -o /src/publish
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0-${ARCH} as final
 
+ARG ARCH
+ARG KUBECTL_VERSION=v1.27.3
+ARG INSTALL_LOCATION=/app/kubectl/linux
+
 # Setup common tools
 RUN tdnf clean all && \
   tdnf check-update && \
@@ -32,7 +36,7 @@ RUN tdnf install -y \
 
 COPY /build/setup-kubectl.sh .
 RUN chmod +x ./setup-kubectl.sh \
-    && ./setup-kubectl.sh \
+    && ./setup-kubectl.sh ${KUBECTL_VERSION} ${INSTALL_LOCATION} ${ARCH} \
     && rm -f ./setup-kubectl.sh
 
 WORKDIR /src/routingmanager
