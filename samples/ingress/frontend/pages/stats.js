@@ -49,7 +49,7 @@ export default class Stats extends React.Component {
         return (
             <div>
                 <div className="container-fluid app-title">
-                    <Link prefetch href="/">
+                    <Link prefetch href="/" legacyBehavior>
                         <h1 className="app-title"><i className="fas fa-arrow-left"></i> todo <span className="no-color">stats</span></h1>
                     </Link>
                     <div className="row">
