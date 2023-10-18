@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using k8s.Models;
 using Microsoft.BridgeToKubernetes.Library.Models;
 
 namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients

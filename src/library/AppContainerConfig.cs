@@ -17,7 +17,6 @@ using Microsoft.BridgeToKubernetes.Common.Restore;
 using Microsoft.BridgeToKubernetes.Common.Socket;
 using Microsoft.BridgeToKubernetes.Common.Utilities;
 using Microsoft.BridgeToKubernetes.Library.Client.ManagementClients;
-using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Connect.Environment;
 using Microsoft.BridgeToKubernetes.Library.EndpointManagement;
