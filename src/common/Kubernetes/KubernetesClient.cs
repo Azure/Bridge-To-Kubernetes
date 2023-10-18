@@ -107,25 +107,6 @@ namespace Microsoft.BridgeToKubernetes.Common.Kubernetes
 
         #endregion List namespaces
 
-        #region List nodes
-
-        /// <summary>
-        ///  <see cref="IKubernetesClient.ListNodes(CancellationToken)"/>
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task<V1NodeList> ListNodes(CancellationToken cancellationToken = default)
-        {
-            var result = await ClientInvokeWrapperAsync(async () =>
-            {
-                return await RestClient.CoreV1.ListNodeAsync(cancellationToken: cancellationToken);
-            }, nameof(ListNodes), cancellationToken);
-
-            return result?.Items == null ? new V1NodeList(new List<V1Node>()) : result;
-        }
-
-        #endregion List nodes
-
         #region Deployments
 
         /// <summary>

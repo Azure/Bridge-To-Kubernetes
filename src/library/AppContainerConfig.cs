@@ -225,15 +225,6 @@ namespace Microsoft.BridgeToKubernetes.Library
                 MacAddressHash = (c) => c.Resolve<MacInformationProvider>().MacAddressHash
             });
 
-            builder.Register(c =>
-            {
-                ManagementClientFactory.IsTelemetryEnabledCallback = c.Resolve<IApplicationInsightsLoggerConfig>().IsTelemetryEnabledCallback; // Set the IsTelemetryEnabled callback, in order to instantiate the SDK with the same telemetry collection settings as the CLI
-                ManagementClientFactory.IsLogFileEnabled = c.Resolve<IFileLoggerConfig>().LogFileEnabled;
-                return new ManagementClientFactory(c.Resolve<SourceUserAgentProvider>().UserAgent, c.Resolve<IOperationContext>().CorrelationId);
-            })
-                   .As<IManagementClientFactory>()
-                   .SingleInstance();
-
             // Common Module
             builder.RegisterModule<CommonModule>();
 

@@ -20,8 +20,8 @@ function install_kubectl {
         arch="arm64"
     fi
 
-    echo "Setting up kubectl $kubectl_version in $install_location with arch $arch"
-    curl -LO "https://storage.googleapis.com/kubernetes-release/release/$kubectl_version/bin/linux/$arch/kubectl"
+    echo "Setting up kubectl $kubectl_version in $install_location with arch $arch"    
+    curl -LO "https://dl.k8s.io/release/$kubectl_version/bin/linux/$arch/kubectl"
     chmod +x kubectl
     mkdir -p "$install_location"
     mv kubectl "$install_location"

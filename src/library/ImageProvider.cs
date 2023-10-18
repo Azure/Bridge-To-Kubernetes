@@ -5,14 +5,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using k8s.Models;
 using Microsoft.BridgeToKubernetes.Common;
 using Microsoft.BridgeToKubernetes.Common.Logging;
-using Microsoft.BridgeToKubernetes.Library.Client.ManagementClients;
-using Microsoft.BridgeToKubernetes.Library.ClientFactory;
 using Microsoft.BridgeToKubernetes.Library.Utilities;
 
 namespace Microsoft.BridgeToKubernetes.Library
@@ -22,11 +16,9 @@ namespace Microsoft.BridgeToKubernetes.Library
         private readonly ILog _log;
         private readonly IEnvironmentVariables _environmentVariables;
 
-        private readonly IKubernetesManagementClient _kubernetesManagementClient;
-
-        private AsyncLazy<string> _devHostImage;
-        private AsyncLazy<string> _devHostRestorationJobImage;
-        private AsyncLazy<string> _routingManagerImage;
+        private Lazy<string> _devHostImage;
+        private Lazy<string> _devHostRestorationJobImage;
+        private Lazy<string> _routingManagerImage;
 
         private static readonly IReadOnlyDictionary<ReleaseEnvironment, string> ContainerRegistries = new Dictionary<ReleaseEnvironment, string>()
             {
@@ -41,11 +33,13 @@ namespace Microsoft.BridgeToKubernetes.Library
         {
             // To change DevHostImageName tag, please update deployment\settings\services\imagetag.setting accordingly
             // During development, use environment variable LPK_DEVHOSTIMAGENAME to override the default devhostAgent image name
+            private static Lazy<string> _name = new Lazy<string>(() =>
+            {
+                string tag = EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_TAG");
+                return $"{Common.Constants.ImageName.RemoteAgentImageName}:{tag}";
+            });
 
-            private static Lazy<string> _tag = new(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_TAG"));
-            public static string Version => _tag.Value;
-
-            public static string Name => Common.Constants.ImageName.RemoteAgentImageName;
+            public static string Name => _name.Value;
 
             /// <summary>
             /// These entrypoints are supported by the devhostAgent image - they all point to the same start entrypoint.
@@ -68,36 +62,33 @@ namespace Microsoft.BridgeToKubernetes.Library
         {
             // To change RestorationJobImageName tag, please update deployment\settings\services\imagetag.setting accordingly
             // During development, use environment variable LPK_RESTORATIONJOBIMAGENAME to override the default restorationjob image name
-            private static Lazy<string> _tag = new(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG"));
+            private static Lazy<string> _tag = new Lazy<string>(() => EmbeddedFileUtilities.GetImageTag("MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG"));
 
             public static string Version => _tag.Value;
 
-            internal static string Name => Common.Constants.ImageName.RestorationJobImageName;
+            internal static string Name => $"lpkrestorationjob:{_tag.Value}";
         }
 
         private static class RoutingManager
         {
-            public static string Version => Common.Constants.ImageTag.RoutingManagerImageTag;
-            internal static string Name => Common.Constants.Routing.RoutingManagerNameLower;
+            internal static string Name => $"{Common.Constants.Routing.RoutingManagerNameLower}:stable";
         }
 
-        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables, IManagementClientFactory managementClientFactory)
+        public ImageProvider(ILog log, IEnvironmentVariables environmentVariables)
         {
             _log = log;
             _environmentVariables = environmentVariables;
-            var kubeConfigManagementClient = managementClientFactory.CreateKubeConfigClient();
-            var kubeConfigDetails = kubeConfigManagementClient.GetKubeConfigDetails();
-            _kubernetesManagementClient = managementClientFactory.CreateKubernetesManagementClient(kubeConfigDetails);
-            _devHostImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.DevHostImageName, DevHost.Name, DevHost.Version));
-            _devHostRestorationJobImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name, DevHostRestorationJob.Version));
-            _routingManagerImage = new AsyncLazy<string>(async () => await GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name, RoutingManager.Version));
+
+            _devHostImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostImageName, DevHost.Name));
+            _devHostRestorationJobImage = new Lazy<string>(() => GetImage(_environmentVariables.DevHostRestorationJobImageName, DevHostRestorationJob.Name));
+            _routingManagerImage = new Lazy<string>(() => GetImage(_environmentVariables.RoutingManagerImageName, RoutingManager.Name));
         }
 
-        public string DevHostImage => _devHostImage.GetAwaiter().GetResult();
-        public string DevHostRestorationJobImage => _devHostRestorationJobImage.GetAwaiter().GetResult();
-        public string RoutingManagerImage => _routingManagerImage.GetAwaiter().GetResult();
+        public string DevHostImage => _devHostImage.Value;
+        public string DevHostRestorationJobImage => _devHostRestorationJobImage.Value;
+        public string RoutingManagerImage => _routingManagerImage.Value;
 
-        public async Task<string> GetImage(string overrideImage, string defaultImage, string tag)
+        private string GetImage(string overrideImage, string defaultImage)
         {
             if (!string.IsNullOrWhiteSpace(overrideImage))
             {
@@ -105,22 +96,7 @@ namespace Microsoft.BridgeToKubernetes.Library
                 return overrideImage;
             }
 
-            // determine if nodes are running arm architecture
-            V1NodeList nodes = (await _kubernetesManagementClient.ListNodes(new CancellationToken())).Value;
-            // this can never happen or timed out while getting nodes
-            if (nodes?.Items == null || !nodes.Items.Any())
-            {
-                _log.Warning($"No nodes found in cluster. Using default image '{defaultImage}' with '{tag}'");
-                return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}:{tag}";
-            }
-            bool isAllNodesArmArch = nodes.Items.All(node => node?.Status?.NodeInfo?.Architecture == Common.Constants.Architecture.Arm64);
-            
-            if (isAllNodesArmArch)
-            {
-                return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}-arm64:{tag}";
-            }
-
-            return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}:{tag}";
+            return $"{ContainerRegistries[_environmentVariables.ReleaseEnvironment]}/{defaultImage}";
         }
     }
 }

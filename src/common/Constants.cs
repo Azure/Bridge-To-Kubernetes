@@ -219,18 +219,6 @@ namespace Microsoft.BridgeToKubernetes.Common
         internal static class ImageName
         {
             public const string RemoteAgentImageName = "lpkremoteagent";
-            public const string RestorationJobImageName = "lpkrestorationjob";
-        }
-
-        internal static class ImageTag
-        {
-            public const string RoutingManagerImageTag = "stable";
-        }
-
-        internal static class Architecture
-        {
-            public const string Arm64 = "arm64";
-            public const string Amd64 = "amd64";
         }
 
         internal static class Https

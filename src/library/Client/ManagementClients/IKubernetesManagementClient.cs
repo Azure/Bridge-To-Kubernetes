@@ -50,13 +50,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Client.ManagementClients
         Task<OperationResponse<IEnumerable<string>>> ListServicesInNamespacesAsync(string namespaceName, CancellationToken cancellationToken, bool excludeSystemServices = true);
 
         /// <summary>
-        /// List all nodes in the cluster
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<OperationResponse<V1NodeList>> ListNodes(CancellationToken cancellationToken);
-
-        /// <summary>
         /// Lists all the public Urls in the specified namespace
         /// </summary>
         /// <param name="namespaceName">The name of the namespace where to look for ingresses</param>
