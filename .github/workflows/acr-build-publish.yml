@@ -28,14 +28,15 @@ jobs:
         shell: bash
         id: version
         run: |
+          chmod +x ./deployment/settings/setenvironmentvariables.sh
           `./deployment/settings/setenvironmentvariables.sh deployment/settings/services/imagetag.setting`
           printenv | grep "MINDARO"
-          if [ ${{ matrix.components}} === "devhostagent" ]; then
-            echo "version=$MINDARO_DEVHOSTAGENT_TAG" >> $GITHUB_ENV
-          elif [ ${{ matrix.components}} === "devhostagent.restorationjob" ]; then
-            echo "version=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
+          if [ ${{ matrix.components}} == "devhostagent" ]; then
+            echo "tag=$MINDARO_DEVHOSTAGENT_TAG" >> $GITHUB_ENV
+          elif [ ${{ matrix.components}} == "devhostagent.restorationjob" ]; then
+            echo "tag=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
           else
-            echo "version=$MINDARO_ROUTINGMANAGER_TAG" >> $GITHUB_ENV
+            echo "tag=$MINDARO_ROUTINGMANAGER_TAG" >> $GITHUB_ENV
           fi
       - name: Build and push for ${{ matrix.components }}
         uses: docker/build-push-action@v5
@@ -43,4 +44,4 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ steps.version.outputs.version }}
+          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
