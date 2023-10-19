@@ -45,4 +45,4 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ steps.version.outputs.tag }}
+          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
