@@ -31,9 +31,9 @@ jobs:
           chmod +x ./deployment/settings/setenvironmentvariables.sh
           `./deployment/settings/setenvironmentvariables.sh deployment/settings/services/imagetag.setting`
           printenv | grep "MINDARO"
-          if [ ${{ matrix.components}} === "devhostagent" ]; then
+          if [ ${{ matrix.components}} == "devhostagent" ]; then
             echo "version=$MINDARO_DEVHOSTAGENT_TAG" >> $GITHUB_ENV
-          elif [ ${{ matrix.components}} === "devhostagent.restorationjob" ]; then
+          elif [ ${{ matrix.components}} == "devhostagent.restorationjob" ]; then
             echo "version=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
           else
             echo "version=$MINDARO_ROUTINGMANAGER_TAG" >> $GITHUB_ENV
