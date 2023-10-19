@@ -14,12 +14,6 @@ function install_kubectl {
     install_location="${2:-$DEFAULT_INSTALL_LOCATION}"
     arch="${3:-$DEFAULT_ARCH}"
 
-    # Map arm64v8 architecture to arm64
-    if [ "$arch" == "arm64v8" ]; then
-        echo "setting arch to arm64"
-        arch="arm64"
-    fi
-
     echo "Setting up kubectl $kubectl_version in $install_location with arch $arch"    
     curl -LO "https://dl.k8s.io/release/$kubectl_version/bin/linux/$arch/kubectl"
     chmod +x kubectl
