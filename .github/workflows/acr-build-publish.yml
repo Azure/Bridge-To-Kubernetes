@@ -5,7 +5,13 @@ jobs:
   docker:
     strategy:
       matrix:
-        components: [devhostagent, devhostagent.restorationjob, routingmanager]
+        include: 
+          - components: devhostagent
+            imageName: lpkremoteagent
+          - components: devhostagent.restorationjob
+            imageName: lpkrestorationjob
+          - components: routingmanager
+            imageName: routingmanager
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,7 +31,7 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.components }}:1.3.4
+          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:1.3.4
 
       # - name: Build and push for devhostagent.restorationjob
       #   uses: docker/build-push-action@v5
