@@ -24,7 +24,15 @@ jobs:
           registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-      - name: Read version for tag
+      - name: Set telemetry variables
+        shell: bash
+        run: |
+          if [ $GITHUB_REF == "refs/heads/main" ]; then
+            echo "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
+          else
+            echo "##vso[task.setvariable variable=TelemetryType]TELEMETRY_DEVELOPMENT"
+          fi
+      - name: Set image tags
         shell: bash
         id: version
         run: |
