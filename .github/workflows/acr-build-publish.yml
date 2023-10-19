@@ -28,6 +28,7 @@ jobs:
         shell: bash
         id: version
         run: |
+          chmod +x ./deployment/settings/setenvironmentvariables.sh
           `./deployment/settings/setenvironmentvariables.sh deployment/settings/services/imagetag.setting`
           printenv | grep "MINDARO"
           if [ ${{ matrix.components}} === "devhostagent" ]; then
