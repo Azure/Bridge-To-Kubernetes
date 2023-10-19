@@ -19,13 +19,13 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and push for {{ matrix.components }}
+      - name: Build and push for ${{ matrix.components }}
         uses: docker/build-push-action@v5
         with:
-          file: src/{{ matrix.components }}/Dockerfile
+          file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/{{ matrix.components }}:1.3.4
+          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.components }}:1.3.4
 
       # - name: Build and push for devhostagent.restorationjob
       #   uses: docker/build-push-action@v5
