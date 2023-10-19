@@ -3,6 +3,9 @@ on: [workflow_dispatch]
 
 jobs:
   docker:
+    strategy:
+      matrix:
+        components: [devhostagent, devhostagent.restorationjob, routingmanager]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,26 +19,26 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and push for devhostagent
+      - name: Build and push for {{ matrix.components }}
         uses: docker/build-push-action@v5
         with:
-          file: src/devhostagent/Dockerfile
+          file: src/{{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/lpkremoteagent:1.3.4
+          tags: ${{ secrets.ACR_REGISTRY }}/{{ matrix.components }}:1.3.4
 
-      - name: Build and push for devhostagent.restorationjob
-        uses: docker/build-push-action@v5
-        with:
-          file: src/devhostagent.restorationjob/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/lpkrestorationjob:latest
+      # - name: Build and push for devhostagent.restorationjob
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     file: src/devhostagent.restorationjob/Dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     push: true
+      #     tags: ${{ secrets.ACR_REGISTRY }}/lpkrestorationjob:latest
 
-      - name: Build and push for routingmanager
-        uses: docker/build-push-action@v5
-        with:
-          file: src/routingmanager/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/routingmanager:latest
+      # - name: Build and push for routingmanager
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     file: src/routingmanager/Dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     push: true
+      #     tags: ${{ secrets.ACR_REGISTRY }}/routingmanager:latest
