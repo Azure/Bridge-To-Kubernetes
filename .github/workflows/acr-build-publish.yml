@@ -1,0 +1,41 @@
+name: build and push to acr
+on: [workflow_dispatch]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push for devhostagent
+        uses: docker/build-push-action@v5
+        with:
+          file: src/devhostagent/Dockerfile
+          platforms: linux/arm64,linux-amd64
+          push: true
+          tags: ${{ secrets.ACR_REGISTRY }}/lpkremoteagent:1.3.4
+
+      - name: Build and push for devhostagent.restorationjob
+        uses: docker/build-push-action@v5
+        with:
+          file: src/devhostagent.restorationjob/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.ACR_REGISTRY }}/lpkrestorationjob:latest
+
+      - name: Build and push for routingmanager
+        uses: docker/build-push-action@v5
+        with:
+          file: src/routingmanager/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.ACR_REGISTRY }}/routingmanager:latest

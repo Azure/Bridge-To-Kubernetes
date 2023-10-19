@@ -1,8 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+ARG ARCH=amd64
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0-${ARCH} AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0-${ARCH} AS build
 WORKDIR /src
 COPY ["databaseApi.csproj", ""]
 RUN dotnet restore "./databaseApi.csproj"
