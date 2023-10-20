@@ -29,11 +29,7 @@ variables:
 - name: RunTests
   value: True
 
-trigger:
-  branches:
-    include:
-    - refs/heads/main
-  batch: True
+trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
   repositories:
