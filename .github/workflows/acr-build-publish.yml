@@ -1,6 +1,16 @@
 name: build and push to acr
-on: [workflow_dispatch]
-
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - prod
 jobs:
   docker:
     strategy:
@@ -13,6 +23,7 @@ jobs:
           - components: routingmanager
             imageName: routingmanager
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +32,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ACR_REGISTRY }}
+          registry: ${{ vars.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
       - name: Set telemetry variables
@@ -52,4 +63,4 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ secrets.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
+          tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
