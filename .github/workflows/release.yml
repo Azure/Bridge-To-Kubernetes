@@ -7,6 +7,25 @@ jobs:
     strategy:
       matrix:
         mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
+        include:
+          - mode: osx-x64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/darwin/amd64/kubectl'
+            kubectlPath: 'osx\kubectl'
+          - mode: linux-x64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl'
+            kubectlPath: 'linux\kubectl'
+          - mode: win-x64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/windows/amd64/kubectl.exe'
+            kubectlPath: 'win\kubectl.exe'
+          - mode: win-arm64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe'
+            kubectlPath: 'win\kubectl.exe'
+          - mode: osx-arm64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl'
+            kubectlPath: 'osx\kubectl'
+          - mode: linux-arm64
+            kubectlUrl: 'https://dl.k8s.io/release/v1.27.3/bin/linux/arm64/kubectl'
+            kubectlPath: 'linux\kubectl'
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -33,41 +52,11 @@ jobs:
       uses: Azure/powershell@v1
       with:
         inlineScript: |
-          if ('${{ matrix.mode }}' -eq 'win-x64') {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/windows/amd64/kubectl.exe'
-            $dir = 'win'
-            $file = 'kubectl.exe'
-          } elseif ('${{ matrix.mode }}' -eq 'win-arm64') {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe'
-            $dir = 'win'
-            $file = 'kubectl.exe'
-          } elseif ('${{ matrix.mode }}' -eq 'osx-x64') {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/darwin/amd64/kubectl'
-            $dir = 'osx'
-            $file = 'kubectl'
-          } elseif ('${{ matrix.mode }}' -eq 'osx-arm64') {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl'
-            $dir = 'osx'
-            $file = 'kubectl'
-          } elseif ('${{ matrix.mode }}' -eq 'linux-arm64') {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/linux/arm64/kubectl'
-            $dir = 'linux'
-            $file = 'kubectl'
-          } else {
-            $url = 'https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl'
-            $dir = 'linux'
-            $file = 'kubectl'
-          }
-          Write-Output "url is: "$url
-          Write-Output "directory is: "$dir
-          Write-Output "file is: "$file
           New-Item -Path '${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\kubectl' -ItemType Directory
-          $filePath = '${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\kubectl\'+$dir
-          Write-Output "file path is: "$filePath
-          New-Item -Path $filePath -ItemType Directory
-          $fileName = $filePath + '\' + $file
-          Write-Output "file name is: "$fileName 
-          curl.exe $url -o $fileName
+          $kubectlPath = '${{ github.workspace }}\src\dsc\bin\Release\net7.0\${{ matrix.mode }}\publish\kubectl\${{ matrix.kubectlPath }}'
+          $kubectlDir = Split-Path $kubectlPath
+          New-Item -Path $kubectlDir -ItemType Directory
+          curl.exe $url -o $kubectlPath
         azPSVersion: '3.1.0'
     - name: Create .Zip files (${{ matrix.mode }})
       uses: TheDoctor0/zip-release@0.6.2
