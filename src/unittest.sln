@@ -1,0 +1,52 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dsc.tests", "dsc.tests\dsc.tests.csproj", "{8BC5BADD-5E16-4144-820C-9714321C6AAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common.tests", "common.tests\common.tests.csproj", "{74C94065-702C-474B-80CA-673572DF23E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "library.tests", "library.tests\library.tests.csproj", "{782EE760-1A03-40E4-BA3B-DEAE6E88B338}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "routingmanager.tests", "routingmanager.tests\routingmanager.tests.csproj", "{C7BE177D-7606-4C64-861E-CA8148F68D70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "endpointmanager.tests", "endpointmanager.tests\endpointmanager.tests.csproj", "{F15D1D94-6F73-44FB-988B-2F429EE64108}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devhostAgent.restorationjob.tests", "devhostAgent.restorationjob.tests\devhostAgent.restorationjob.tests.csproj", "{0F2441A5-E65F-4F84-B8E9-D58252FEE771}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BC5BADD-5E16-4144-820C-9714321C6AAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BC5BADD-5E16-4144-820C-9714321C6AAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BC5BADD-5E16-4144-820C-9714321C6AAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BC5BADD-5E16-4144-820C-9714321C6AAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74C94065-702C-474B-80CA-673572DF23E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74C94065-702C-474B-80CA-673572DF23E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74C94065-702C-474B-80CA-673572DF23E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74C94065-702C-474B-80CA-673572DF23E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{782EE760-1A03-40E4-BA3B-DEAE6E88B338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{782EE760-1A03-40E4-BA3B-DEAE6E88B338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{782EE760-1A03-40E4-BA3B-DEAE6E88B338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{782EE760-1A03-40E4-BA3B-DEAE6E88B338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7BE177D-7606-4C64-861E-CA8148F68D70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7BE177D-7606-4C64-861E-CA8148F68D70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7BE177D-7606-4C64-861E-CA8148F68D70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7BE177D-7606-4C64-861E-CA8148F68D70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F15D1D94-6F73-44FB-988B-2F429EE64108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15D1D94-6F73-44FB-988B-2F429EE64108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F15D1D94-6F73-44FB-988B-2F429EE64108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15D1D94-6F73-44FB-988B-2F429EE64108}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F2441A5-E65F-4F84-B8E9-D58252FEE771}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F2441A5-E65F-4F84-B8E9-D58252FEE771}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F2441A5-E65F-4F84-B8E9-D58252FEE771}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F2441A5-E65F-4F84-B8E9-D58252FEE771}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
