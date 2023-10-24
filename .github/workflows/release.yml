@@ -74,27 +74,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: build
-    strategy:
-      matrix:
-        include:
-          - mode: osx-x64
-            assetBuildName: lpk-osx-x64
-            assetName: lpk-osx
-          - mode: linux-x64
-            assetBuildName: lpk-linux-x64
-            assetName: lpk-linux
-          - mode: win-x64
-            assetBuildName: lpk-win-x64
-            assetName: lpk-win
-          - mode: win-arm64
-            assetBuildName: lpk-win-arm64
-            assetName: lpk-win-arm64
-          - mode: osx-arm64
-            assetBuildName: lpk-osx-arm64
-            assetName: lpk-osx-arm64
-          - mode: linux-arm64
-            assetBuildName: lpk-linux-arm64
-            assetName: lpk-linux-arm64
     steps:
     - uses: actions/checkout@v3
     - name: Get Changelog Entry
@@ -113,12 +92,57 @@ jobs:
         body: ${{ steps.changelog_reader.outputs.changes }}
     - name: Download All artifacts
       uses: actions/download-artifact@v3
-    - name: Upload Release Assets
+    - name: Upload Window Release Assets
       uses: actions/upload-release-asset@v1 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/${{ matrix.assetBuildName }}/${{ matrix.assetBuildName }}.zip
-        asset_name: ${{ matrix.assetName }}.zip
+        asset_path: ${{ github.workspace }}/lpk-win-x64/lpk-win-x64.zip
+        asset_name: lpk-win.zip
+        asset_content_type: application/zip
+    - name: Upload Window ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-win-arm64/lpk-win-arm64.zip
+        asset_name: lpk-win-arm64.zip
+        asset_content_type: application/zip
+    - name: Upload Linux Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-linux-x64/lpk-linux-x64.zip
+        asset_name: lpk-linux.zip
+        asset_content_type: application/zip
+    - name: Upload Linux ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-linux-arm64/lpk-linux-arm64.zip
+        asset_name: lpk-linux-arm64.zip
+        asset_content_type: application/zip
+    - name: Upload OSX Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-osx-x64/lpk-osx-x64.zip
+        asset_name: lpk-osx.zip
+        asset_content_type: application/zip
+    - name: Upload OSX ARM64 Release Assets
+      uses: actions/upload-release-asset@v1 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/lpk-osx-arm64/lpk-osx-arm64.zip
+        asset_name: lpk-osx-arm64.zip
         asset_content_type: application/zip
