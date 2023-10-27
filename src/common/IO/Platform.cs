@@ -100,7 +100,7 @@ namespace Microsoft.BridgeToKubernetes.Common.IO
             {
                 foreach (KeyValuePair<string, string> env in envVariables)
                 {
-                    process.StartInfo.EnvironmentVariables[env.Key] = env.Value;
+                    process.StartInfo.EnvironmentVariables.Add(env.Key, env.Value);
                 }
             }
 
