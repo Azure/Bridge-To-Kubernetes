@@ -16,7 +16,6 @@ namespace Microsoft.BridgeToKubernetes.Library.Logging
                 public const string CheckCredentialsAsync = "CheckCredentialsAsync";
                 public const string ListNamespacesAsync = "ListNamespacesAsync";
                 public const string ListServicesInNamespacesAsync = "ListServicesInNamespacesAsync";
-                public const string ListNodes = "ListNodes";
                 public const string ListPublicUrlsInNamespaceAsync = "ListPublicUrlsInNamespaceAsync";
                 public const string GetRoutingHeaderValue = "GetRoutingHeaderValue";
                 public const string IsRoutingSupported = "IsRoutingSupported";
