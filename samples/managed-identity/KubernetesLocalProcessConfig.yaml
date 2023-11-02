@@ -5,6 +5,6 @@ env:
   - name: STORAGE_CONTAINER_NAME
     value: "mitestsa-container"
   - name: MI_CLIENT_ID
-    value: "b24d4637-3453-4f6f-8187-228a5442a675"
+    value: "a2cc59eb-fa11-485c-9bee-c84aa4cb97d0" #b24d4637-3453-4f6f-8187-228a5442a675 for non arm clusters, please change value and test.
 enableFeatures:
   - ManagedIdentity

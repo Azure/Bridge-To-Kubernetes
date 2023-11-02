@@ -1,0 +1,48 @@
+name: PR build pipeline
+on: [workflow_dispatch]
+
+jobs:
+  self-contained:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 7.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for ${{ matrix.mode }}
+      run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained true --verbosity normal
+    - name: Build endpointmanagerlauncher
+      if: ${{ matrix.mode == 'win-x64' || matrix.mode == 'win-arm64'}}
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r ${{ matrix.mode }} -c Release --no-restore
+    - name: Run unit test cases
+      run: | 
+        dotnet restore src\unittest.sln
+        dotnet test src\unittest.sln -c Release --no-restore --verbosity normal
+  non-self-contained:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 7.0.x
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.6
+    - name: Restore dependencies using Nuget
+      run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
+    - name: dotnet Publish for ${{ matrix.mode }}
+      run: dotnet publish src\dsc\dsc.csproj -c Release -r ${{ matrix.mode }} --no-restore --self-contained false --verbosity normal
+    - name: Build endpointmanagerlauncher
+      if: ${{ matrix.mode == 'win-x64' || matrix.mode == 'win-arm64'}}
+      run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r ${{ matrix.mode }} -c Release --no-restore
