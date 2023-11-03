@@ -23,9 +23,4 @@ RUN dotnet publish "mi-webapp.csproj" -c Release -o /app/publish -a ${TARGETARCH
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-# RUN tdnf clean all
-# RUN tdnf check-update && tdnf update -y
-# RUN tdnf upgrade -y
-# RUN tdnf install -y libsecret-1-dev
-# # RUN tdnf install -y libsecret-1-0
 ENTRYPOINT ["dotnet", "mi-webapp.dll"]
