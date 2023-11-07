@@ -1,0 +1,66 @@
+name: build and push to acr
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - prod
+jobs:
+  docker:
+    strategy:
+      matrix:
+        include: 
+          - components: devhostagent
+            imageName: lpkremoteagent
+          - components: devhostagent.restorationjob
+            imageName: lpkrestorationjob
+          - components: routingmanager
+            imageName: routingmanager
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Set telemetry variables
+        shell: bash
+        run: |
+          if [ $GITHUB_REF == "refs/heads/main" ]; then
+            echo "##vso[task.setvariable variable=TelemetryType]TELEMETRY_PRODUCTION"
+          else
+            echo "##vso[task.setvariable variable=TelemetryType]TELEMETRY_DEVELOPMENT"
+          fi
+      - name: Set image tags
+        shell: bash
+        id: version
+        run: |
+          chmod +x ./deployment/settings/setenvironmentvariables.sh
+          `./deployment/settings/setenvironmentvariables.sh deployment/settings/services/imagetag.setting`
+          printenv | grep "MINDARO"
+          if [ ${{ matrix.components}} == "devhostagent" ]; then
+            echo "tag=$MINDARO_DEVHOSTAGENT_TAG" >> $GITHUB_ENV
+          elif [ ${{ matrix.components}} == "devhostagent.restorationjob" ]; then
+            echo "tag=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
+          else
+            echo "tag=$MINDARO_ROUTINGMANAGER_TAG" >> $GITHUB_ENV
+          fi
+      - name: Build and push for ${{ matrix.components }}
+        uses: docker/build-push-action@v5
+        with:
+          file: src/${{ matrix.components }}/Dockerfile
+          platforms: linux/arm64,linux/amd64
+          push: true
+          tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}

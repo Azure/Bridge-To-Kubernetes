@@ -24,7 +24,7 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager
         // This label is used in user's original service to select over envoy pods
         public const string EntityLabel = Common.Constants.Routing.RoutingLabelPrefix + "entity";
 
-        public const string EnvoyImageName = "envoyproxy/envoy:v1.14.1";
+        public const string EnvoyImageName = "envoyproxy/envoy:v1.16.5";
 
         public const string OriginalServiceSelectorAnnotation = Common.Constants.Routing.RoutingLabelPrefix + "originalServiceSelector";
         public const string ClonedFromAnnotation = Common.Constants.Routing.RoutingLabelPrefix + "clonedFrom";

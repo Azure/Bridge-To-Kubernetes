@@ -112,6 +112,16 @@ jobs:
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
       externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager for arm64 (Windows) (to download runtime pack)
+    enabled: True
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-arm64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     name: ''
     displayName: Use NuGet 5.9.x
@@ -190,6 +200,17 @@ jobs:
       modifyOutputPath: false
       selectOrConfig: config
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm 64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
     displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
     inputs:
@@ -197,6 +218,17 @@ jobs:
       publishWebProjects: false
       projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher for arm64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -211,6 +243,17 @@ jobs:
         !**/*.pdb
       TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/EndpointManagerLauncher
       OverWrite: true
+  - task: CopyFiles@2
+    displayName: Copy EndpointManager Launcher to dsc folder for arm 64
+    enabled: True
+    inputs:
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/EndpointManagerLauncher
+      OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
     enabled: True
@@ -219,6 +262,17 @@ jobs:
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (OSX)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained true --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -233,6 +287,17 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (Linux)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-arm64 --no-restore --self-contained true --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
   - task: PowerShell@2
     displayName: Download kubectl
     continueOnError: True
@@ -244,21 +309,46 @@ jobs:
 
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
+        curl https://dl.k8s.io/release/v1.27.3/bin/windows/amd64/kubectl.exe -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
 
 
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl' -ItemType Directory
 
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.27.3/bin/darwin/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
 
 
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl' -ItemType Directory
 
         New-Item -Path './src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl  -OutFile ./src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
+  - task: PowerShell@2
+    displayName: Download kubectl for arm64
+    continueOnError: True
+    inputs:
+      targetType: inline
+      script: >
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win/kubectl.exe
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/linux/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     name: ''
     displayName: Sign Files
@@ -308,6 +398,46 @@ jobs:
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/win
   - task: CopyFiles@2
+    displayName: Collect files for .zip (Windows) for arm64
+    enabled: True
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/winarm64
+  - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     enabled: True
     inputs:
@@ -352,6 +482,50 @@ jobs:
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
   - task: CopyFiles@2
+    displayName: Collect files for .zip (OSX) for arm64
+    enabled: True
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
+  - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     enabled: True
     inputs:
@@ -395,6 +569,50 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/linux
+  - task: CopyFiles@2
+    displayName: Collect files for .zip (Linux) for arm64
+    enabled: True
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/linuxarm64
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
     enabled: True
@@ -404,6 +622,14 @@ jobs:
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win.zip
   - task: ArchiveFiles@2
+    displayName: Create .zip file (Windows) for arm64
+    enabled: True
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/winarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win-arm64.zip
+  - task: ArchiveFiles@2
     displayName: Create .zip file (OSX)
     enabled: True
     inputs:
@@ -412,6 +638,14 @@ jobs:
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
   - task: ArchiveFiles@2
+    displayName: Create .zip file (OSX) for arm64
+    enabled: True
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
+  - task: ArchiveFiles@2
     displayName: Create .zip file (Linux)
     enabled: True
     inputs:
@@ -419,6 +653,14 @@ jobs:
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux.zip
+  - task: ArchiveFiles@2
+    displayName: Create .zip file (Linux) for arm64
+    enabled: True
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/linuxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux-arm64.zip
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
     enabled: True
@@ -437,7 +679,13 @@ jobs:
 
         $Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
 
-        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux } | ConvertTo-Json
+        $Win_Arm64 = @{ url="$BlobUrl/lpk-win-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win-arm64.zip).Hash)" }
+
+        $OSX_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+
+        $Linux_Arm64 = @{ url="$BlobUrl/lpk-linux-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux-arm64.zip).Hash)" }
+
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; linux_arm64 = $Linux_Arm64; osx_arm64 = $OSX_Arm64 } | ConvertTo-Json
 
         $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
 
@@ -467,6 +715,15 @@ jobs:
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
       buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-x64\publish\dsc.nuspec'
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack CLI NuGet for arm64 (Windows)'
+    inputs:
+      command: pack
+      feedsToUse: config
+      packagesToPack: src/dsc/dsc.csproj
+      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
+      nobuild: true
+      buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-arm64\publish\dsc.nuspec'
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Manifest Generator for nuget'
     inputs:
@@ -593,6 +850,15 @@ jobs:
       selectOrConfig: config
       nugetConfigPath: src/nuget.config
       externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
+  - task: DotNetCoreCLI@2
+    displayName: restore EndpointManager for ARM 64 (Windows) (to download runtime pack)
+    inputs:
+      command: restore
+      projects: src\endpointmanager\endpointmanager.csproj
+      restoreArguments: -r win-arm64
+      selectOrConfig: config
+      nugetConfigPath: src/nuget.config
+      externalEndpoints: dba0ba50-2d4e-4f12-9f5a-42a638da803b
   - task: NuGetToolInstaller@1
     displayName: Use NuGet 6.1.x
     inputs:
@@ -614,6 +880,15 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (Windows)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --self-contained false --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
     displayName: publish EndpointManagerLauncher(Windows)
     enabled: True
     inputs:
@@ -621,6 +896,17 @@ jobs:
       publishWebProjects: false
       projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r win-x64 --no-restore --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+      selectOrConfig: config
+  - task: DotNetCoreCLI@2
+    displayName: publish EndpointManagerLauncher for arm64 (Windows)
+    enabled: True
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\EndpointManagerLauncher\endpointmanagerlauncher.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r win-arm64 --no-restore --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
       selectOrConfig: config
@@ -635,6 +921,17 @@ jobs:
         !**/*.pdb
       TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/EndpointManagerLauncher
       OverWrite: true
+  - task: CopyFiles@2
+    displayName: Copy EndpointManager Launcher to dsc folder for arm64
+    enabled: True
+    inputs:
+      SourceFolder: src/EndpointManagerLauncher/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+      TargetFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/EndpointManagerLauncher
+      OverWrite: true
   - task: DotNetCoreCLI@2
     displayName: publish DSC (OSX)
     inputs:
@@ -645,12 +942,30 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (OSX)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
     displayName: publish DSC (Linux)
     inputs:
       command: publish
       publishWebProjects: false
       projects: src\dsc\dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r linux-x64 --no-restore --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (Linux)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src\dsc\dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r linux-arm64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
   - task: PowerShell@2
@@ -663,21 +978,46 @@ jobs:
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
+        curl https://dl.k8s.io/release/v1.27.3/bin/windows/amd64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-x64/publish/kubectl/win/kubectl.exe
 
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl' -ItemType Directory
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
+        curl https://dl.k8s.io/release/v1.27.3/bin/darwin/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-x64/publish/kubectl/osx/kubectl
 
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl' -ItemType Directory
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux' -ItemType Directory
 
-        curl https://dl.k8s.io/release/v1.21.2/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
+        curl https://dl.k8s.io/release/v1.27.3/bin/linux/amd64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-x64/publish/kubectl/linux/kubectl
+  - task: PowerShell@2
+    displayName: Download kubectl for arm64
+    continueOnError: True
+    inputs:
+      targetType: inline
+      script: >
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win/kubectl.exe
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl
+
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl' -ItemType Directory
+
+        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl/linux' -ItemType Directory
+
+        curl https://dl.k8s.io/release/v1.27.3/bin/linux/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl/linux/kubectl
   - task: VSBuild@1
     displayName: Sign Files
     enabled: True
@@ -724,10 +1064,53 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/win
+  - task: CopyFiles@2
+    displayName: Collect files for .zip for arm64 (Windows)
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish
+      Contents: >-
+        **/*
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/winarm64
   - task: CodeSign@1
     displayName: Validate Signatures
     inputs:
       Path: '$(Agent.TempDirectory)/zip/win'
+  - task: CodeSign@1
+    displayName: Validate Signatures for arm64
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/winarm64'
   - task: CopyFiles@2
     displayName: Collect files for .zip (OSX)
     inputs:
@@ -771,10 +1154,57 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
+  - task: CopyFiles@2
+    displayName: Collect files for .zip for arm64 (OSX)
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
   - task: CodeSign@1
     displayName: Validate Signatures OSX
     inputs:
       Path: '$(Agent.TempDirectory)/zip/osx'
+  - task: CodeSign@1
+    displayName: Validate Signatures OSX for arm64
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/osxarm64'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -818,10 +1248,57 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/linux
+  - task: CopyFiles@2
+    displayName: Collect files for .zip for arm64 (Linux)
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/linuxarm64
   - task: CodeSign@1
     displayName: Validate Signatures linux
     inputs:
       Path: '$(Agent.TempDirectory)/zip/linux'
+  - task: CodeSign@1
+    displayName: Validate Signatures linux for arm64
+    inputs:
+      Path: '$(Agent.TempDirectory)/zip/linuxarm64'
   - task: ArchiveFiles@2
     displayName: Create .zip file (Windows)
     inputs:
@@ -830,6 +1307,13 @@ jobs:
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win.zip
   - task: ArchiveFiles@2
+    displayName: Create .zip file for arm64 (Windows)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/winarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-win-arm64.zip
+  - task: ArchiveFiles@2
     displayName: Create .zip file (OSX)
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/osx
@@ -837,12 +1321,26 @@ jobs:
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
   - task: ArchiveFiles@2
+    displayName: Create .zip file for arm64 (OSX)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
+  - task: ArchiveFiles@2
     displayName: Create .zip file (Linux)
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/linux
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux.zip
+  - task: ArchiveFiles@2
+    displayName: Create .zip file for arm64 (Linux)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/linuxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux-arm64.zip
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
     inputs:
@@ -864,6 +1362,14 @@ jobs:
 
         $Cli_Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
 
+        # CLI binaries for arm64
+
+        $Cli_Win_Arm64 = @{ url="$BlobUrl/lpk-win-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win-arm64.zip).Hash)" }
+
+        $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+
+        $Cli_Linux_Arm64 = @{ url="$BlobUrl/lpk-linux-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux-arm64.zip).Hash)" }
+
         # Kubectl binaries
 
         $Kubectl_Win = @{ url="$BlobLKSUrl/kubectl-win.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
@@ -871,6 +1377,14 @@ jobs:
         $Kubectl_Osx = @{ url="$BlobLKSUrl/kubectl-osx.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
 
         $Kubectl_Linux = @{ url="$BlobLKSUrl/kubectl-linux.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+
+        # Kubectl binaries for arm64
+
+        $Kubectl_Win_Arm64 = @{ url="$BlobLKSUrl/kubectl-win-arm64.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+
+        $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+
+        $Kubectl_Linux_Arm64 = @{ url="$BlobLKSUrl/kubectl-linux-arm64.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
 
         #dotnet runtime binaries
 
@@ -880,19 +1394,39 @@ jobs:
 
         $Dotnet_Linux = @{ url="$BlobLKSUrl/dotnetruntime-linux.zip"; sha256hash="801D9D251D07B9A88195450FCBFD70C7507CEEEF05D5F0E88CC14CEBFCC10F4B" }
 
+        #dotnet runtime binaries for arm64
+
+        $Dotnet_Win_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-win-arm64.zip"; sha512hash="902488cbfee81dd5e1009eb86ab82d479ed7d9c44e4e4b6bb3df90a68eea65c0140978b02f46f9f6d0847466e1de73e9551688a79082e0679350a46276f441f9" }
+
+        $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
+
+        $Dotnet_Linux_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-linux-arm64.zip"; sha512hash="814db12231db89d9935404ec6693b3fb50ad022c0affbc131d657878e194274f1af5e92dd32c2c4f2a78a7e38d0c18a46ba4ecc67630ca3adf5b7550367c2366" }
+
         # Win Json
 
         $Win = @{ dotnetruntime = $Dotnet_Win; kubectl = $Kubectl_Win; bridge = $Cli_Win }
+
+        # Win Json for arm64
+
+        $Win_Arm64 = @{ dotnetruntime = $Dotnet_Win_Arm64; kubectl = $Kubectl_Win_Arm64; bridge = $Cli_Win_Arm64 }
 
         # OSX Json
 
         $OSX = @{ dotnetruntime = $Dotnet_Osx; kubectl = $Kubectl_Osx; bridge = $Cli_Osx }
 
+        # OSX Json for arm64
+
+        $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
+
         # Linux Json
 
         $Linux = @{ dotnetruntime = $Dotnet_Linux; kubectl = $Kubectl_Linux; bridge = $Cli_Linux }
 
-        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux } | ConvertTo-Json
+        # Linux Json for arm64
+
+        $Linux_Arm64 = @{ dotnetruntime = $Dotnet_Linux_Arm64; kubectl = $Kubectl_Linux_Arm64; bridge = $Cli_Linux_Arm64 }
+
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
 
         $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
 
