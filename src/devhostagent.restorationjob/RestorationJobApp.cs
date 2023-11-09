@@ -253,7 +253,10 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 else if (pods.Items.Count != 1)
                 {
                     _log.Warning("Found {0} pods for deployment {1}/{2} but expected 1", pods.Items.Count, new PII(ns), new PII(name));
-                    return null;
+                    // return the first pod's IP, probably this is multiple replica's for a pod.
+                    // confirm it is multiple replica's for a pod.
+                    bool isReplicaSet = pods.Items.Where(p => p.Metadata.OwnerReferences.All(r => r.Kind == "ReplicaSet")).All(p => p.Kind == "Pod");
+                    return isReplicaSet ? new Uri(string.Format(AgentPingEndpointFormat, pods.Items.First().Status.PodIP)) : null;
                 }
 
                 var devhostAgentPod = pods.Items.Single();
