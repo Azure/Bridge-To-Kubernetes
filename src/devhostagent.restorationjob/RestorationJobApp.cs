@@ -140,33 +140,33 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                             continue;
                         }
 
-                        results.ToList().ForEach(async result =>
+                        bool isAnyConnectedSession = results.ToList().Any(result => result.NumConnectedSessions > 0);
+
+                        int numConnectedSessions = results.ToList().Sum(result => result.NumConnectedSessions);
+
+                        if (isAnyConnectedSession && numConnectedSessions > 0)
                         {
+                            _log.Verbose($"Agent has {numConnectedSessions} connected sessions");
+                            lastPingWithSessions = DateTimeOffset.Now;
+                            perfLogger.SetProperty(HasConnectedClients, true);
+                        }
+                        else
+                        {
+                            perfLogger.SetProperty(HasConnectedClients, false);
+                            TimeSpan? disconnectedTimeSpan = lastPingWithSessions.HasValue
+                                ? DateTimeOffset.Now - lastPingWithSessions.Value
+                                : DateTimeOffset.Now - (timeSinceLastPingIsNull ??= DateTimeOffset.Now); //??= is equivalent to checking if value == null ? value2 : value
 
-                            if (result.NumConnectedSessions > 0)
+                            if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
                             {
-                                _log.Verbose($"Agent has {result.NumConnectedSessions} connected sessions");
-                                lastPingWithSessions = DateTimeOffset.Now;
-                                perfLogger.SetProperty(HasConnectedClients, true);
+                                // Restore workload
+                                _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
+                                await this.RestoreAsync(patch, cancellationToken);
+                                _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
+                                perfLogger.SetProperty(RestorePerformed, true);
+                                restoredWorkload = true;
                             }
-                            else
-                            {
-                                perfLogger.SetProperty(HasConnectedClients, false);
-                                TimeSpan? disconnectedTimeSpan = lastPingWithSessions.HasValue
-                                    ? DateTimeOffset.Now - lastPingWithSessions.Value
-                                    : DateTimeOffset.Now - (timeSinceLastPingIsNull ??= DateTimeOffset.Now); //??= is equivalent to checking if value == null ? value2 : value
-
-                                if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
-                                {
-                                    // Restore workload
-                                    _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
-                                    await this.RestoreAsync(patch, cancellationToken);
-                                    _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
-                                    perfLogger.SetProperty(RestorePerformed, true);
-                                    restoredWorkload = true;
-                                }
-                            }
-                        });
+                        }
                         numFailedPings = 0;
                         perfLogger.SetSucceeded();
                     }

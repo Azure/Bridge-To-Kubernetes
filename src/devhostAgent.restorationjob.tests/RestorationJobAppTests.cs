@@ -246,7 +246,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
         }
 
         [Fact]
-        public void ExecuteDeploymentPatchForReplicaSet() 
+        public void ExecuteForReplicaSet() 
         {
             string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
             A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
@@ -264,7 +264,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
         }
 
         [Fact]
-        public void ExecuteDeploymentPatchForStatefulSet() {
+        public void ExecuteForStatefulSet() {
             string patchStateJson = File.ReadAllText(Path.Combine("TestData", "StatefulSetPatch.json"));
             A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
             StatefulSetPatch_Helper(false, true);
@@ -275,7 +275,26 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
 
             int exitCode = _app.Execute(Array.Empty<string>(), default);
             Assert.Equal(0, exitCode);
-            A.CallTo(_fakeDelegatingHandler).MustHaveHappened(4, Times.Exactly);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappened(8, Times.Exactly);
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void ExecuteForReplicaSetWithAlternativeConnections() {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            DeploymentPatch_Helper(false, true);
+            ConfigureHttpCall(GetSuccessPingResult(0))
+                .NumberOfTimes(1)
+                .Then
+                .ReturnsLazily(GetSuccessPingResult(2))
+                .NumberOfTimes(1)
+                .Then
+                .ReturnsLazily(GetSuccessPingResult(0));
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default);
+            Assert.Equal(0, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappened(6, Times.Exactly);
             A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustHaveHappened();
         }
 
