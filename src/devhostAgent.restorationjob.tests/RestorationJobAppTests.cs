@@ -245,9 +245,43 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
             A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustNotHaveHappened();
         }
 
+        [Fact]
+        public void ExecuteDeploymentPatchForReplicaSet() 
+        {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "DeploymentPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            DeploymentPatch_Helper(false, true);
+            ConfigureHttpCall(GetSuccessPingResult(3))
+                .NumberOfTimes(3)
+                .Then
+                .ReturnsLazily(GetSuccessPingResult(0));
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default);
+            Assert.Equal(0, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappened(6, Times.Exactly);
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustHaveHappened();
+
+        }
+
+        [Fact]
+        public void ExecuteDeploymentPatchForStatefulSet() {
+            string patchStateJson = File.ReadAllText(Path.Combine("TestData", "StatefulSetPatch.json"));
+            A.CallTo(() => _autoFake.Resolve<IFileSystem>().ReadAllTextFromFile(DevHostConstants.DevHostRestorationJob.PatchStateFullPath, A<int>._)).Returns(patchStateJson);
+            StatefulSetPatch_Helper(false, true);
+            ConfigureHttpCall(GetSuccessPingResult(3))
+                .NumberOfTimes(3)
+                .Then
+                .ReturnsLazily(GetSuccessPingResult(0));
+
+            int exitCode = _app.Execute(Array.Empty<string>(), default);
+            Assert.Equal(0, exitCode);
+            A.CallTo(_fakeDelegatingHandler).MustHaveHappened(4, Times.Exactly);
+            A.CallTo(() => _autoFake.Resolve<IRemoteRestoreJobCleaner>().CleanupRemoteRestoreJobByInstanceLabelAsync(A<string>._, A<string>._, A<CancellationToken>._)).MustHaveHappened();
+        }
+
         #region Test helpers
 
-        private void DeploymentPatch_Helper(bool isSetup)
+        private void DeploymentPatch_Helper(bool isSetup, bool isMultiReplicaSet = false)
         {
             if (isSetup)
             {
@@ -256,11 +290,51 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
                     {
                         Items = new V1Pod[] { _CreateDevHostPod() }
                     });
+            } else if (isMultiReplicaSet) {
+                V1PodList podList = new()
+                {
+                    Items = new List<V1Pod>()
+                };
+                for (int i = 0; i < 3; i++) {
+                    podList.Items.Add(_CreateDevHostPod());
+                }
+                A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListPodsForDeploymentAsync(A<string>._, A<string>._, A<CancellationToken>._))
+                    .Returns(podList);
             }
             else
             {
                 // Verify
                 A.CallTo(() => _autoFake.Resolve<IWorkloadRestorationService>().RestoreDeploymentPatchAsync(A<DeploymentPatch>._, A<CancellationToken>._, A<Action<ProgressMessage>>._, A<bool>._))
+                    .MustHaveHappenedOnceExactly();
+            }
+        }
+
+        private void StatefulSetPatch_Helper(bool isSetup, bool isStatefulSet = false) {
+            if (isSetup)
+            {
+                A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListPodsForStatefulSetAsync(A<string>._, A<string>._, A<CancellationToken>._))
+                    .Returns(new V1PodList
+                    {
+                        Items = new V1Pod[] { _CreateDevHostPod() }
+                    });
+            } else if (isStatefulSet) {
+                V1PodList podList = new()
+                {
+                    Items = new List<V1Pod>()
+                };
+                for (int i = 0; i < 3; i++) {
+                    if (i == 0) {
+                        podList.Items.Add(_CreateDevHostPod("StatefulSet", "bikes-pqwrt"));
+                    }
+                    podList.Items.Add(_CreateDevHostPod("StatefulSet", "bikes-iutyr"));
+                }
+                A.CallTo(() => _autoFake.Resolve<IKubernetesClient>().ListPodsForStatefulSetAsync(A<string>._, A<string>._, A<CancellationToken>._))
+                    .Returns(podList);
+            }
+            else
+            {
+                // Verify
+                A.CallTo(() => _autoFake.Resolve<IWorkloadRestorationService>().RestoreStatefulSetPatchAsync(A<StatefulSetPatch>._, A<CancellationToken>._, A<Action<ProgressMessage>>._, A<bool>._))
                     .MustHaveHappenedOnceExactly();
             }
         }
@@ -297,17 +371,23 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob.Tests
 
         #endregion Test helpers
 
-        private V1Pod _CreateDevHostPod()
+        private V1Pod _CreateDevHostPod(string kind = "ReplicaSet", string name="bikes-pqwrt")
         {
             var pod = new V1Pod
             {
-                Metadata = new V1ObjectMeta(namespaceProperty: "mynamespace", name: "mypod"),
+                Metadata = new V1ObjectMeta(namespaceProperty: "mynamespace", name: "mypod", ownerReferences: new V1OwnerReference[] { 
+                    new() {
+                    ApiVersion = "apps/v1",
+                    Kind = kind,
+                    Name = name,
+                    Uid = "1234"
+                    }
+                }),
                 Spec = new V1PodSpec
                 {
                     Containers = new V1Container[]
                     {
-                        new V1Container
-                        {
+                        new() {
                             Image = "mindaro/devhostagent:1234"
                         }
                     }

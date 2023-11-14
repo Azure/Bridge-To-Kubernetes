@@ -85,9 +85,9 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 AssertHelper.NotNullOrEmpty(_restorationJobEnvironmentVariables.InstanceLabelValue, nameof(_restorationJobEnvironmentVariables.InstanceLabelValue));
 
                 // Load patch state
-                Dictionary<PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>> patchState = ParsePatchState(cancellationToken);
+                (PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>) patchState = ParsePatchState(cancellationToken);
 
-                _log.Info("Waiting to restore previous state on {0} {1}/{2}...", patchState.Keys.FirstOrDefault().KubernetesType.GetStringValue(), new PII(patchState.Keys.FirstOrDefault().Namespace), new PII(patchState.Keys.FirstOrDefault().Name));
+                _log.Info("Waiting to restore previous state on {0} {1}/{2}...", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
                 // Extra wait at the beginning to allow things to initialize
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
@@ -117,8 +117,8 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         }))
                     {
                         // Get agent endpoint
-                        var patch = patchState.Keys.FirstOrDefault();
-                        List<Uri> agentEndpoint = await patchState[patch].Invoke(patch, cancellationToken);
+                        var patch = patchState.Item1;
+                        List<Uri> agentEndpoint = await patchState.Item2(patch, cancellationToken);
                         if (agentEndpoint == null || agentEndpoint.Count == 0)
                         {
                             _log.Verbose("Couldn't get agent endpoint");
@@ -128,7 +128,10 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
 
 
                         // Ping agent
-                        ConnectedSessionsResponseModel[] results = await Task.WhenAll(agentEndpoint.Select(uri => PingAgentAsync(uri, cancellationToken)).Where(content => null != content));
+                        ConnectedSessionsResponseModel[] results = await Task
+                        .WhenAll(agentEndpoint.Select(uri => PingAgentAsync(uri, cancellationToken))
+                        .ToList()
+                        .Where(content => null != content));
 
                         if (results == null || results.Length == 0)
                         {
@@ -158,7 +161,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                                     // Restore workload
                                     _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
                                     await this.RestoreAsync(patch, cancellationToken);
-                                    _log.Info("Restored {0} {1}/{2}.", patchState.Keys.FirstOrDefault().KubernetesType.GetStringValue(), new PII(patchState.Keys.FirstOrDefault().Namespace), new PII(patchState.Keys.FirstOrDefault().Name));
+                                    _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
                                     perfLogger.SetProperty(RestorePerformed, true);
                                     restoredWorkload = true;
                                 }
@@ -217,35 +220,28 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// <summary>
         /// Parses the mounted patch state JSON
         /// </summary>
-        private Dictionary<PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>> ParsePatchState(CancellationToken cancellationToken)
+        private (PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>) ParsePatchState(CancellationToken cancellationToken)
         {
             string patchStateJson = _fileSystem.ReadAllTextFromFile(DevHostRestorationJob.PatchStateFullPath);
             string type = JsonPropertyHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
-            Dictionary<PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>> patchState = new();
 
             switch (type)
             {
                 case nameof(DeploymentPatch):
                     var deploymentPatch = JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson);
-                    patchState.Add(deploymentPatch, (patch, ct) => GetAgentEndpointAsync(deploymentPatch, ct));
-                    break;
+                    return (deploymentPatch, (patch, ct) => GetAgentEndpointAsync(deploymentPatch, ct));
                 case nameof(PodPatch):
                     var podPatch = JsonHelpers.DeserializeObject<PodPatch>(patchStateJson);
-                    patchState.Add(podPatch, (patch, ct) => GetAgentEndpointAsync(podPatch, ct));
-                    break;
+                    return (podPatch, (patch, ct) => GetAgentEndpointAsync(podPatch, ct));
                 case nameof(PodDeployment):
                     var podDeployment = JsonHelpers.DeserializeObject<PodDeployment>(patchStateJson);
-                    patchState.Add(podDeployment, (patch, ct) => GetAgentEndpointAsync(podDeployment, ct));
-                    break;
+                    return (podDeployment, (patch, ct) => GetAgentEndpointAsync(podDeployment, ct));
                 case nameof(StatefulSetPatch):
                     var statefulSet = JsonHelpers.DeserializeObject<StatefulSetPatch>(patchStateJson);
-                    patchState.Add(statefulSet, (patch, ct) => GetAgentEndpointAsync(statefulSet, ct));
-                    break;
+                    return (statefulSet, (patch, ct) => GetAgentEndpointAsync(statefulSet, ct));
                 default:
                     throw new InvalidOperationException($"Unknown restoration patch type: '{type}'");
             }
-
-            return patchState;
         }
         #region Get agent endpoint
 

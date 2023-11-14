@@ -1,0 +1,91 @@
+{
+    "statefulSet": {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "deployment.kubernetes.io/revision": "189"
+        },
+        "labels": {
+          "app": "bikes",
+          "chart": "bikes-0.1.0",
+          "draft": "draft-app",
+          "heritage": "Helm",
+          "release": "bikesharingapp"
+        },
+        "name": "bikes",
+        "namespace": "dev"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "matchLabels": {
+            "app": "bikes",
+            "release": "bikesharingapp"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "bikes",
+              "draft": "draft-app",
+              "release": "bikesharingapp"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "mongo_collection",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "collection",
+                        "name": "bikes-mongo"
+                      }
+                    }
+                  },
+                  {
+                    "name": "mongo_connectionstring",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "connectionstring",
+                        "name": "bikes-mongo"
+                      }
+                    }
+                  },
+                  {
+                    "name": "mongo_database",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "database",
+                        "name": "bikes-mongo"
+                      }
+                    }
+                  }
+                ],
+                "image": "azdspublic/bikesharing-bikes:build.20200619.1",
+                "imagePullPolicy": "Always",
+                "name": "bikes",
+                "ports": [
+                  {
+                    "containerPort": 80,
+                    "name": "http",
+                    "protocol": "TCP"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "reversePatch": [
+      {
+        "value": "azdspublic/bikesharing-bikes:build.20200619.1",
+        "path": "/spec/template/spec/containers/0/image",
+        "op": "replace"
+      }
+    ],
+    "type": "StatefulSetPatch"
+  }
