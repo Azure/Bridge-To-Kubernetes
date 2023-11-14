@@ -133,16 +133,16 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         .ToList()
                         .Where(content => null != content));
 
-                        if (results == null || results.Length == 0)
+                        if (results == null || results.Length == 0 || results.All(result => result == null))
                         {
                             _log.Verbose("Failed to ping agent");
                             numFailedPings++;
                             continue;
                         }
 
-                        bool isAnyConnectedSession = results.ToList().Any(result => result.NumConnectedSessions > 0);
+                        bool isAnyConnectedSession = results.ToList().Any(result => result != null && result.NumConnectedSessions > 0);
 
-                        int numConnectedSessions = results.ToList().Sum(result => result.NumConnectedSessions);
+                        int numConnectedSessions = results.ToList().Where(result => null != result).Sum(result => result.NumConnectedSessions);
 
                         if (isAnyConnectedSession && numConnectedSessions > 0)
                         {
@@ -152,11 +152,34 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         }
                         else
                         {
-                            perfLogger.SetProperty(HasConnectedClients, false);
-                            TimeSpan? disconnectedTimeSpan = lastPingWithSessions.HasValue
-                                ? DateTimeOffset.Now - lastPingWithSessions.Value
-                                : DateTimeOffset.Now - (timeSinceLastPingIsNull ??= DateTimeOffset.Now); //??= is equivalent to checking if value == null ? value2 : value
+                            // perfLogger.SetProperty(HasConnectedClients, false);
+                            // TimeSpan? disconnectedTimeSpan = lastPingWithSessions.HasValue
+                            //     ? DateTimeOffset.Now - lastPingWithSessions.Value
+                            //     : DateTimeOffset.Now - (timeSinceLastPingIsNull ??= DateTimeOffset.Now); //??= is equivalent to checking if value == null ? value2 : value
 
+                            // if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
+                            // {
+                            //     // Restore workload
+                            //     _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
+                            //     await this.RestoreAsync(patch, cancellationToken);
+                            //     _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
+                            //     perfLogger.SetProperty(RestorePerformed, true);
+                            //     restoredWorkload = true;
+                            // }
+                            perfLogger.SetProperty(HasConnectedClients, false);
+                            TimeSpan? disconnectedTimeSpan = null;
+                            if (lastPingWithSessions == null)
+                            {
+                                // first loop timeUntilLastPingIsNull will be set to current time and then next while loop it will preserve that time.
+                                // if lastPingWithSessions is being null for last 60 seconds or more then restoration will happen.
+                                timeSinceLastPingIsNull = timeSinceLastPingIsNull == null ? DateTimeOffset.Now : timeSinceLastPingIsNull;
+                                disconnectedTimeSpan = DateTimeOffset.Now - timeSinceLastPingIsNull;
+                            } else
+                            {
+                                disconnectedTimeSpan = DateTimeOffset.Now - lastPingWithSessions;
+                            }
+
+                            
                             if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
                             {
                                 // Restore workload
@@ -267,7 +290,10 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     // return all the pod's IP, probably this is multiple replica's for a pod.
                     // confirm it is multiple replica's for a pod and owner of the pod name.
                     var uris = pods.Items
-                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == "ReplicaSet") && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name)))
+                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == "ReplicaSet") 
+                        && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name))
+                        && pod.Status.Phase == "Running"
+                        && pod.Status.ContainerStatuses.All(c => c.Ready))
                         .Where(pod => !string.IsNullOrWhiteSpace(pod.Status.PodIP))
                         .Select(pod => new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)))
                         .ToList();
