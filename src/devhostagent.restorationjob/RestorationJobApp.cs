@@ -335,7 +335,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
 
                     if (uris.Count == 0)
                     {
-                        _log.Warning("Unable to find any pod with owner reference as ReplicaSet and name starts with {0}", new PII(name));
+                        _log.Warning("Unable to find any pod with owner reference as StatefulSet and name starts with {0}", new PII(name));
                         return null;
                     }
 
