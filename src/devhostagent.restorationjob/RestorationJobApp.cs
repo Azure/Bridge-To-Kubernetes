@@ -152,20 +152,6 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         }
                         else
                         {
-                            // perfLogger.SetProperty(HasConnectedClients, false);
-                            // TimeSpan? disconnectedTimeSpan = lastPingWithSessions.HasValue
-                            //     ? DateTimeOffset.Now - lastPingWithSessions.Value
-                            //     : DateTimeOffset.Now - (timeSinceLastPingIsNull ??= DateTimeOffset.Now); //??= is equivalent to checking if value == null ? value2 : value
-
-                            // if (disconnectedTimeSpan != null && disconnectedTimeSpan.Value > _restorationJobEnvironmentVariables.RestoreTimeout)
-                            // {
-                            //     // Restore workload
-                            //     _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
-                            //     await this.RestoreAsync(patch, cancellationToken);
-                            //     _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
-                            //     perfLogger.SetProperty(RestorePerformed, true);
-                            //     restoredWorkload = true;
-                            // }
                             perfLogger.SetProperty(HasConnectedClients, false);
                             TimeSpan? disconnectedTimeSpan = null;
                             if (lastPingWithSessions == null)
