@@ -276,7 +276,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     // return all the pod's IP, probably this is multiple replica's for a pod.
                     // confirm it is multiple replica's for a pod and owner of the pod name.
                     var uris = pods.Items
-                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == "ReplicaSet") 
+                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == OwningObject.ReplicaSet) 
                         && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name))
                         && pod.Status.Phase == "Running"
                         && pod.Status.ContainerStatuses.All(c => c.Ready))
@@ -340,7 +340,10 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     // return all the pod's IP, probably this is multiple replica's for a pod.
                     // confirm it is multiple replica's for a pod and owner of the pod name.
                     var uris = pods.Items
-                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == "StatefulSet") && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name)))
+                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == OwningObject.StatefulSet) 
+                        && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name))
+                        && pod.Status.Phase == "Running"
+                        && pod.Status.ContainerStatuses.All(c => c.Ready))
                         .Where(pod => !string.IsNullOrWhiteSpace(pod.Status.PodIP))
                         .Select(pod => new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)))
                         .ToList();
