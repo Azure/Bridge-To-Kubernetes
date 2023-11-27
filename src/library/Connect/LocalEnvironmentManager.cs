@@ -426,7 +426,7 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
 
             foreach (var endpoint in workloadInfo.ReachableEndpoints)
             {
-                if (endpoint.Ports.Length == 0)
+                if (endpoint.Ports == null || endpoint.Ports.Length == 0)
                 {
                     _log.Verbose("Skipping endpoint {0} as it has no configured port", endpoint.DnsName);
                     continue;
