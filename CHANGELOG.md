@@ -11,6 +11,7 @@ If you are using one of the IDE extensions for Bridge to Kubernetes, check the r
 - [Support arm64 binaries for linux, windows and macos](https://github.com/Azure/Bridge-To-Kubernetes/pull/290)
 - [Update package version](https://github.com/Azure/Bridge-To-Kubernetes/pull/330)
 - [Update build-pipelines-PR.yml for Azure Pipelines](https://github.com/Azure/Bridge-To-Kubernetes/commit/65a0527df3ad85525668c05e8737de71247087ab)
+- [Fix the routing manager tag issue](https://github.com/Azure/Bridge-To-Kubernetes/pull/342)
 
 ## [1.0.20230927.2]
 - [Update samples/managed-identity app's client id](https://github.com/Azure/Bridge-To-Kubernetes/pull/307)
