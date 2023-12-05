@@ -55,7 +55,7 @@ jobs:
           elif [ ${{ matrix.components}} == "devhostagent.restorationjob" ]; then
             echo "tag=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
           else
-            echo "tag=$MINDARO_ROUTINGMANAGER_TAG" >> $GITHUB_ENV
+            echo "tag=stable" >> $GITHUB_ENV
           fi
       - name: Build and push for ${{ matrix.components }}
         uses: docker/build-push-action@v5
