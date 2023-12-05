@@ -51,7 +51,6 @@ jobs:
           `./deployment/settings/setenvironmentvariables.sh deployment/settings/services/imagetag.setting`
           printenv | grep "MINDARO"
           if [ ${{ matrix.components}} == "devhostagent" ]; then
-            docker tag ${{ matrix.imageName }} ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:$MINDARO_DEVHOSTAGENT_TAG
             echo "tag=$MINDARO_DEVHOSTAGENT_TAG" >> $GITHUB_ENV
           elif [ ${{ matrix.components}} == "devhostagent.restorationjob" ]; then
             echo "tag=$MINDARO_DEVHOSTAGENT_RESTORATIONJOB_TAG" >> $GITHUB_ENV
