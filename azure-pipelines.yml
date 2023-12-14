@@ -1503,6 +1503,13 @@ jobs:
       script: |
         mkdir -p "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx"
         curl -L https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl -o "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl"
+
+  - task: Bash@3
+    displayName: code sign for OSX arm64
+    inputs:
+      targetType: 'inline'
+      script: |
+        codesign --force --deep --sign - "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/dsc"
   - task: CopyFiles@2
     displayName: Collect files for .zip for arm64 (OSX)
     inputs:
