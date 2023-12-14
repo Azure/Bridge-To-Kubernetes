@@ -1598,9 +1598,9 @@ jobs:
 
         # OSX Json for arm64
 
-        # $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
+        $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
 
-        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; osx_arm64 = $OSX_Arm64} | ConvertTo-Json
 
         $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
 
