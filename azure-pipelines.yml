@@ -1558,34 +1558,74 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
-  - task: Bash@3
-    displayName: Generate lks.json for osx arm64
-    inputs: 
-      targetType: 'inline'
-      script: |
-        ZipHost="mindaromaster.blob.core.windows.net"
-        BlobUrl="https://$ZipHost/zipv2/1.0.$BUILD_BUILDNUMBER"
-        BlobLKSUrl="https://$ZipHost/zipv2/LKS"
-        ZipDir="$BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+  - task: PowerShell@2
+    displayName: Generate lks.json for .zip files
+    inputs:
+      targetType: inline
+      script: >
+        $ZipHost = "mindaromaster.blob.core.windows.net"
+
+        $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
+
+        $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
+
+        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+
 
         # CLI binaries for arm64
-        Cli_Osx_Arm64="$BlobUrl/lpk-osx-arm64.zip"
-        Cli_Osx_Arm64_Hash=$(shasum -a 256 "$ZipDir/lpk-osx-arm64.zip" | awk '{print $1}')
+
+
+        $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+
 
         # Kubectl binaries for arm64
-        Kubectl_Osx_Arm64="$BlobLKSUrl/kubectl-osx-arm64.zip"
-        Kubectl_Osx_Arm64_Hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9"
 
-        # dotnet runtime binaries for arm64
-        dotnet_Osx_Arm64="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"
-        dotnet_Osx_Arm64_Hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8"
+
+        $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+
+
+        #dotnet runtime binaries for arm64
+
+
+        $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
 
         # OSX Json for arm64
-        OSX_Arm64="{\"dotnetruntime\":{\"url\":\"$dotnet_Osx_Arm64\",\"sha512hash\":\"$dotnet_Osx_Arm64_Hash\"},\"kubectl\":{\"url\":\"$Kubectl_Osx_Arm64\",\"sha256hash\":\"$Kubectl_Osx_Arm64_Hash\"},\"bridge\":{\"url\":\"$Cli_Osx_Arm64\",\"sha256hash\":\"$Cli_Osx_Arm64_Hash\"}}"
 
-        Json="{\"version\":\"1.0.$BUILD_BUILDNUMBER\",\"osx_arm64\":$OSX_Arm64}"
+        # $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
 
-        echo $Json > $ZipDir/lks.json
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
+
+        $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
+
+        New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+
+        $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+
+        Write-Host $Json
+  - task: ManifestGeneratorTask@0
+    displayName: Manifest Generator for zip
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
+  - task: PublishBuildArtifacts@1
+    displayName: Generate lks.json for .zip files
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
 
       
 ...
