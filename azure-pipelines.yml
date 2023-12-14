@@ -1497,7 +1497,7 @@ jobs:
     inputs:
       command: publish
       publishWebProjects: false
-      projects: src\dsc\dsc.csproj
+      projects: src/dsc/dsc.csproj
       arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
