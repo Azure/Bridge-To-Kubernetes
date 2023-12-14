@@ -1558,6 +1558,13 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
+  - task: ArchiveFiles@2
+    displayName: Create .zip file for arm64 (OSX)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
     inputs:
