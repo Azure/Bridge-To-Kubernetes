@@ -1376,11 +1376,11 @@ jobs:
   #   displayName: Manifest Generator for zip
   #   inputs:
   #     BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
-  # - task: PublishBuildArtifacts@1
-  #   displayName: Generate lks.json for .zip files
-  #   inputs:
-  #     PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
-  #     ArtifactName: zipv2
+  - task: PublishBuildArtifacts@1
+    displayName: Generate lks.json for .zip files
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
 
   - task: SdtReport@2
     inputs:
@@ -1550,11 +1550,11 @@ jobs:
   #   displayName: Manifest Generator for zip
   #   inputs:
   #     BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
-  # - task: PublishBuildArtifacts@1
-  #   displayName: Generate lks.json for .zip files
-  #   inputs:
-  #     PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
-  #     ArtifactName: zipv2
+  - task: PublishBuildArtifacts@1
+    displayName: Generate lks.json for .zip files
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
 
   - task: SdtReport@2
     inputs:
@@ -1580,6 +1580,11 @@ jobs:
     - visualstudio
     - vstest
   steps:
+  - task: DownloadBuildArtifacts@1
+    displayName: Download artifacts
+    inputs:
+      downloadPath: $(Build.ArtifactStagingDirectory)/zip
+      artifactName: zipv2
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
     inputs:
