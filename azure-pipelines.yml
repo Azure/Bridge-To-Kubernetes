@@ -941,15 +941,6 @@ jobs:
       arguments: -c ${{ parameters.BuildConfiguration }} -r osx-x64 --no-restore --self-contained false --verbosity detailed
       zipAfterPublish: false
       modifyOutputPath: false
-  # - task: DotNetCoreCLI@2
-  #   displayName: publish DSC for arm64 (OSX)
-  #   inputs:
-  #     command: publish
-  #     publishWebProjects: false
-  #     projects: src\dsc\dsc.csproj
-  #     arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained false --verbosity detailed
-  #     zipAfterPublish: false
-  #     modifyOutputPath: false
   - task: DotNetCoreCLI@2
     displayName: publish DSC (Linux)
     inputs:
@@ -1154,57 +1145,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
-  # - task: CopyFiles@2
-  #   displayName: Collect files for .zip for arm64 (OSX)
-  #   inputs:
-  #     SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish
-  #     Contents: >-
-  #       **/*
-
-  #       src/resources/license.rtf
-
-  #       src/vscode/ThirdPartyNotices.txt
-
-  #       !**/*.pdb
-
-  #       !**/*.xml
-
-  #       !**/*.nuspec
-
-  #       !**/cs/*
-
-  #       !**/de/*
-
-  #       !**/es/*
-
-  #       !**/fr/*
-
-  #       !**/it/*
-
-  #       !**/ja/*
-
-  #       !**/ko/*
-
-  #       !**/pl/*
-
-  #       !**/pt-BR/*
-
-  #       !**/ru/*
-
-  #       !**/tr/*
-
-  #       !**/zh-Hans/*
-
-  #       !**/zh-Hant/*
-  #     TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
   - task: CodeSign@1
     displayName: Validate Signatures OSX
     inputs:
       Path: '$(Agent.TempDirectory)/zip/osx'
-  # - task: CodeSign@1
-  #   displayName: Validate Signatures OSX for arm64
-  #   inputs:
-  #     Path: '$(Agent.TempDirectory)/zip/osxarm64'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -1320,13 +1264,6 @@ jobs:
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
-  # - task: ArchiveFiles@2
-  #   displayName: Create .zip file for arm64 (OSX)
-  #   inputs:
-  #     rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
-  #     includeRootFolder: false
-  #     sevenZipCompression: 5
-  #     archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
   - task: ArchiveFiles@2
     displayName: Create .zip file (Linux)
     inputs:
@@ -1341,109 +1278,109 @@ jobs:
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux-arm64.zip
-  - task: PowerShell@2
-    displayName: Generate lks.json for .zip files
-    inputs:
-      targetType: inline
-      script: >
-        $ZipHost = "mindaromaster.blob.core.windows.net"
+  # - task: PowerShell@2
+  #   displayName: Generate lks.json for .zip files
+  #   inputs:
+  #     targetType: inline
+  #     script: >
+  #       $ZipHost = "mindaromaster.blob.core.windows.net"
 
-        $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
+  #       $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
 
-        $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
+  #       $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
 
-        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+  #       $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
 
-        # CLI binaries
+  #       # CLI binaries
 
-        $Cli_Win = @{ url="$BlobUrl/lpk-win.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win.zip).Hash)" }
+  #       $Cli_Win = @{ url="$BlobUrl/lpk-win.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win.zip).Hash)" }
 
-        $Cli_Osx = @{ url="$BlobUrl/lpk-osx.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx.zip).Hash)" }
+  #       $Cli_Osx = @{ url="$BlobUrl/lpk-osx.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx.zip).Hash)" }
 
-        $Cli_Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
+  #       $Cli_Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
 
-        # CLI binaries for arm64
+  #       # CLI binaries for arm64
 
-        $Cli_Win_Arm64 = @{ url="$BlobUrl/lpk-win-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win-arm64.zip).Hash)" }
+  #       $Cli_Win_Arm64 = @{ url="$BlobUrl/lpk-win-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win-arm64.zip).Hash)" }
 
-        # $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+  #       # $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
 
-        $Cli_Linux_Arm64 = @{ url="$BlobUrl/lpk-linux-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux-arm64.zip).Hash)" }
+  #       $Cli_Linux_Arm64 = @{ url="$BlobUrl/lpk-linux-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux-arm64.zip).Hash)" }
 
-        # Kubectl binaries
+  #       # Kubectl binaries
 
-        $Kubectl_Win = @{ url="$BlobLKSUrl/kubectl-win.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+  #       $Kubectl_Win = @{ url="$BlobLKSUrl/kubectl-win.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
 
-        $Kubectl_Osx = @{ url="$BlobLKSUrl/kubectl-osx.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+  #       $Kubectl_Osx = @{ url="$BlobLKSUrl/kubectl-osx.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
 
-        $Kubectl_Linux = @{ url="$BlobLKSUrl/kubectl-linux.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+  #       $Kubectl_Linux = @{ url="$BlobLKSUrl/kubectl-linux.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
 
-        # Kubectl binaries for arm64
+  #       # Kubectl binaries for arm64
 
-        $Kubectl_Win_Arm64 = @{ url="$BlobLKSUrl/kubectl-win-arm64.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+  #       $Kubectl_Win_Arm64 = @{ url="$BlobLKSUrl/kubectl-win-arm64.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
 
-        $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+  #       $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
 
-        $Kubectl_Linux_Arm64 = @{ url="$BlobLKSUrl/kubectl-linux-arm64.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+  #       $Kubectl_Linux_Arm64 = @{ url="$BlobLKSUrl/kubectl-linux-arm64.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
 
-        #dotnet runtime binaries
+  #       #dotnet runtime binaries
 
-        $Dotnet_Win = @{ url="$BlobLKSUrl/dotnetruntime-win.zip"; sha256hash="0FCA9F2AB829C85615007EA646CF436D2E90C9A4095C84C2F9EB3EC0754468A8" }
+  #       $Dotnet_Win = @{ url="$BlobLKSUrl/dotnetruntime-win.zip"; sha256hash="0FCA9F2AB829C85615007EA646CF436D2E90C9A4095C84C2F9EB3EC0754468A8" }
 
-        $Dotnet_Osx = @{ url="$BlobLKSUrl/dotnetruntime-osx.zip"; sha256hash="D25F8BB708C364678AAA0F3798F5EADD1BE46800376F15D2F12C785C74AF8443" }
+  #       $Dotnet_Osx = @{ url="$BlobLKSUrl/dotnetruntime-osx.zip"; sha256hash="D25F8BB708C364678AAA0F3798F5EADD1BE46800376F15D2F12C785C74AF8443" }
 
-        $Dotnet_Linux = @{ url="$BlobLKSUrl/dotnetruntime-linux.zip"; sha256hash="801D9D251D07B9A88195450FCBFD70C7507CEEEF05D5F0E88CC14CEBFCC10F4B" }
+  #       $Dotnet_Linux = @{ url="$BlobLKSUrl/dotnetruntime-linux.zip"; sha256hash="801D9D251D07B9A88195450FCBFD70C7507CEEEF05D5F0E88CC14CEBFCC10F4B" }
 
-        #dotnet runtime binaries for arm64
+  #       #dotnet runtime binaries for arm64
 
-        $Dotnet_Win_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-win-arm64.zip"; sha512hash="902488cbfee81dd5e1009eb86ab82d479ed7d9c44e4e4b6bb3df90a68eea65c0140978b02f46f9f6d0847466e1de73e9551688a79082e0679350a46276f441f9" }
+  #       $Dotnet_Win_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-win-arm64.zip"; sha512hash="902488cbfee81dd5e1009eb86ab82d479ed7d9c44e4e4b6bb3df90a68eea65c0140978b02f46f9f6d0847466e1de73e9551688a79082e0679350a46276f441f9" }
 
-        $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
+  #       $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
 
-        $Dotnet_Linux_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-linux-arm64.zip"; sha512hash="814db12231db89d9935404ec6693b3fb50ad022c0affbc131d657878e194274f1af5e92dd32c2c4f2a78a7e38d0c18a46ba4ecc67630ca3adf5b7550367c2366" }
+  #       $Dotnet_Linux_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-linux-arm64.zip"; sha512hash="814db12231db89d9935404ec6693b3fb50ad022c0affbc131d657878e194274f1af5e92dd32c2c4f2a78a7e38d0c18a46ba4ecc67630ca3adf5b7550367c2366" }
 
-        # Win Json
+  #       # Win Json
 
-        $Win = @{ dotnetruntime = $Dotnet_Win; kubectl = $Kubectl_Win; bridge = $Cli_Win }
+  #       $Win = @{ dotnetruntime = $Dotnet_Win; kubectl = $Kubectl_Win; bridge = $Cli_Win }
 
-        # Win Json for arm64
+  #       # Win Json for arm64
 
-        $Win_Arm64 = @{ dotnetruntime = $Dotnet_Win_Arm64; kubectl = $Kubectl_Win_Arm64; bridge = $Cli_Win_Arm64 }
+  #       $Win_Arm64 = @{ dotnetruntime = $Dotnet_Win_Arm64; kubectl = $Kubectl_Win_Arm64; bridge = $Cli_Win_Arm64 }
 
-        # OSX Json
+  #       # OSX Json
 
-        $OSX = @{ dotnetruntime = $Dotnet_Osx; kubectl = $Kubectl_Osx; bridge = $Cli_Osx }
+  #       $OSX = @{ dotnetruntime = $Dotnet_Osx; kubectl = $Kubectl_Osx; bridge = $Cli_Osx }
 
-        # OSX Json for arm64
+  #       # OSX Json for arm64
 
-        # $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
+  #       # $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
 
-        # Linux Json
+  #       # Linux Json
 
-        $Linux = @{ dotnetruntime = $Dotnet_Linux; kubectl = $Kubectl_Linux; bridge = $Cli_Linux }
+  #       $Linux = @{ dotnetruntime = $Dotnet_Linux; kubectl = $Kubectl_Linux; bridge = $Cli_Linux }
 
-        # Linux Json for arm64
+  #       # Linux Json for arm64
 
-        $Linux_Arm64 = @{ dotnetruntime = $Dotnet_Linux_Arm64; kubectl = $Kubectl_Linux_Arm64; bridge = $Cli_Linux_Arm64 }
+  #       $Linux_Arm64 = @{ dotnetruntime = $Dotnet_Linux_Arm64; kubectl = $Kubectl_Linux_Arm64; bridge = $Cli_Linux_Arm64 }
 
-        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
+  #       $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
 
-        $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
+  #       $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
 
-        New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+  #       New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
 
-        $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+  #       $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
 
-        Write-Host $Json
-  - task: ManifestGeneratorTask@0
-    displayName: Manifest Generator for zip
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
-  - task: PublishBuildArtifacts@1
-    displayName: Generate lks.json for .zip files
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
-      ArtifactName: zipv2
+  #       Write-Host $Json
+  # - task: ManifestGeneratorTask@0
+  #   displayName: Manifest Generator for zip
+  #   inputs:
+  #     BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
+  # - task: PublishBuildArtifacts@1
+  #   displayName: Generate lks.json for .zip files
+  #   inputs:
+  #     PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+  #     ArtifactName: zipv2
 
   - task: SdtReport@2
     inputs:
@@ -1565,59 +1502,59 @@ jobs:
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
-  - task: PowerShell@2
-    displayName: Generate lks.json for .zip files
-    inputs:
-      targetType: inline
-      script: >
-        $ZipHost = "mindaromaster.blob.core.windows.net"
+  # - task: PowerShell@2
+  #   displayName: Generate lks.json for .zip files
+  #   inputs:
+  #     targetType: inline
+  #     script: >
+  #       $ZipHost = "mindaromaster.blob.core.windows.net"
 
-        $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
+  #       $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
 
-        $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
+  #       $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
 
-        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
-
-
-        # CLI binaries for arm64
+  #       $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
 
 
-        $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+  #       # CLI binaries for arm64
 
 
-        # Kubectl binaries for arm64
+  #       $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
 
 
-        $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+  #       # Kubectl binaries for arm64
 
 
-        #dotnet runtime binaries for arm64
+  #       $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
 
 
-        $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
+  #       #dotnet runtime binaries for arm64
 
-        # OSX Json for arm64
 
-        $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
+  #       $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
 
-        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; osx_arm64 = $OSX_Arm64} | ConvertTo-Json
+  #       # OSX Json for arm64
 
-        $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
+  #       $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
 
-        New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+  #       $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; osx_arm64 = $OSX_Arm64} | ConvertTo-Json
 
-        $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+  #       $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
 
-        Write-Host $Json
-  - task: ManifestGeneratorTask@0
-    displayName: Manifest Generator for zip
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
-  - task: PublishBuildArtifacts@1
-    displayName: Generate lks.json for .zip files
-    inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
-      ArtifactName: zipv2
+  #       New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+
+  #       $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+
+  #       Write-Host $Json
+  # - task: ManifestGeneratorTask@0
+  #   displayName: Manifest Generator for zip
+  #   inputs:
+  #     BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
+  # - task: PublishBuildArtifacts@1
+  #   displayName: Generate lks.json for .zip files
+  #   inputs:
+  #     PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+  #     ArtifactName: zipv2
 
   - task: SdtReport@2
     inputs:
@@ -1633,6 +1570,121 @@ jobs:
     inputs:
       GdnBreakAllTools: true
       GdnBreakFast: true
+- job: Phase_4
+  displayName: "Generate Lks.json for zipv2"
+  dependsOn: [],
+  pool:
+    name: 'VSEngSS-MicroBuild2022-1ES'
+    demands:
+    - msbuild
+    - visualstudio
+    - vstest
+  steps:
+  - task: PowerShell@2
+    displayName: Generate lks.json for .zip files
+    inputs:
+      targetType: inline
+      script: >
+        $ZipHost = "mindaromaster.blob.core.windows.net"
+
+        $BlobUrl = "https://$ZipHost/zipv2/1.0.$env:BUILD_BUILDNUMBER"
+
+        $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
+
+        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+
+        # CLI binaries
+
+        $Cli_Win = @{ url="$BlobUrl/lpk-win.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win.zip).Hash)" }
+
+        $Cli_Osx = @{ url="$BlobUrl/lpk-osx.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx.zip).Hash)" }
+
+        $Cli_Linux = @{ url="$BlobUrl/lpk-linux.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux.zip).Hash)" }
+
+        # CLI binaries for arm64
+
+        $Cli_Win_Arm64 = @{ url="$BlobUrl/lpk-win-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-win-arm64.zip).Hash)" }
+
+        $Cli_Osx_Arm64 = @{ url="$BlobUrl/lpk-osx-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-osx-arm64.zip).Hash)" }
+
+        $Cli_Linux_Arm64 = @{ url="$BlobUrl/lpk-linux-arm64.zip"; sha256hash="$((Get-FileHash $ZipDir\lpk-linux-arm64.zip).Hash)" }
+
+        # Kubectl binaries
+
+        $Kubectl_Win = @{ url="$BlobLKSUrl/kubectl-win.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+
+        $Kubectl_Osx = @{ url="$BlobLKSUrl/kubectl-osx.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+
+        $Kubectl_Linux = @{ url="$BlobLKSUrl/kubectl-linux.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+
+        # Kubectl binaries for arm64
+
+        $Kubectl_Win_Arm64 = @{ url="$BlobLKSUrl/kubectl-win-arm64.zip"; sha256hash="5490F9B60E4C2C4229CA00FBFA946AE65655F0739BE9714C6A0A0FB7BE2A6F2C" }
+
+        $Kubectl_Osx_Arm64 = @{ url="$BlobLKSUrl/kubectl-osx-arm64.zip"; sha256hash="D24EAFEC39EB2393DBA0088B762953BEDCC04156AC9E324FA290476BD3C888B9" }
+
+        $Kubectl_Linux_Arm64 = @{ url="$BlobLKSUrl/kubectl-linux-arm64.zip"; sha256hash="01B76D4E4A9081452932F27C767C9D8F3507C8AD3CC9269CEB16729F4D0ED900" }
+
+        #dotnet runtime binaries
+
+        $Dotnet_Win = @{ url="$BlobLKSUrl/dotnetruntime-win.zip"; sha256hash="0FCA9F2AB829C85615007EA646CF436D2E90C9A4095C84C2F9EB3EC0754468A8" }
+
+        $Dotnet_Osx = @{ url="$BlobLKSUrl/dotnetruntime-osx.zip"; sha256hash="D25F8BB708C364678AAA0F3798F5EADD1BE46800376F15D2F12C785C74AF8443" }
+
+        $Dotnet_Linux = @{ url="$BlobLKSUrl/dotnetruntime-linux.zip"; sha256hash="801D9D251D07B9A88195450FCBFD70C7507CEEEF05D5F0E88CC14CEBFCC10F4B" }
+
+        #dotnet runtime binaries for arm64
+
+        $Dotnet_Win_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-win-arm64.zip"; sha512hash="902488cbfee81dd5e1009eb86ab82d479ed7d9c44e4e4b6bb3df90a68eea65c0140978b02f46f9f6d0847466e1de73e9551688a79082e0679350a46276f441f9" }
+
+        $Dotnet_Osx_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-osx-arm64.zip"; sha512hash="e6979ab34bea777f1f48bf9208a024b33b1685ec236f13c609975ebc7e1f641806b47daefb9ff1f74f675ee6242b628edd615982bc9c014d18e18cd2662171a8" }
+
+        $Dotnet_Linux_Arm64 = @{ url="$BlobLKSUrl/dotnetruntime-linux-arm64.zip"; sha512hash="814db12231db89d9935404ec6693b3fb50ad022c0affbc131d657878e194274f1af5e92dd32c2c4f2a78a7e38d0c18a46ba4ecc67630ca3adf5b7550367c2366" }
+
+        # Win Json
+
+        $Win = @{ dotnetruntime = $Dotnet_Win; kubectl = $Kubectl_Win; bridge = $Cli_Win }
+
+        # Win Json for arm64
+
+        $Win_Arm64 = @{ dotnetruntime = $Dotnet_Win_Arm64; kubectl = $Kubectl_Win_Arm64; bridge = $Cli_Win_Arm64 }
+
+        # OSX Json
+
+        $OSX = @{ dotnetruntime = $Dotnet_Osx; kubectl = $Kubectl_Osx; bridge = $Cli_Osx }
+
+        # OSX Json for arm64
+
+        $OSX_Arm64 = @{ dotnetruntime = $Dotnet_Osx_Arm64; kubectl = $Kubectl_Osx_Arm64; bridge = $Cli_Osx_Arm64 }
+
+        # Linux Json
+
+        $Linux = @{ dotnetruntime = $Dotnet_Linux; kubectl = $Kubectl_Linux; bridge = $Cli_Linux }
+
+        # Linux Json for arm64
+
+        $Linux_Arm64 = @{ dotnetruntime = $Dotnet_Linux_Arm64; kubectl = $Kubectl_Linux_Arm64; bridge = $Cli_Linux_Arm64 }
+
+        $Json = @{ version="1.0.$env:BUILD_BUILDNUMBER"; win = $Win; osx = $OSX; linux = $Linux; win_arm64 = $Win_Arm64; osx_arm64 = $OSX_Arm64; linux_arm64 = $Linux_Arm64} | ConvertTo-Json
+
+        $Json | Out-File -FilePath $ZipDir/lks.json -Encoding ascii
+
+        New-Item -ItemType directory -Path $ZipDir/1.0.$env:BUILD_BUILDNUMBER
+
+        $Json | Out-File -FilePath $ZipDir/1.0.$env:BUILD_BUILDNUMBER/lks.json -Encoding ascii
+
+        Write-Host $Json
+  - task: ManifestGeneratorTask@0
+    displayName: Manifest Generator for zip
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
+  - task: PublishBuildArtifacts@1
+    displayName: Publish lks.json for zipv2
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
+    
+
 
       
 ...
