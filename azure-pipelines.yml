@@ -1572,7 +1572,7 @@ jobs:
       GdnBreakFast: true
 - job: Phase_4
   displayName: "Generate Lks.json for zipv2"
-  dependsOn: ["Phase_3", "Phase_4"]
+  dependsOn: ["Phase_3", "Phase_2"]
   pool:
     name: 'VSEngSS-MicroBuild2022-1ES'
     demands:
