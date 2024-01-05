@@ -1431,7 +1431,7 @@ jobs:
 
         $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
 
-        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zipv2/"
+        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip/zipv2/"
 
         # CLI binaries
 
