@@ -1275,7 +1275,7 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: zipv2'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/zipv2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
 
   - task: SdtReport@2
@@ -1402,7 +1402,7 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: Generate lks.json for .zip files
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/zipv2
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
       
 - job: Phase_4
