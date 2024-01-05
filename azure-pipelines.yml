@@ -997,13 +997,6 @@ jobs:
         curl https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win/kubectl.exe
 
 
-        # New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl' -ItemType Directory
-
-        # New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx' -ItemType Directory
-
-        # curl https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl
-
-
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl' -ItemType Directory
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl/linux' -ItemType Directory
@@ -1280,7 +1273,7 @@ jobs:
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux-arm64.zip
   
   - task: PublishBuildArtifacts@1
-    displayName: Generate lks.json for .zip files
+    displayName: 'Publish Artifact: zipv2'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zipv2
       ArtifactName: zipv2
@@ -1411,21 +1404,7 @@ jobs:
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zipv2
       ArtifactName: zipv2
-
-  - task: SdtReport@2
-    inputs:
-      GdnExportAllTools: true
-      GdnExportHtmlFile: true
-  - task: PublishSecurityAnalysisLogs@3
-    inputs:
-      ArtifactName: 'CodeAnalysisLogs'
-      ArtifactType: 'Container'
-      AllTools: true
-      ToolLogsNotFoundAction: 'Standard'
-  - task: PostAnalysis@2
-    inputs:
-      GdnBreakAllTools: true
-      GdnBreakFast: true
+      
 - job: Phase_4
   displayName: "Generate Lks.json for zipv2"
   dependsOn: ["Phase_3", "Phase_2"]
