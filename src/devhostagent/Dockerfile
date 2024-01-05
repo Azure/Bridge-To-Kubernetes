@@ -1,10 +1,7 @@
 # Build container
-FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0 AS build
 
-RUN tdnf clean all && \
- tdnf check-update && \
- tdnf upgrade -y  
-
+ARG TARGETARCH
 ARG Configuration=Release
 ARG TelemetryType=TELEMETRY_DEVELOPMENT
 ARG MindaroBuildNumber=0.0
@@ -12,14 +9,14 @@ ARG MindaroBuildNumber=0.0
 WORKDIR /src/devhostagent
 COPY /src/devhostagent/devhostAgent.csproj .
 COPY /src/common/common.csproj /src/common/
-RUN dotnet restore
+RUN dotnet restore -a ${TARGETARCH}
 COPY /src/devhostagent/ /src/devhostagent/
 COPY /src/common/ /src/common/
 COPY /build/ /build/
 ENV TelemetryType=${TelemetryType}
 ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 
-RUN dotnet publish -c ${Configuration} -o /src/publish devhostAgent.csproj
+RUN dotnet publish -c ${Configuration} -a ${TARGETARCH} --self-contained false --no-restore -o /src/publish devhostAgent.csproj
 
 # Final container
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0 as final

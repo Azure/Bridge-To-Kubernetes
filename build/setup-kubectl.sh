@@ -1,31 +1,27 @@
 #!/bin/bash
 set -e
 
+# Default values for kubectl version, install location, and architecture
+DEFAULT_KUBECTL_VERSION="v1.27.3"
 DEFAULT_INSTALL_LOCATION="/app/kubectl/linux"
-DEFAULT_KUBECTL_VERSION="v1.21.2"
+DEFAULT_ARCH="amd64"
 
-# Arguments: kubectl version, install location
-function installKubectl {
-    local loc_kube_version=$1
-    local loc_setup_location=$2
+# Function to install kubectl
+# Arguments: kubectl version, install location, architecture
+function install_kubectl {
+    # Set default values if arguments are not provided
+    kubectl_version="${1:-$DEFAULT_KUBECTL_VERSION}"
+    install_location="${2:-$DEFAULT_INSTALL_LOCATION}"
+    arch="${3:-$DEFAULT_ARCH}"
 
-    if [ -z "$loc_kube_version" ]; then
-        loc_kube_version=$DEFAULT_KUBECTL_VERSION
-    fi
-
-    if [ -z "$loc_setup_location" ]; then
-        loc_setup_location=$DEFAULT_INSTALL_LOCATION
-    fi
-
-    echo "Setting up kubectl $loc_kube_version in $loc_setup_location"
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/${loc_kube_version}/bin/linux/amd64/kubectl
+    echo "Setting up kubectl $kubectl_version in $install_location with arch $arch"    
+    curl -LO "https://dl.k8s.io/release/$kubectl_version/bin/linux/$arch/kubectl"
     chmod +x kubectl
-    mkdir -p $loc_setup_location
-    mv kubectl $loc_setup_location
+    mkdir -p "$install_location"
+    mv kubectl "$install_location"
 }
 
-if [ -z "$@" ]; then
-    installKubectl
-else
-    "$@"
-fi
+kubectl_version=$1
+install_location=$2
+arch=$3
+install_kubectl "$kubectl_version" "$install_location" "$arch"

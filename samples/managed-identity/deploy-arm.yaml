@@ -1,4 +1,5 @@
-﻿apiVersion: apps/v1
+#this deploy yaml is for arm clusters so that managed identity can be kept separate for arm clusters.
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mi-webapp
@@ -13,7 +14,7 @@ spec:
       labels:
         app: mi-webapp
         # Label for pod identity
-        aadpodidbinding: mi-test
+        aadpodidbinding: mi-test-arm
     spec:
       containers:
         - image: mindarodev.azurecr.io/samples/mi-webapp:v1
@@ -30,7 +31,7 @@ spec:
           - name: STORAGE_CONTAINER_NAME
             value: "mitestsa-container"
           - name: MI_CLIENT_ID
-            value: "b24d4637-3453-4f6f-8187-228a5442a675"
+            value: "a2cc59eb-fa11-485c-9bee-c84aa4cb97d0"
           ports:
           - containerPort: 80
 
@@ -55,11 +56,12 @@ spec:
 apiVersion: "aadpodidentity.k8s.io/v1"
 kind: AzureIdentity
 metadata:
-  name: mi-test
+  name: mi-test-arm
 spec:
   type: 0
-  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/MC_testing-scenario_testing-scenarios_westeurope/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
-  clientID: "b24d4637-3453-4f6f-8187-228a5442a675"
+  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/MC_testing-scenario_testing-scenarios-arm_westeurope/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
+  clientID: "a2cc59eb-fa11-485c-9bee-c84aa4cb97d0"
+
 ---
 # AzureIdentityBinding resource for pod identity 
 apiVersion: "aadpodidentity.k8s.io/v1"
@@ -67,5 +69,5 @@ kind: AzureIdentityBinding
 metadata:
   name: mi-test-binding
 spec:
-  azureIdentity: mi-test
-  selector: mi-test
+  azureIdentity: mi-test-arm
+  selector: mi-test-arm
