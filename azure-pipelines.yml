@@ -1400,7 +1400,7 @@ jobs:
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
 
   - task: PublishBuildArtifacts@1
-    displayName: Generate lks.json for .zip files
+    displayName: 'Publish Artifact: zipv2'
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
