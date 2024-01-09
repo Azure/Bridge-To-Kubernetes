@@ -942,15 +942,6 @@ jobs:
       zipAfterPublish: false
       modifyOutputPath: false
   - task: DotNetCoreCLI@2
-    displayName: publish DSC for arm64 (OSX)
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: src\dsc\dsc.csproj
-      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --no-restore --self-contained false --verbosity detailed
-      zipAfterPublish: false
-      modifyOutputPath: false
-  - task: DotNetCoreCLI@2
     displayName: publish DSC (Linux)
     inputs:
       command: publish
@@ -1004,13 +995,6 @@ jobs:
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win' -ItemType Directory
 
         curl https://dl.k8s.io/release/v1.27.3/bin/windows/arm64/kubectl.exe -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/win-arm64/publish/kubectl/win/kubectl.exe
-
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl' -ItemType Directory
-
-        New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx' -ItemType Directory
-
-        curl https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl  -OutFile $(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl
 
 
         New-Item -Path '$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/linux-arm64/publish/kubectl' -ItemType Directory
@@ -1154,57 +1138,10 @@ jobs:
 
         !**/zh-Hant/*
       TargetFolder: $(Agent.TempDirectory)/zip/osx
-  - task: CopyFiles@2
-    displayName: Collect files for .zip for arm64 (OSX)
-    inputs:
-      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish
-      Contents: >-
-        **/*
-
-        src/resources/license.rtf
-
-        src/vscode/ThirdPartyNotices.txt
-
-        !**/*.pdb
-
-        !**/*.xml
-
-        !**/*.nuspec
-
-        !**/cs/*
-
-        !**/de/*
-
-        !**/es/*
-
-        !**/fr/*
-
-        !**/it/*
-
-        !**/ja/*
-
-        !**/ko/*
-
-        !**/pl/*
-
-        !**/pt-BR/*
-
-        !**/ru/*
-
-        !**/tr/*
-
-        !**/zh-Hans/*
-
-        !**/zh-Hant/*
-      TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
   - task: CodeSign@1
     displayName: Validate Signatures OSX
     inputs:
       Path: '$(Agent.TempDirectory)/zip/osx'
-  - task: CodeSign@1
-    displayName: Validate Signatures OSX for arm64
-    inputs:
-      Path: '$(Agent.TempDirectory)/zip/osxarm64'
   - task: CopyFiles@2
     displayName: Collect files for .zip (Linux)
     inputs:
@@ -1321,13 +1258,6 @@ jobs:
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx.zip
   - task: ArchiveFiles@2
-    displayName: Create .zip file for arm64 (OSX)
-    inputs:
-      rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
-      includeRootFolder: false
-      sevenZipCompression: 5
-      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
-  - task: ArchiveFiles@2
     displayName: Create .zip file (Linux)
     inputs:
       rootFolderOrFile: $(Agent.TempDirectory)/zip/linux
@@ -1341,6 +1271,155 @@ jobs:
       includeRootFolder: false
       sevenZipCompression: 5
       archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-linux-arm64.zip
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: zipv2'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
+
+  - task: SdtReport@2
+    inputs:
+      GdnExportAllTools: true
+      GdnExportHtmlFile: true
+  - task: PublishSecurityAnalysisLogs@3
+    inputs:
+      ArtifactName: 'CodeAnalysisLogs'
+      ArtifactType: 'Container'
+      AllTools: true
+      ToolLogsNotFoundAction: 'Standard'
+  - task: PostAnalysis@2
+    inputs:
+      GdnBreakAllTools: true
+      GdnBreakFast: true
+
+- job: Phase_3
+  displayName: Run NON self-contained build for macos arm64
+  timeoutInMinutes: 120
+  cancelTimeoutInMinutes: 1
+  pool:
+    vmImage: macos-13-arm64
+  steps:
+  - checkout: self
+    clean: true
+    fetchTags: false
+    persistCredentials: True
+  - task: PowerShell@2
+    displayName: Set staging/prod build vars for signing and telemetry
+    inputs:
+      targetType: inline
+      script: >-
+        $branchName = $env:BUILD_SOURCEBRANCH
+
+        if ($branchName -eq "refs/heads/main") {
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for main branch"
+        } else {
+            Write-Host "##vso[task.setvariable variable=TelemetryType;]${{ parameters.TelemetryType }}"
+            Write-Host "Done setting telemetry key instance as ${{ parameters.TelemetryType }} for other branch"
+        }
+
+        Write-Host "##vso[task.setvariable variable=MicroBuild_NuPkgSigningEnabled;]true"
+  - task: UseDotNet@2
+    displayName: Use .NET Core SDK 7.0.X
+    inputs:
+      version: $(BuildParameters.dotnetversion)
+      installationPath: $(Agent.TempDirectory)/dotnet
+  - task: DotNetCoreCLI@2
+    displayName: publish DSC for arm64 (OSX)
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: src/dsc/dsc.csproj
+      arguments: -c ${{ parameters.BuildConfiguration }} -r osx-arm64 --self-contained false --verbosity detailed
+      zipAfterPublish: false
+      modifyOutputPath: false
+  - task: Bash@3
+    displayName: Download kubectl for OSX arm64
+    inputs:
+      targetType: 'inline'
+      script: |
+        mkdir -p "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx"
+        curl -L https://dl.k8s.io/release/v1.27.3/bin/darwin/arm64/kubectl -o "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/kubectl/osx/kubectl"
+
+  - task: Bash@3
+    displayName: code sign for OSX arm64
+    inputs:
+      targetType: 'inline'
+      script: |
+        codesign --force --deep --sign - "$(Build.SourcesDirectory)/src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish/dsc"
+  - task: CopyFiles@2
+    displayName: Collect files for .zip for arm64 (OSX)
+    inputs:
+      SourceFolder: src/dsc/bin/${{ parameters.BuildConfiguration }}/$(BuildParameters.dotnetversionforbuild)/osx-arm64/publish
+      Contents: >-
+        **/*
+
+        src/resources/license.rtf
+
+        src/vscode/ThirdPartyNotices.txt
+
+        !**/*.pdb
+
+        !**/*.xml
+
+        !**/*.nuspec
+
+        !**/cs/*
+
+        !**/de/*
+
+        !**/es/*
+
+        !**/fr/*
+
+        !**/it/*
+
+        !**/ja/*
+
+        !**/ko/*
+
+        !**/pl/*
+
+        !**/pt-BR/*
+
+        !**/ru/*
+
+        !**/tr/*
+
+        !**/zh-Hans/*
+
+        !**/zh-Hant/*
+      TargetFolder: $(Agent.TempDirectory)/zip/osxarm64
+  - task: ArchiveFiles@2
+    displayName: Create .zip file for arm64 (OSX)
+    inputs:
+      rootFolderOrFile: $(Agent.TempDirectory)/zip/osxarm64
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(Build.ArtifactStagingDirectory)/zip/lpk-osx-arm64.zip
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: zipv2'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
+      ArtifactName: zipv2
+      
+- job: Phase_4
+  displayName: "Generate Lks.json for zipv2"
+  dependsOn: ["Phase_3", "Phase_2"]
+  pool:
+    name: 'VSEngSS-MicroBuild2022-1ES'
+    demands:
+    - msbuild
+    - visualstudio
+    - vstest
+  steps:
+  - task: DownloadBuildArtifacts@1
+    displayName: Download artifacts
+    inputs:
+      downloadPath: $(Build.ArtifactStagingDirectory)/zip
+      artifactName: zipv2
   - task: PowerShell@2
     displayName: Generate lks.json for .zip files
     inputs:
@@ -1352,7 +1431,7 @@ jobs:
 
         $BlobLKSUrl = "https://$ZipHost/zipv2/LKS"
 
-        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip"
+        $ZipDir = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY/zip/zipv2/"
 
         # CLI binaries
 
@@ -1440,23 +1519,12 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)/zip/
   - task: PublishBuildArtifacts@1
-    displayName: Generate lks.json for .zip files
+    displayName: Publish lks.json for zipv2
     inputs:
       PathtoPublish: $(Build.ArtifactStagingDirectory)/zip
       ArtifactName: zipv2
+    
 
-  - task: SdtReport@2
-    inputs:
-      GdnExportAllTools: true
-      GdnExportHtmlFile: true
-  - task: PublishSecurityAnalysisLogs@3
-    inputs:
-      ArtifactName: 'CodeAnalysisLogs'
-      ArtifactType: 'Container'
-      AllTools: true
-      ToolLogsNotFoundAction: 'Standard'
-  - task: PostAnalysis@2
-    inputs:
-      GdnBreakAllTools: true
-      GdnBreakFast: true
+
+      
 ...
