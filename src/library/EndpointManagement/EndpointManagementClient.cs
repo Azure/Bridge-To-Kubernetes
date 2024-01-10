@@ -283,7 +283,7 @@ namespace Microsoft.BridgeToKubernetes.Library.EndpointManagement
                                                                                 || socketException.SocketErrorCode == SocketError.NetworkDown))
             {
                 // We expect to hit this case if the endpoint manager is not yet running.
-                _log.Info($"{EndpointManager.ProcessName} is not running: '{ex.Message}'");
+                _log.Info($"{EndpointManager.ProcessName} is not running: '{ex.Message}' and socket error code: '{socketException.SocketErrorCode}'");
             }
             catch (Exception ex) when (ex is IUserVisibleExceptionReporter)
             {
