@@ -23,6 +23,7 @@ jobs:
           - components: routingmanager
             imageName: routingmanager
     runs-on: ubuntu-latest
+    permissions: read-all
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Checkout

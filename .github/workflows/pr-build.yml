@@ -4,6 +4,7 @@ on: [workflow_dispatch]
 jobs:
   self-contained:
     runs-on: windows-latest
+    permissions: read-all
     strategy:
       matrix:
         mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
@@ -28,6 +29,7 @@ jobs:
         dotnet test src\unittest.sln -c Release --no-restore --verbosity normal
   non-self-contained:
     runs-on: windows-latest
+    permissions: read-all
     strategy:
       matrix:
         mode: [osx-x64,linux-x64,win-x64,win-arm64,osx-arm64,linux-arm64]
