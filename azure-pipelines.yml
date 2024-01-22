@@ -715,15 +715,6 @@ jobs:
       packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
       nobuild: true
       buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-x64\publish\dsc.nuspec'
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet pack CLI NuGet for arm64 (Windows)'
-    inputs:
-      command: pack
-      feedsToUse: config
-      packagesToPack: src/dsc/dsc.csproj
-      packDirectory: '$(Build.ArtifactStagingDirectory)/nuget'
-      nobuild: true
-      buildProperties: 'Configuration=${{ parameters.BuildConfiguration }};NuspecFile=bin\${{ parameters.BuildConfiguration }}\$(BuildParameters.dotnetversionforbuild)\win-arm64\publish\dsc.nuspec'
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Manifest Generator for nuget'
     inputs:
