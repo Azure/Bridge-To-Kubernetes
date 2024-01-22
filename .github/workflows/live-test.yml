@@ -4,7 +4,6 @@ on:
     types: [ok-to-test-command]
 permissions:
   id-token: write
-  contents: read
 jobs:
   liveTest:
     env:
