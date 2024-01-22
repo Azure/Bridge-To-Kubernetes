@@ -9,6 +9,7 @@ using Microsoft.BridgeToKubernetes.Common.Models.Settings;
 using Microsoft.BridgeToKubernetes.Library.Connect;
 using Microsoft.BridgeToKubernetes.Library.Models;
 using Microsoft.BridgeToKubernetes.TestHelpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -268,6 +269,21 @@ namespace Microsoft.BridgeToKubernetes.Library.Tests
                     ["PODNAME_SERVICENAME_SERVICE_PORT_CLIENT"] = "5051",
                     
                 }
+            };
+
+            // endpoints with no port should not throw
+            yield return new object[]
+            {
+                new[]
+                {
+                    new EndpointInfo
+                    {
+                        DnsName = "noport.servicename",
+                        LocalIP = System.Net.IPAddress.Parse("127.0.0.1"),
+                        Ports = Array.Empty<PortPair>()
+                    }
+                },
+                new Dictionary<string, string>()
             };
         }
 
