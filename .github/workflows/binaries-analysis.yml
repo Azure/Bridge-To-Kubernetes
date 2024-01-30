@@ -9,6 +9,9 @@ on:
   schedule:
     - cron: '21 17 * * 0'
 
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: BinSkim Binary Analyze
@@ -22,10 +25,15 @@ jobs:
       security-events: write
 
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      with:
+        egress-policy: audit
+
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
     - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@v1.0.6
+      uses: NuGet/setup-nuget@b2bc17b761a1d88cab755a776c7922eb26eefbfa # v1.0.6
     - name: Get BinSkim package from nuget
       run: nuget install Microsoft.CodeAnalysis.BinSkim -Version 1.9.5 -OutputDirectory ${{ github.workspace }}
     - name: Restore dependencies using Nuget
@@ -35,7 +43,7 @@ jobs:
     - name: Build endpointmanagerlauncher
       run: dotnet publish src\EndpointManagerLauncher\endpointmanagerlauncher.csproj -r win-x64 -c Release --no-restore
     - name: Install and Run BinSkim analysis
-      uses: Azure/powershell@v1
+      uses: Azure/powershell@1300bbd2b3e1c21c029fe34887d16d2809a1397f # v1.4.0
       with: 
         inlineScript: |
           ${{ github.workspace }}\Microsoft.CodeAnalysis.BinSkim.1.9.5\tools\netcoreapp3.1\win-x64\BinSkim.exe analyze *.exe *.dll --recurse
