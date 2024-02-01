@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "devDependencies": {
         "nodemon": "^2.0.4",
-        "webpack": "^5.76.0"
+        "webpack": "^5.90.1"
     },
     "dependencies": {
         "body-parser": "^1.19.0",
