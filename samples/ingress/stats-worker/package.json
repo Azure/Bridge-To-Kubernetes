@@ -2,7 +2,7 @@
     "name": "todo-stats-worker",
     "version": "1.0.0",
     "devDependencies": {
-        "nodemon": "^2.0.15"
+        "nodemon": "^3.0.3"
     },
     "dependencies": {
         "redis": "^4.0.2",
