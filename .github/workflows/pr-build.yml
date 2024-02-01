@@ -22,7 +22,7 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@b2bc17b761a1d88cab755a776c7922eb26eefbfa # v1.0.6
+      uses: NuGet/setup-nuget@a21f25cd3998bf370fde17e3f1b4c12c175172f9 # v2.0.0
     - name: Restore dependencies using Nuget
       run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for ${{ matrix.mode }}
@@ -51,7 +51,7 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@b2bc17b761a1d88cab755a776c7922eb26eefbfa # v1.0.6
+      uses: NuGet/setup-nuget@a21f25cd3998bf370fde17e3f1b4c12c175172f9 # v2.0.0
     - name: Restore dependencies using Nuget
       run: nuget restore src\client.sln -Verbosity Normal -NonInteractive -ConfigFile src/nuget.config
     - name: dotnet Publish for ${{ matrix.mode }}

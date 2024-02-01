@@ -33,7 +33,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
     - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@b2bc17b761a1d88cab755a776c7922eb26eefbfa # v1.0.6
+      uses: NuGet/setup-nuget@a21f25cd3998bf370fde17e3f1b4c12c175172f9 # v2.0.0
     - name: Get BinSkim package from nuget
       run: nuget install Microsoft.CodeAnalysis.BinSkim -Version 1.9.5 -OutputDirectory ${{ github.workspace }}
     - name: Restore dependencies using Nuget
