@@ -1,11 +1,11 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:9658a001bc235f15d2d7f3a68f90cb1897f2fdc3e2e74161605c076d3472e39c AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:6b9c857a60b67f968fd5bae373e414690947b8b58e7951b3228fd712b82938e8 AS build
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["LocalAgent/localagent.csproj", "LocalAgent/"]
