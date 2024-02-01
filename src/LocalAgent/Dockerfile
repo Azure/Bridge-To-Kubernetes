@@ -5,7 +5,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0@sha256:6b9c857a60b67f968fd5bae373e414690947b8b58e7951b3228fd712b82938e8 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:7ef41132b2ebe6166bde36b7ba2f0d302e10307c3e0523a4539643a77233f56d AS build
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["LocalAgent/localagent.csproj", "LocalAgent/"]
