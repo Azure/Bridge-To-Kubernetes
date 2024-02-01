@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0@sha256:9658a001bc235f15d2d7f3a68f90cb1897f2fdc3e2e74161605c076d3472e39c
+FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:3ff67792728179308c4bf06799d8b45d155c60fddc347acf69465a496d9a20b8
 
 COPY bin/Release/net7.0/publish/ App/
 WORKDIR /App
