@@ -51,7 +51,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Autofac" Version="6.4.0" />
-    <PackageReference Include="KubernetesClient" Version="13.0.11" />
+    <PackageReference Include="KubernetesClient" Version="11.0.9" />
     <PackageReference Include="KubernetesClient.Basic" Version="11.0.9" />
     <PackageReference Include="KubernetesClient.Models" Version="11.0.9" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
@@ -67,7 +67,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="SystemTextJsonPatch" Version="1.0.0" />
+    <PackageReference Include="SystemTextJsonPatch" Version="3.1.0" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)\..\..\build\ClientAssemblyVersion.proj" />
