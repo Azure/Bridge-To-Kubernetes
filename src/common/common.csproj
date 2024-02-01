@@ -67,7 +67,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="SystemTextJsonPatch" Version="1.0.0" />
+    <PackageReference Include="SystemTextJsonPatch" Version="3.1.0" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)\..\..\build\ClientAssemblyVersion.proj" />
