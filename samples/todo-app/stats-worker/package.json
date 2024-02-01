@@ -2,10 +2,10 @@
     "name": "todo-stats-worker",
     "version": "1.0.0",
     "devDependencies": {
-        "nodemon": "^2.0.15"
+        "nodemon": "^3.0.3"
     },
     "dependencies": {
-        "redis": "^4.0.2",
+        "redis": "^4.6.12",
         "servicebus": "^2.3.3"
     },
     "overrides": {
