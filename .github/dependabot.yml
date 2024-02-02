@@ -3,22 +3,22 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /samples/ConnectSQLDatabase/ConnectSQLDatabase
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/ConnectSQLDatabase/ConnectSQLDatabase
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/ingress/database-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /samples/ingress/database-api
@@ -33,12 +33,12 @@ updates:
   - package-ecosystem: npm
     directory: /samples/ingress/frontend
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/ingress/stats-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: npm
     directory: /samples/ingress/stats-api
@@ -53,12 +53,12 @@ updates:
   - package-ecosystem: npm
     directory: /samples/ingress/stats-worker
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/managed-identity
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /samples/managed-identity
@@ -68,17 +68,17 @@ updates:
   - package-ecosystem: docker
     directory: /samples/todo-app/database-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /samples/todo-app/database-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/todo-app/frontend
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: npm
     directory: /samples/todo-app/frontend
@@ -88,42 +88,42 @@ updates:
   - package-ecosystem: docker
     directory: /samples/todo-app/stats-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: npm
     directory: /samples/todo-app/stats-api
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /samples/todo-app/stats-worker
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: npm
     directory: /samples/todo-app/stats-worker
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/EndpointManagerLauncher
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /src/LocalAgent
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/LocalAgent
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/common.tests
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/common
@@ -133,7 +133,7 @@ updates:
   - package-ecosystem: nuget
     directory: /src/devhostAgent.restorationjob.tests
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /src/devhostagent.restorationjob
@@ -143,37 +143,37 @@ updates:
   - package-ecosystem: nuget
     directory: /src/devhostagent.restorationjob
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /src/devhostagent
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/devhostagent
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/dsc.tests
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/dsc
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/endpointmanager.tests
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/endpointmanager
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/library.tests
@@ -188,24 +188,24 @@ updates:
   - package-ecosystem: nuget
     directory: /src
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/routingmanager.tests
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: docker
     directory: /src/routingmanager
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/routingmanager
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: nuget
     directory: /src/testhelpers
     schedule:
-      interval: daily
+      interval: weekly
