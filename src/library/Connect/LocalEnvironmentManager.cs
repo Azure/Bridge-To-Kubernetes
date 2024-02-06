@@ -424,99 +424,121 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
         {
             var result = new Dictionary<string, string>(workloadInfo.EnvironmentVariables);
 
-            foreach (var endpoint in workloadInfo.ReachableEndpoints)
+            try
             {
-                if (endpoint.Ports == null || endpoint.Ports.Length == 0)
+                foreach (var endpoint in workloadInfo.ReachableEndpoints)
                 {
-                    _log.Verbose("Skipping endpoint {0} as it has no configured port", endpoint.DnsName);
-                    continue;
-                }
-
-                if (string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Override the DAPR env variables with the real local ports (that might be different if we neeeded to re-allocate them)
-                    result["DAPR_HTTP_PORT"] = endpoint.Ports[0].LocalPort.ToString(); // TODO (lolodi): this is a hack that relies on the HTTP port to always be the first and GRPC port the second.
-                    result["DAPR_GRPC_PORT"] = endpoint.Ports[1].LocalPort.ToString(); // We should probably name the port pairs (maybe with the env variable that we want to set with them).
-                                                                                       // Once we do that, we can actually stop assigning the DAPR dns name ot this endpoint and just leave it empty, consistently with how the Remote agent works
-                }
-
-                // because we are using dns name instead of service we have to retrieve it by splitting when needed
-                // If this ever cause issues we should consider larger refactor where we add serviceName member variable to EndpointInfo class.
-                var dnsNameArray = endpoint.DnsName
-                    .ToUpperInvariant()
-                    .Split(".");
-
-                var serviceName = dnsNameArray
-                    .First()
-                    .Replace("-", "_");
-
-                // when !endpoint.IsInWorkloadNamespace
-                var serviceNs = dnsNameArray.Length == 2
-                    ? dnsNameArray
-                        .Last()
-                        .Replace("-", "_")
-                    : null;
-
-                // sometimes cross talk is desired between namespaces, append those not matching workload
-                if (!string.IsNullOrWhiteSpace(serviceNs))
-                {
-                    serviceName = $"{serviceName}_{serviceNs}";
-                }
-
-                var host = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
-                    ? endpoint.LocalIP.ToString()
-                    : endpoint.DnsName;
-
-                if (string.Equals(serviceName, "KUBERNETES", StringComparison.OrdinalIgnoreCase))
-                {
-                    // reset KUBERNETES_SECRET_HOST to cluster name
-                    host = _kubernetesClient.HostName;
-                }
-
-                // Service Host
-                result[$"{serviceName}_SERVICE_HOST"] = host;
-
-                // Service Port
-                // tl;dr: allocate the first port in the service to the backwards-compatible environment variable in keeping with Kubernetes source code.
-                // These environment variables are distinct per service definition as they do not contain metadata that distinguish them apart from other port mapping variables.
-                // Kubernetes currently appears to bind the first port in the service definition to these ports, as such, we are initializing them in the outer loop here so
-                // they cannot be overwritten by the final iteration of the inner loop below which would end up setting them to the final port in the collection
-                var unnamedPort = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
-                    ? endpoint.Ports[0].LocalPort.ToString()
-                    : endpoint.Ports[0].RemotePort.ToString();
-
-                result[$"{serviceName}_SERVICE_PORT"] = unnamedPort;
-                result[$"{serviceName}_PORT"] = $"{endpoint.Ports[0].Protocol}://{host}:{unnamedPort}";
-
-                // All named ports (only the first may be unnamed according to Kubernetes source code)
-                foreach (var portPair in endpoint.Ports)
-                {
-                    var port = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
-                        ? portPair.LocalPort
-                        : portPair.RemotePort;
-
-                    var protocolUpper = string.IsNullOrWhiteSpace(portPair.Protocol)
-                        ? KubernetesConstants.Protocols.Tcp.ToUpperInvariant()
-                        : portPair.Protocol.ToUpperInvariant();
-
-                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"] = portPair.Protocol;
-                    result[$"{serviceName}_PORT_{port}_{protocolUpper}"] = $"{portPair.Protocol}://{host}:{port}";
-                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"] = port.ToString();
-                    result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
-
-                    if (!string.IsNullOrWhiteSpace(portPair.Name))
+                    if (endpoint.Ports == null || endpoint.Ports.Length == 0)
                     {
-                        result[$"{serviceName}_SERVICE_PORT_{portPair.Name.ToUpperInvariant()}"] = port.ToString();
+                        _log.Info("Skipping endpoint {0} as it has no configured port", endpoint.DnsName);
+                        continue;
                     }
 
-                    // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable from dns name to ip:port
-                    if (_useKubernetesServiceEnvironmentVariables && string.Equals(serviceName, ManagedIdentity.TargetServiceNameOnLocalMachine, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase))
                     {
-                        result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = $"http://{host}:{port}/metadata/identity/oauth2/token";
+                        // Override the DAPR env variables with the real local ports (that might be different if we neeeded to re-allocate them)
+                        result["DAPR_HTTP_PORT"] = endpoint.Ports[0].LocalPort.ToString(); // TODO (lolodi): this is a hack that relies on the HTTP port to always be the first and GRPC port the second.
+                        result["DAPR_GRPC_PORT"] = endpoint.Ports[1].LocalPort.ToString(); // We should probably name the port pairs (maybe with the env variable that we want to set with them).
+                                                                                           // Once we do that, we can actually stop assigning the DAPR dns name ot this endpoint and just leave it empty, consistently with how the Remote agent works
+                    }
+
+                    // because we are using dns name instead of service we have to retrieve it by splitting when needed
+                    // If this ever cause issues we should consider larger refactor where we add serviceName member variable to EndpointInfo class.
+                    var dnsNameArray = endpoint.DnsName
+                        .ToUpperInvariant()
+                        .Split(".");
+
+                    var serviceName = dnsNameArray
+                        .First()
+                        .Replace("-", "_");
+
+                    // when !endpoint.IsInWorkloadNamespace
+                    var serviceNs = dnsNameArray.Length == 2
+                        ? dnsNameArray
+                            .Last()
+                            .Replace("-", "_")
+                        : null;
+
+                    // sometimes cross talk is desired between namespaces, append those not matching workload
+                    if (!string.IsNullOrWhiteSpace(serviceNs))
+                    {
+                        serviceName = $"{serviceName}_{serviceNs}";
+                    }
+
+                    var host = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                        ? endpoint.LocalIP.ToString()
+                        : endpoint.DnsName;
+
+                    if (string.Equals(serviceName, "KUBERNETES", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // reset KUBERNETES_SECRET_HOST to cluster name
+                        host = _kubernetesClient.HostName;
+                    }
+
+                    // Service Host
+                    result[$"{serviceName}_SERVICE_HOST"] = host;
+
+                    // Service Port
+                    // tl;dr: allocate the first port in the service to the backwards-compatible environment variable in keeping with Kubernetes source code.
+                    // These environment variables are distinct per service definition as they do not contain metadata that distinguish them apart from other port mapping variables.
+                    // Kubernetes currently appears to bind the first port in the service definition to these ports, as such, we are initializing them in the outer loop here so
+                    // they cannot be overwritten by the final iteration of the inner loop below which would end up setting them to the final port in the collection
+                    var unnamedPort = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                        ? endpoint.Ports[0].LocalPort.ToString()
+                        : endpoint.Ports[0].RemotePort.ToString();
+
+                    result[$"{serviceName}_SERVICE_PORT"] = unnamedPort;
+                    result[$"{serviceName}_PORT"] = $"{endpoint.Ports[0].Protocol}://{host}:{unnamedPort}";
+
+
+                    try
+                    {
+                        if (endpoint.Ports.Length > 0)
+                        {
+                            // All named ports (only the first may be unnamed according to Kubernetes source code)
+                            foreach (var portPair in endpoint.Ports)
+                            {
+                                var port = _useKubernetesServiceEnvironmentVariables || string.Equals(endpoint.DnsName, DAPR, StringComparison.OrdinalIgnoreCase)
+                                    ? portPair.LocalPort
+                                    : portPair.RemotePort;
+
+                                var protocolUpper = string.IsNullOrWhiteSpace(portPair.Protocol)
+                                    ? KubernetesConstants.Protocols.Tcp.ToUpperInvariant()
+                                    : portPair.Protocol.ToUpperInvariant();
+
+                                result[$"{serviceName}_PORT_{port}_{protocolUpper}_PROTO"] = portPair.Protocol;
+                                result[$"{serviceName}_PORT_{port}_{protocolUpper}"] = $"{portPair.Protocol}://{host}:{port}";
+                                result[$"{serviceName}_PORT_{port}_{protocolUpper}_PORT"] = port.ToString();
+                                result[$"{serviceName}_PORT_{port}_{protocolUpper}_ADDR"] = host;
+
+                                if (!string.IsNullOrWhiteSpace(portPair.Name))
+                                {
+                                    result[$"{serviceName}_SERVICE_PORT_{portPair.Name.ToUpperInvariant()}"] = port.ToString();
+                                }
+
+                                // if this is managed identity with useKubernetesServiceEnvironmentVariables set to true we have to update ms endpoint variable from dns name to ip:port
+                                if (_useKubernetesServiceEnvironmentVariables && string.Equals(serviceName, ManagedIdentity.TargetServiceNameOnLocalMachine, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    result[ManagedIdentity.MSI_ENDPOINT_EnvironmentVariable] = $"http://{host}:{port}/metadata/identity/oauth2/token";
+                                }
+                            }
+
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Info("Error in CreateEnvVariablesForK8s in endpoint.Ports: {0}", ex.Message, ex.StackTrace);
+                        throw;
                     }
                 }
+
             }
-
+            catch (Exception ex)
+            {
+                _log.Info("Error in CreateEnvVariablesForK8s in workloadInfo.ReachableEndpoints: {0}", ex.StackTrace, ex.Message);
+                throw;
+            }
             return result;
         }
 
