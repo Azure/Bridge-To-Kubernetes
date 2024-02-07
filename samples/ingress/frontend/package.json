@@ -14,7 +14,7 @@
         "next": "^13.5.4",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "servicebus": "^2.3.0",
+        "servicebus": "^2.3.3",
         "styled-jsx": "^5.0.1"
     },
     "overrides": {
