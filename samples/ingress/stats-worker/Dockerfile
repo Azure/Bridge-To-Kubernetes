@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:2f46fd49c767554c089a5eb219115313b72748d8f62f5eccb58ef52bc36db4ad
+FROM node:lts-alpine@sha256:be8f26834660fd887d22fb2659615f3ef2dd9eaf2a3d544512674eeb7959cafb
 
 WORKDIR /app
 COPY package*.json ./
