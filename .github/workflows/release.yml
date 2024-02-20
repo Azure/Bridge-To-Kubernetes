@@ -110,7 +110,7 @@ jobs:
         release_name: ${{ steps.changelog_reader.outputs.version  }}
         body: ${{ steps.changelog_reader.outputs.changes }}
     - name: Download All artifacts
-      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
     - name: Upload Window Release Assets
       uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2 
       env:
