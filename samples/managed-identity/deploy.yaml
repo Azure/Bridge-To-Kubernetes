@@ -16,7 +16,7 @@ spec:
         aadpodidbinding: mi-test
     spec:
       containers:
-        - image: mindarodev.azurecr.io/samples/mi-webapp:v1
+        - image: mindarodev.azurecr.io/samples/mi-webapp:v2
           imagePullPolicy: IfNotPresent
           name: mi-webapp
           env:

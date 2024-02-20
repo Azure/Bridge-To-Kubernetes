@@ -75,7 +75,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: stats-worker
-        image: azdspublic/todo-app-stats-worker
+        image: mindarodev.azurecr.io/samples/stats-worker:v5
         env:
         - name: STATS_QUEUE_URI
           value: amqp://stats-queue
@@ -101,7 +101,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: stats-api
-        image: azdspublic/todo-app-stats-api
+        image: mindarodev.azurecr.io/samples/stats-api:v6
         livenessProbe:
           httpGet:
             path: /hello
@@ -173,21 +173,10 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: frontend
-        image: azdspublic/todo-app-frontend
+        image: mindarodev.azurecr.io/samples/frontend:v5
         env:
         - name: STATS_QUEUE_URI
           value: amqp://stats-queue
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  selector:
-    name: frontend
-  ports:
-  - port: 80
-    targetPort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -206,7 +195,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: database-api
-        image: azdspublic/todo-app-database-api
+        image: mindarodev.azurecr.io/samples/database-api:v5
         env:
         - name: MONGO_CONNECTION_STRING
           value: mongodb://todos-db
