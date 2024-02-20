@@ -63,7 +63,7 @@ jobs:
       - name: Build and push for ${{ matrix.components }}
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
-          file: ${{ steps.version.outputs.filename }}
+          file: ${{ env.filename }}
           platforms: linux/arm64,linux/amd64
           push: true
           tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ github.event.inputs.tag }}
