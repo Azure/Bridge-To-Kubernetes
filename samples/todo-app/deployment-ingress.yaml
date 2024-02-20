@@ -178,6 +178,17 @@ spec:
         - name: STATS_QUEUE_URI
           value: amqp://stats-queue
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    name: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
