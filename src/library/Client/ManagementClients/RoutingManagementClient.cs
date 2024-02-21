@@ -420,9 +420,9 @@ namespace Microsoft.BridgeToKubernetes.Library.ManagementClients
                     NamespaceProperty = _namespaceName,
                     Labels = new Dictionary<string, string>() { { Routing.RoutingComponentLabel, Routing.RoutingManagerNameLower } }
                 },
-                Subjects = new List<V1Subject>()
+                Subjects = new List<Rbacv1Subject>()
                 {
-                    new V1Subject()
+                    new()
                     {
                         Kind = "ServiceAccount",
                         Name = RoutingManagerServiceAccountName,
