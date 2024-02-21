@@ -5,7 +5,7 @@
         "nodemon": "^3.0.3"
     },
     "dependencies": {
-        "redis": "^4.6.12",
+        "redis": "^4.6.13",
         "servicebus": "^2.3.3"
     },
     "overrides": {
