@@ -233,6 +233,12 @@ namespace Microsoft.BridgeToKubernetes.Common
             public const int Port = 7891;
         }
 
+        internal static class OwningObject 
+        {
+            public const string ReplicaSet = "ReplicaSet";
+            public const string StatefulSet = "StatefulSet";
+        }
+
         internal const string DAPR = "DAPR";
     }
 }

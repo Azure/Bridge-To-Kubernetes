@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -84,9 +85,9 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 AssertHelper.NotNullOrEmpty(_restorationJobEnvironmentVariables.InstanceLabelValue, nameof(_restorationJobEnvironmentVariables.InstanceLabelValue));
 
                 // Load patch state
-                var patchState = this._ParsePatchState();
+                (PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>) patchState = ParsePatchState(cancellationToken);
 
-                _log.Info("Waiting to restore previous state on {0} {1}/{2}...", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
+                _log.Info("Waiting to restore previous state on {0} {1}/{2}...", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
                 // Extra wait at the beginning to allow things to initialize
                 await Task.Delay(_restorationJobEnvironmentVariables.PingInterval, cancellationToken);
                 int numFailedPings = 0;
@@ -116,25 +117,36 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                         }))
                     {
                         // Get agent endpoint
-                        Uri agentEndpoint = await this._GetAgentEndpointAsync((dynamic)patchState, cancellationToken);
-                        if (agentEndpoint == null)
+                        var patch = patchState.Item1;
+                        List<Uri> agentEndpoint = await patchState.Item2(patch, cancellationToken);
+                        if (agentEndpoint == null || agentEndpoint.Count == 0)
                         {
                             _log.Verbose("Couldn't get agent endpoint");
                             numFailedPings++;
                             continue;
                         }
 
+
                         // Ping agent
-                        var result = await this._PingAgentAsync(agentEndpoint, cancellationToken);
-                        if (result == null)
+                        ConnectedSessionsResponseModel[] results = await Task
+                        .WhenAll(agentEndpoint.Select(uri => PingAgentAsync(uri, cancellationToken))
+                        .ToList()
+                        .Where(content => null != content));
+
+                        if (results == null || results.Length == 0 || results.All(result => result == null))
                         {
                             _log.Verbose("Failed to ping agent");
                             numFailedPings++;
                             continue;
                         }
-                        else if (result.NumConnectedSessions > 0)
+
+                        bool isAnyConnectedSession = results.ToList().Any(result => result != null && result.NumConnectedSessions > 0);
+
+                        int numConnectedSessions = results.ToList().Where(result => null != result).Sum(result => result.NumConnectedSessions);
+
+                        if (isAnyConnectedSession && numConnectedSessions > 0)
                         {
-                            _log.Verbose($"Agent has {result.NumConnectedSessions} connected sessions");
+                            _log.Verbose($"Agent has {numConnectedSessions} connected sessions");
                             lastPingWithSessions = DateTimeOffset.Now;
                             perfLogger.SetProperty(HasConnectedClients, true);
                         }
@@ -158,13 +170,12 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                             {
                                 // Restore workload
                                 _log.Info($"Agent has no connected sessions for {disconnectedTimeSpan.Value:g}. Restoring...");
-                                await this._RestoreAsync((dynamic)patchState, cancellationToken);
-                                _log.Info("Restored {0} {1}/{2}.", patchState.KubernetesType.GetStringValue(), new PII(patchState.Namespace), new PII(patchState.Name));
+                                await this.RestoreAsync(patch, cancellationToken);
+                                _log.Info("Restored {0} {1}/{2}.", patchState.Item1.KubernetesType.GetStringValue(), new PII(patchState.Item1.Namespace), new PII(patchState.Item1.Name));
                                 perfLogger.SetProperty(RestorePerformed, true);
                                 restoredWorkload = true;
                             }
                         }
-
                         numFailedPings = 0;
                         perfLogger.SetSucceeded();
                     }
@@ -194,7 +205,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
             }
         }
 
-        private async Task<ConnectedSessionsResponseModel> _PingAgentAsync(Uri agentEndpoint, CancellationToken cancellationToken)
+        private async Task<ConnectedSessionsResponseModel> PingAgentAsync(Uri agentEndpoint, CancellationToken cancellationToken)
         {
             try
             {
@@ -202,7 +213,7 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 using (var response = await _httpClient.GetAsync(agentEndpoint, cancellationToken))
                 {
                     response.EnsureSuccessStatusCode();
-                    string rawContent = await response.Content.ReadAsStringAsync();
+                    string rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
                     var content = JsonHelpers.DeserializeObject<ConnectedSessionsResponseModel>(rawContent);
                     return content;
                 }
@@ -218,30 +229,39 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// <summary>
         /// Parses the mounted patch state JSON
         /// </summary>
-        private PatchEntityBase _ParsePatchState()
+        private (PatchEntityBase, Func<PatchEntityBase, CancellationToken, Task<List<Uri>>>) ParsePatchState(CancellationToken cancellationToken)
         {
             string patchStateJson = _fileSystem.ReadAllTextFromFile(DevHostRestorationJob.PatchStateFullPath);
             string type = JsonPropertyHelpers.ParseAndGetProperty<string>(patchStateJson, typeof(PatchEntityBase).GetJsonPropertyName(nameof(PatchEntityBase.Type)));
-            return type switch
-            {
-                nameof(DeploymentPatch) => JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson),
-                nameof(PodPatch) => JsonHelpers.DeserializeObject<PodPatch>(patchStateJson),
-                nameof(PodDeployment) => JsonHelpers.DeserializeObject<PodDeployment>(patchStateJson),
-                nameof(StatefulSetPatch) => JsonHelpers.DeserializeObject<StatefulSetPatch>(patchStateJson),
-                _ => throw new InvalidOperationException($"Unknown restoration patch type: '{type}'"),
-            };
-        }
 
+            switch (type)
+            {
+                case nameof(DeploymentPatch):
+                    var deploymentPatch = JsonHelpers.DeserializeObject<DeploymentPatch>(patchStateJson);
+                    return (deploymentPatch, (patch, ct) => GetAgentEndpointAsync(deploymentPatch, ct));
+                case nameof(PodPatch):
+                    var podPatch = JsonHelpers.DeserializeObject<PodPatch>(patchStateJson);
+                    return (podPatch, (patch, ct) => GetAgentEndpointAsync(podPatch, ct));
+                case nameof(PodDeployment):
+                    var podDeployment = JsonHelpers.DeserializeObject<PodDeployment>(patchStateJson);
+                    return (podDeployment, (patch, ct) => GetAgentEndpointAsync(podDeployment, ct));
+                case nameof(StatefulSetPatch):
+                    var statefulSet = JsonHelpers.DeserializeObject<StatefulSetPatch>(patchStateJson);
+                    return (statefulSet, (patch, ct) => GetAgentEndpointAsync(statefulSet, ct));
+                default:
+                    throw new InvalidOperationException($"Unknown restoration patch type: '{type}'");
+            }
+        }
         #region Get agent endpoint
 
         /// <summary>
         /// Get the agent ping endpoint for a <see cref="DeploymentPatch"/> operation
         /// </summary>
-        private async Task<Uri> _GetAgentEndpointAsync(DeploymentPatch deploymentPatch, CancellationToken cancellationToken)
+        private async Task<List<Uri>> GetAgentEndpointAsync(DeploymentPatch deploymentPatch, CancellationToken cancellationToken)
         {
             string ns = deploymentPatch.Deployment.Namespace();
             string name = deploymentPatch.Deployment.Name();
-
+            List<Uri> uriList = new();
             try
             {
                 var pods = await _kubernetesClient.ListPodsForDeploymentAsync(ns, name, cancellationToken);
@@ -253,7 +273,25 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 else if (pods.Items.Count != 1)
                 {
                     _log.Warning("Found {0} pods for deployment {1}/{2} but expected 1", pods.Items.Count, new PII(ns), new PII(name));
-                    return null;
+                    // return all the pod's IP, probably this is multiple replica's for a pod.
+                    // confirm it is multiple replica's for a pod and owner of the pod name.
+                    var uris = pods.Items
+                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == OwningObject.ReplicaSet) 
+                        && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name))
+                        && pod.Status.Phase == "Running"
+                        && pod.Status.ContainerStatuses.All(c => c.Ready))
+                        .Where(pod => !string.IsNullOrWhiteSpace(pod.Status.PodIP))
+                        .Select(pod => new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)))
+                        .ToList();
+
+                    if (uris.Count == 0)
+                    {
+                        _log.Warning("Unable to find any pod with owner reference as ReplicaSet and name starts with {0}", new PII(name));
+                        return null;
+                    }
+
+                    uriList.AddRange(uris);
+                    return uriList;
                 }
 
                 var devhostAgentPod = pods.Items.Single();
@@ -269,7 +307,9 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                return new Uri(string.Format(AgentPingEndpointFormat, devhostAgentPod.Status.PodIP));
+                uriList.Add(new Uri(string.Format(AgentPingEndpointFormat, devhostAgentPod.Status.PodIP)));
+                return uriList;
+
             }
             catch (Exception e) when (!cancellationToken.IsCancellationRequested)
             {
@@ -281,11 +321,11 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// <summary>
         /// Get the agent ping endpoint for a <see cref="StatefulSetPatch"/> operation
         /// </summary>
-        private async Task<Uri> _GetAgentEndpointAsync(StatefulSetPatch statefulSetPatch, CancellationToken cancellationToken)
+        private async Task<List<Uri>> GetAgentEndpointAsync(StatefulSetPatch statefulSetPatch, CancellationToken cancellationToken)
         {
             string ns = statefulSetPatch.StatefulSet.Namespace();
             string name = statefulSetPatch.StatefulSet.Name();
-
+            List<Uri> uriList = new();
             try
             {
                 var pods = await _kubernetesClient.ListPodsForStatefulSetAsync(ns, name, cancellationToken);
@@ -297,7 +337,25 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                 else if (pods.Items.Count != 1)
                 {
                     _log.Warning("Found {0} pods for StatefulSet {1}/{2} but expected 1", pods.Items.Count, new PII(ns), new PII(name));
-                    return null;
+                    // return all the pod's IP, probably this is multiple replica's for a pod.
+                    // confirm it is multiple replica's for a pod and owner of the pod name.
+                    var uris = pods.Items
+                        .Where(pod => pod.Metadata.OwnerReferences.All(r => r.Kind == OwningObject.StatefulSet) 
+                        && pod.Metadata.OwnerReferences.All(r => r.Name.StartsWith(name))
+                        && pod.Status.Phase == "Running"
+                        && pod.Status.ContainerStatuses.All(c => c.Ready))
+                        .Where(pod => !string.IsNullOrWhiteSpace(pod.Status.PodIP))
+                        .Select(pod => new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)))
+                        .ToList();
+
+                    if (uris.Count == 0)
+                    {
+                        _log.Warning("Unable to find any pod with owner reference as StatefulSet and name starts with {0}", new PII(name));
+                        return null;
+                    }
+
+                    uriList.AddRange(uris);
+                    return uriList;
                 }
 
                 var devhostAgentPod = pods.Items.Single();
@@ -312,8 +370,8 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     _log.Warning("DevhostAgentPod IP was null");
                     return null;
                 }
-
-                return new Uri(string.Format(AgentPingEndpointFormat, devhostAgentPod.Status.PodIP));
+                uriList.Add(new Uri(string.Format(AgentPingEndpointFormat, devhostAgentPod.Status.PodIP)));
+                return uriList;
             }
             catch (Exception e) when (!cancellationToken.IsCancellationRequested)
             {
@@ -325,10 +383,11 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// <summary>
         /// Get the agent ping endpoint for a <see cref="PodPatch"/> operation
         /// </summary>
-        private async Task<Uri> _GetAgentEndpointAsync(PodPatch podPatch, CancellationToken cancellationToken)
+        private async Task<List<Uri>> GetAgentEndpointAsync(PodPatch podPatch, CancellationToken cancellationToken)
         {
             string ns = podPatch.Pod.Namespace();
             string name = podPatch.Pod.Name();
+            List<Uri> uriList = new();
             try
             {
                 var pod = await _kubernetesClient.GetV1PodAsync(ns, name, cancellationToken);
@@ -343,7 +402,8 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                return new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP));
+                uriList.Add(new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)));
+                return uriList;
             }
             catch (Exception e) when (!cancellationToken.IsCancellationRequested)
             {
@@ -355,10 +415,11 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
         /// <summary>
         /// Get the agent ping endpoint for a <see cref="PodDeployment"/> operation
         /// </summary>
-        private async Task<Uri> _GetAgentEndpointAsync(PodDeployment podDeployment, CancellationToken cancellationToken)
+        private async Task<List<Uri>> GetAgentEndpointAsync(PodDeployment podDeployment, CancellationToken cancellationToken)
         {
             string ns = podDeployment.Pod.Namespace();
             string name = podDeployment.Pod.Name();
+            List<Uri> uriList = new();
             try
             {
                 var pod = await _kubernetesClient.GetV1PodAsync(ns, name, cancellationToken);
@@ -368,7 +429,8 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
                     return null;
                 }
 
-                return new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP));
+                uriList.Add(new Uri(string.Format(AgentPingEndpointFormat, pod.Status.PodIP)));
+                return uriList;
             }
             catch (Exception e) when (!cancellationToken.IsCancellationRequested)
             {
@@ -381,29 +443,24 @@ namespace Microsoft.BridgeToKubernetes.DevHostAgent.RestorationJob
 
         #region Restore
 
-        /// <summary>
-        /// Restores a <see cref="DeploymentPatch"/>
-        /// </summary>
-        public Task _RestoreAsync(DeploymentPatch deploymentPatch, CancellationToken cancellationToken)
-            => _workloadRestorationService.RestoreDeploymentPatchAsync(deploymentPatch, cancellationToken, m => _log.Info(m.Message));
-
-        /// <summary>
-        /// Restores a <see cref="StatefulSetPatch"/>
-        /// </summary>
-        public Task _RestoreAsync(StatefulSetPatch statefulSetPatch, CancellationToken cancellationToken)
-            => _workloadRestorationService.RestoreStatefulSetPatchAsync(statefulSetPatch, cancellationToken, m => _log.Info(m.Message));
-
-        /// <summary>
-        /// Restores a <see cref="PodPatch"/>
-        /// </summary>
-        public Task _RestoreAsync(PodPatch podPatch, CancellationToken cancellationToken)
-            => _workloadRestorationService.RestorePodPatchAsync(podPatch, cancellationToken, m => _log.Info(m.Message));
-
-        /// <summary>
-        /// Restores a <see cref="PodDeployment"/>
-        /// </summary>
-        public Task _RestoreAsync(PodDeployment podDeployment, CancellationToken cancellationToken)
-            => _workloadRestorationService.RemovePodDeploymentAsync(podDeployment, cancellationToken, m => _log.Info(m.Message));
+        public async Task RestoreAsync(PatchEntityBase patchEntityBase, CancellationToken cancellationToken) {
+            switch(patchEntityBase.Type) {
+                case nameof(DeploymentPatch):
+                    await _workloadRestorationService.RestoreDeploymentPatchAsync((DeploymentPatch)patchEntityBase, cancellationToken, m => _log.Info(m.Message));
+                    break;
+                case nameof(PodPatch):
+                    await _workloadRestorationService.RestorePodPatchAsync((PodPatch)patchEntityBase, cancellationToken, m => _log.Info(m.Message));
+                    break;
+                case nameof(PodDeployment):
+                    await _workloadRestorationService.RemovePodDeploymentAsync((PodDeployment)patchEntityBase, cancellationToken, m => _log.Info(m.Message));
+                    break;
+                case nameof(StatefulSetPatch):
+                    await _workloadRestorationService.RestoreStatefulSetPatchAsync((StatefulSetPatch)patchEntityBase, cancellationToken, m => _log.Info(m.Message));
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid patch entity type: {patchEntityBase.Type}");
+            }
+        }
 
         #endregion Restore
     }
