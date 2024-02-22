@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import TodoItem from './TodoItem';
 import TodoFooter from './TodoFooter';
+import Link from 'next/link';
 
 class TodoApp extends Component {
     constructor(props) {
@@ -117,7 +118,7 @@ class TodoApp extends Component {
 
         var credits = (
             <div className="credits">
-                Adapted from <strong><link href="http://todomvc.com/">TodoMVC</link></strong>
+                Adapted from <strong><Link href="http://todomvc.com/">TodoMVC</Link></strong>
                 <style jsx>{`
                     .credits {
                         margin-top: 100px;
