@@ -117,7 +117,7 @@ class TodoApp extends Component {
 
         var credits = (
             <div className="credits">
-                Adapted from <strong><a href="http://todomvc.com/">TodoMVC</a></strong>
+                Adapted from <strong><link href="http://todomvc.com/">TodoMVC</link></strong>
                 <style jsx>{`
                     .credits {
                         margin-top: 100px;
