@@ -2,7 +2,7 @@
     "name": "todo-frontend",
     "version": "1.0.0",
     "devDependencies": {
-        "nodemon": "^3.0.3",
+        "nodemon": "^3.1.0",
         "webpack": "^5.90.3"
     },
     "dependencies": {
