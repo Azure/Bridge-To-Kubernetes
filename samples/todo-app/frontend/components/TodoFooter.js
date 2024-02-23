@@ -11,7 +11,7 @@ export default class TodoFooter extends React.Component {
         return (
             <div className="filters">
                 <div className="todo-count">{this.props.todoCount} {activeTodoWord} left</div>
-                <div className="stats-link"><Link prefetch href="/stats"><a>stats</a></Link></div>
+                <div className="stats-link"><Link prefetch href="/stats">stats</Link></div>
                 <style jsx>{`
                     .filters {
                         color: #777;

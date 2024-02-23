@@ -12,12 +12,13 @@ Most sample TODO applications are composed of a frontend and some kind of backen
 
 In all, this extended TODO application is composed of six inter-related components.
 
+
+## Deploy the application with Loadbalancer
+
 ## Prerequisites
 
 - Kubectl CLI (connected to a cluster)
 - [Bridge to Kubernetes VS Code extension](https://aka.ms/bridge-to-k8s-vsc-extension)
-
-## Deploy the application
 
 In this example, we will use a local cluster, MiniKube.
 
@@ -45,6 +46,47 @@ frontend      LoadBalancer   10.0.49.177    127.0.0.1   80:30145/TCP   18h
 ```
 
 Browse to the application using the external IP and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics
+
+## Deploy the Ingress application 
+
+## Pre requisties
+
+- Nginx Ingress Controller deployed to the cluster, without this below tutorial will not work. Sample instructions for deploying Nginx ingress controller can be found below https://kubernetes.github.io/ingress-nginx/deploy/ 
+
+In this example, we will use a local cluster, MiniKube.
+
+First, create a namespace for the sample.
+
+```
+kubectl create namespace todo-app-ingress
+```
+
+Then, apply the deployment manifest:
+
+```
+kubectl apply -n todo-app-ingress -f deployment-ingress.yaml
+```
+
+This is a simple deployment that exposes the frontend using nginx ingress. Wait for all the pods to be running and for the ingress to become available.
+
+If you are testing with MiniKube, you will need to use `minikube tunnel` to resolve an external IP.
+
+```
+kubectl get services -n todo-app-ingress
+NAME          TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
+frontend      ClusterIP   10.0.49.177    127.0.0.1   80:30145/TCP   18h
+```
+
+To get the ingress use the following 
+```
+kubectl get ingress -n todo-app-ingress
+NAME           CLASS   HOSTS                 ADDRESS          PORTS   AGE
+todo-ingress   nginx   todoapp.ingress.com   20.237.125.234   80      8m30s
+```
+
+Browse to the application using the ingress `todoapp.ingress.com` and give it a spin. As you add, complete and delete todos, notice that the stats page updates with the expected metrics.
+
+Note if your ingress route doesn't load please add them to your `host` files 
 
 ## Debug the stats-api service
 
