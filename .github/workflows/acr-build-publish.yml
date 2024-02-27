@@ -11,6 +11,8 @@ on:
           - development
           - staging
           - prod
+env:
+  runner_base: ${{ vars.RUNNER_BASE_NAME }}
 permissions:
   contents: read
 
@@ -25,9 +27,9 @@ jobs:
             imageName: lpkrestorationjob
           - components: routingmanager
             imageName: routingmanager
-    environment: ${{ github.event.inputs.environment }}
     runs-on: 
-      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-ubuntu"]
+      labels: ["self-hosted", "1ES.Pool=$runner_base-ubuntu"]
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
