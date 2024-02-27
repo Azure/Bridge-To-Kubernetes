@@ -26,7 +26,7 @@ jobs:
           - components: routingmanager
             imageName: routingmanager
     runs-on: 
-      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-ubuntu"]
+      labels: ["self-hosted", "1ES.Pool=1es-b2k-pool-ubuntu"]
     environment: ${{ github.event.inputs.environment }}
     steps:
       - name: Harden Runner
