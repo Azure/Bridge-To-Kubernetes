@@ -27,7 +27,7 @@ jobs:
             imageName: routingmanager
     environment: ${{ github.event.inputs.environment }}
     runs-on: 
-      labels: ["self-hosted", "${{ vars.AZURE_1ES_POOL_NAME }}"]
+      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-${{ github.event.inputs.environment }}-ubuntu"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
