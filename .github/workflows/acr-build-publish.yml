@@ -25,9 +25,9 @@ jobs:
             imageName: lpkrestorationjob
           - components: routingmanager
             imageName: routingmanager
-    runs-on: 
-      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-ubuntu"]
     environment: ${{ github.event.inputs.environment }}
+    runs-on: 
+      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-${{ github.event.inputs.environment }}-ubuntu"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -70,4 +70,4 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
+          tags: ${{ vars.AZURE_REGISTRY_SERVER }}/${{ matrix.imageName }}:${{ env.tag }}
