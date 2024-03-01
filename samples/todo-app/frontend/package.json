@@ -8,7 +8,7 @@
     "dependencies": {
         "body-parser": "^1.20.2",
         "classnames": "^2.5.1",
-        "express": "^4.18.2",
+        "express": "^4.18.3",
         "isomorphic-fetch": "^3.0.0",
         "mongodb": "^6.3.0",
         "next": "^14.1.0",
