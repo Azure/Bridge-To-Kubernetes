@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mi-webapp
@@ -30,7 +30,7 @@ spec:
           - name: STORAGE_CONTAINER_NAME
             value: "mitestsa-container"
           - name: MI_CLIENT_ID
-            value: "b24d4637-3453-4f6f-8187-228a5442a675"
+            value: "a2cc59eb-fa11-485c-9bee-c84aa4cb97d0"
           ports:
           - containerPort: 80
 
@@ -58,8 +58,8 @@ metadata:
   name: mi-test
 spec:
   type: 0
-  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/MC_testing-scenario_testing-scenarios_westeurope/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
-  clientID: "b24d4637-3453-4f6f-8187-228a5442a675"
+  resourceID: "/subscriptions/c2e0f009-a61a-4578-8a6d-5715ee782648/resourcegroups/MC_testing-scenario_testing-scenarios-arm_westeurope/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-test"
+  clientID: "a2cc59eb-fa11-485c-9bee-c84aa4cb97d0"
 ---
 # AzureIdentityBinding resource for pod identity 
 apiVersion: "aadpodidentity.k8s.io/v1"
