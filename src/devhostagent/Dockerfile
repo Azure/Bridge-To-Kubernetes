@@ -1,5 +1,5 @@
 # Build container
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:sdk:7.0-cbl-mariner2.0@sha256:69e18e87d68a6653550c1eed320cdddc3ff39296bb9d04f3317eca6e500daea9 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner2.0@sha256:9e054d0663d07e09127d114f753c1068d0bf681eab188352d06f111ce68f050f AS build
 
 ARG TARGETARCH
 ARG Configuration=Release
@@ -19,7 +19,7 @@ ENV MINDARO_BUILD_NUMBER=${MindaroBuildNumber}
 RUN dotnet publish -c ${Configuration} -a ${TARGETARCH} --self-contained false --no-restore -o /src/publish devhostAgent.csproj
 
 # Final container
-FROM mcr.microsoft.com/dotnet/aspnet:aspnet:7.0-cbl-mariner2.0@sha256:fccd19c673dff30603e1f2ca3ae05234e0c1a2512a30e9b71debaf34a1215664 as final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-cbl-mariner2.0@sha256:ea1751dfd2defec87508aa979088741935d1fd4c870bfd53e7645642fc9ead13 as final
 
 RUN tdnf clean all && \
  tdnf check-update && \
