@@ -39,23 +39,19 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "bridge-to-kubernetes.resource",
-            "type": "bridge-to-kubernetes.resource",
-            "resource": "mi-webapp-service",
-            "resourceType": "service",
+            "label": "bridge-to-kubernetes.service",
+            "type": "bridge-to-kubernetes.service",
+            "service": "mi-webapp-service",
             "ports": [
-                5000
+                80
             ],
-            "targetCluster": "testing-scenarios-arm",
-            "targetNamespace": "mi-webapp",
-            "useKubernetesServiceEnvironmentVariables": true,
-            "targetContainer": "mi-webapp",
-            "isolateAs": "hsubra21"
+            "targetCluster": "testing-scenarios",
+            "targetNamespace": "mi-webapp"
         },
         {
             "label": "bridge-to-kubernetes.compound",
             "dependsOn": [
-                "bridge-to-kubernetes.resource",
+                "bridge-to-kubernetes.service",
                 "build"
             ],
             "dependsOrder": "sequence"
