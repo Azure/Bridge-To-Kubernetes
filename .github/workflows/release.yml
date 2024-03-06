@@ -40,7 +40,7 @@ jobs:
 
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Setup .NET
-      uses: actions/setup-dotnet@a351d9ea84bc76ec7508debf02a39d88f8b6c0c0 # v2.1.1
+      uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
       with:
         dotnet-version: 7.0.x
     - name: Setup NuGet.exe for use with actions
