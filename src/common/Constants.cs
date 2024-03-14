@@ -132,6 +132,7 @@ namespace Microsoft.BridgeToKubernetes.Common
             public const string FeatureFlagsAnnotationName = RoutingLabelPrefix + "feature-flags";
             public const string RoutingComponentLabel = RoutingLabelPrefix + "component";
             public const string RouteFromLabelName = RoutingLabelPrefix + "route-from";
+            public const string RouteUniqueName = RoutingLabelPrefix + "route-unique-name";
             public const string KubernetesRouteAsHeaderName = "kubernetes-route-as";
             public const string RoutingManagerNameLower = "routingmanager";
             public const string RoutingManagerServiceName = RoutingManagerNameLower + "-service";

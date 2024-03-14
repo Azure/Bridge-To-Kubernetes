@@ -251,6 +251,9 @@ namespace Microsoft.BridgeToKubernetes.RoutingManager.Envoy
         // https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routeaction-idle-timeout
         [YamlMember(Alias = "idle_timeout", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string IdleTimeout { get; set; } = "0s";
+        
+        [YamlMember(Alias = "auto_host_rewrite", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
+        public bool AutoHostRewrite { get; set; }
     }
 
     internal partial class RequestHeadersToAdd
