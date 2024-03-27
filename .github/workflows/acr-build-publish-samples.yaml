@@ -1,0 +1,69 @@
+name: build and push samples projects to acr
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to build'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+      tag:
+        description: 'Tag to build'
+        required: true
+        default: 'latest'
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    strategy:
+      matrix:
+        include: 
+          - components: stats-api
+            imageName: samples/stats-api
+          - components: frontend
+            imageName: samples/frontend
+          - components: stats-worker    
+            imageName: samples/stats-worker
+          - components: database-api
+            imageName: samples/database-api
+          - components: mi-webapp
+            imageName: samples/mi-webapp
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+      - name: Login to Docker Hub
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ vars.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Set docker file name
+        shell: bash
+        id: version
+        run: |
+            if [ ${{ matrix.components}} == "mi-webapp" ]; then
+              echo "filename=samples/managed-identity/Dockerfile" >> $GITHUB_ENV
+            else
+              echo "filename=samples/todo-app/${{ matrix.components }}/Dockerfile" >> $GITHUB_ENV
+            fi
+      - name: Build and push for ${{ matrix.components }}
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+        with:
+          file: ${{ env.filename }}
+          platforms: linux/arm64,linux/amd64
+          push: true
+          tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ github.event.inputs.tag }}
