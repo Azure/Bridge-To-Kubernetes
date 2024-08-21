@@ -3,209 +3,153 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: /samples/ConnectSQLDatabase/ConnectSQLDatabase
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/ConnectSQLDatabase/ConnectSQLDatabase
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/ingress/database-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: /samples/ingress/database-api
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: /samples/ingress/frontend
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /samples/ingress/frontend
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/ingress/stats-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: npm
-    directory: /samples/ingress/stats-api
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: /samples/ingress/stats-worker
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /samples/ingress/stats-worker
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/managed-identity
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: /samples/managed-identity
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: /samples/todo-app/database-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: /samples/todo-app/database-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/todo-app/frontend
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: npm
-    directory: /samples/todo-app/frontend
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: /samples/todo-app/stats-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: npm
-    directory: /samples/todo-app/stats-api
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: /samples/todo-app/stats-worker
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: npm
-    directory: /samples/todo-app/stats-worker
-    schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/EndpointManagerLauncher
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: docker
     directory: /src/LocalAgent
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/LocalAgent
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/common.tests
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/common
     schedule:
-      interval: daily
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/devhostAgent.restorationjob.tests
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: docker
     directory: /src/devhostagent.restorationjob
     schedule:
-      interval: daily
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/devhostagent.restorationjob
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: docker
     directory: /src/devhostagent
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/devhostagent
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/dsc.tests
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/dsc
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/endpointmanager.tests
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/endpointmanager
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/library.tests
     schedule:
-      interval: daily
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/library
     schedule:
-      interval: daily
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/routingmanager.tests
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: docker
     directory: /src/routingmanager
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/routingmanager
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
 
   - package-ecosystem: nuget
     directory: /src/testhelpers
     schedule:
-      interval: weekly
+      interval: monthly
+    # enable only security updates
+    open-pull-requests-limit: 0
