@@ -1,7 +1,0 @@
-version: 0.1
-volumeMounts:
-env:
-  - name: DB_HOST
-    value: $(externalendpoints:server-bridgetest123.database.windows.net:1433)
-  - name: DB_NAME
-    value: database-bridgetest123
