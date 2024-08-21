@@ -25,8 +25,9 @@ jobs:
             imageName: lpkrestorationjob
           - components: routingmanager
             imageName: routingmanager
-    runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    runs-on: 
+      labels: ["self-hosted", "1ES.Pool=${{ vars.RUNNER_BASE_NAME }}-${{ github.event.inputs.environment }}-ubuntu"]
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -37,12 +38,10 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
-      - name: Login to Docker Hub
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-        with:
-          registry: ${{ vars.ACR_REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Authenticate to ACR
+        run : |
+          az login --identity
+          az acr login -n ${{ vars.AZURE_REGISTRY_SERVER }}
       - name: Set telemetry variables
         shell: bash
         run: |
@@ -71,4 +70,4 @@ jobs:
           file: src/${{ matrix.components }}/Dockerfile
           platforms: linux/arm64,linux/amd64
           push: true
-          tags: ${{ vars.ACR_REGISTRY }}/${{ matrix.imageName }}:${{ env.tag }}
+          tags: ${{ vars.AZURE_REGISTRY_SERVER }}/${{ matrix.imageName }}:${{ env.tag }}
