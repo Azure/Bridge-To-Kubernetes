@@ -468,15 +468,23 @@ namespace Microsoft.BridgeToKubernetes.Library.Connect
                     c.Image = agentImage;
                     c.Command = new List<string>();
                     c.Args = new List<string>();
-                    
-                    // When creating new env variables, the previous env variables are not retained to ensure only one is present.
-                    var newEnv = new List<V1EnvVar>();
 
-                    newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.CollectTelemetry, _environmentVariables.CollectTelemetry.ToString()));
-                    newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.ConsoleVerbosity, LoggingVerbosity.Verbose.ToString()));
-                    newEnv.Add(new V1EnvVar(EnvironmentVariables.Names.CorrelationId, _operationContext.CorrelationId));
-
-                    c.Env = newEnv;
+                    // When adding new env variables, make ensure the previous env variables do not have these values.
+                    if(c.Env == null){
+                        c.Env = new List<V1EnvVar>();
+                    }
+                    for (int i = c.Env.Count - 1; i >= 0; i--)
+                    {
+                        if (EnvironmentVariables.Names.CollectTelemetry.Equals(c.Env[i].Name) ||
+                            EnvironmentVariables.Names.ConsoleVerbosity.Equals(c.Env[i].Name) ||
+                            EnvironmentVariables.Names.CorrelationId.Equals(c.Env[i].Name))
+                        {
+                            c.Env.Remove(c.Env[i]);
+                        }
+                    }
+                    c.Env.Add(new V1EnvVar(EnvironmentVariables.Names.CollectTelemetry, _environmentVariables.CollectTelemetry.ToString()));
+                    c.Env.Add(new V1EnvVar(EnvironmentVariables.Names.ConsoleVerbosity, LoggingVerbosity.Verbose.ToString()));
+                    c.Env.Add(new V1EnvVar(EnvironmentVariables.Names.CorrelationId, _operationContext.CorrelationId));
 
                     // If probes option is not enabled or not set, remove any probe in the new pod.
                     if (localProcessConfig?.IsProbesEnabled != true)
